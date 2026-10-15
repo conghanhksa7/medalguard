@@ -8,13 +8,13 @@
 
 ---
 
-## 📌 Overview
+## Overview
 
 In Medallion Lakehouse architectures (Bronze → Silver → Gold), data faults originating at the ingestion layer (schema drift, constraint breaches, semantic shifts) frequently propagate silently to business analytics tables (Gold layer). **MedalGuard** is a contract-driven data failure detection and staged quarantine framework designed to intercept and isolate data corruptions at layer boundaries before they impact downstream decisions.
 
 ---
 
-## 📊 Milestone 2: Baseline C0 Experimental Results
+## Milestone 2: Baseline C0 Experimental Results
 
 Baseline C0 represents an unmonitored Lakehouse pipeline (Bronze → Silver → Gold without contract enforcement). Experiments were executed on TPC-H Benchmark (SF=0.1, 866,602 rows) across **14 fault mutations** (M1a–M5c) and **5 benign mutations** (B1, B2, B3, B5, B7).
 
@@ -43,7 +43,7 @@ Baseline C0 represents an unmonitored Lakehouse pipeline (Bronze → Silver → 
 
 ---
 
-## 🛠️ Project Structure
+## Project Structure
 
 ```
 medalguard-seminar/
@@ -69,7 +69,7 @@ medalguard-seminar/
 
 ---
 
-## 🚀 Quick Start & Reproducibility
+## Quick Start & Reproducibility
 
 ### 1. Environment Setup
 ```bash
