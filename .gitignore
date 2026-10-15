@@ -30,3 +30,9 @@ Thumbs.db
 
 # Results (keep structure, ignore large files)
 results/raw/*.json
+
+# Local scripts & reports
+scripts/fill_baseline_form.py
+*.docx
+*.pdf
+
