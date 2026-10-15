@@ -1,0 +1,37 @@
+version: 1
+strict_columns: false   # Allow additive schema evolution (new columns OK)
+table: silver.silver_orders
+source_table: bronze.bronze_orders
+
+columns:
+  - name: o_orderkey
+    type: BIGINT
+    not_null: true
+    unique: true
+  - name: o_custkey
+    type: BIGINT
+    not_null: true
+  - name: o_orderstatus
+    type: VARCHAR
+    not_null: true
+    allowed_values: ["O", "F", "P"]
+  - name: o_totalprice
+    type: DOUBLE
+    not_null: true
+    min_value: 0
+  - name: o_orderdate
+    type: DATE
+    not_null: true
+  - name: o_orderpriority
+    type: VARCHAR
+  - name: o_clerk
+    type: VARCHAR
+  - name: o_shippriority
+    type: INTEGER
+
+quality_rules:
+  - rule: row_count
+    min: 1
+  - rule: null_rate
+    column: o_custkey
+    max: 0.01

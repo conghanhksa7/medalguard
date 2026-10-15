@@ -1,0 +1,78 @@
+version: 2
+
+models:
+  - name: silver_orders
+    description: "Cleaned orders (no contract enforcement)"
+    columns:
+      - name: o_orderkey
+        data_type: bigint
+      - name: o_custkey
+        data_type: bigint
+      - name: o_orderstatus
+        data_type: varchar
+      - name: o_totalprice
+        data_type: double
+      - name: o_orderdate
+        data_type: date
+      - name: o_orderpriority
+        data_type: varchar
+      - name: o_clerk
+        data_type: varchar
+      - name: o_shippriority
+        data_type: integer
+
+  - name: silver_lineitem
+    description: "Cleaned lineitem (no contract enforcement)"
+    columns:
+      - name: l_orderkey
+        data_type: bigint
+      - name: l_partkey
+        data_type: bigint
+      - name: l_suppkey
+        data_type: bigint
+      - name: l_linenumber
+        data_type: integer
+      - name: l_quantity
+        data_type: double
+      - name: l_extendedprice
+        data_type: double
+      - name: l_discount
+        data_type: double
+      - name: l_tax
+        data_type: double
+      - name: l_returnflag
+        data_type: varchar
+      - name: l_linestatus
+        data_type: varchar
+      - name: l_shipdate
+        data_type: date
+      - name: l_commitdate
+        data_type: date
+      - name: l_receiptdate
+        data_type: date
+      - name: l_shipinstruct
+        data_type: varchar
+      - name: l_shipmode
+        data_type: varchar
+      - name: l_comment
+        data_type: varchar
+
+  - name: silver_customer
+    description: "Cleaned customer (no contract enforcement)"
+    columns:
+      - name: c_custkey
+        data_type: bigint
+      - name: c_name
+        data_type: varchar
+      - name: c_address
+        data_type: varchar
+      - name: c_nationkey
+        data_type: integer
+      - name: c_phone
+        data_type: varchar
+      - name: c_acctbal
+        data_type: double
+      - name: c_mktsegment
+        data_type: varchar
+      - name: c_comment
+        data_type: varchar

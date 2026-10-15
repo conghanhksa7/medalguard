@@ -1,0 +1,74 @@
+version: 1
+strict_columns: false   # Allow additive schema evolution
+table: silver.silver_lineitem
+source_table: bronze.bronze_lineitem
+
+columns:
+  - name: l_orderkey
+    type: BIGINT
+    not_null: true
+  - name: l_partkey
+    type: BIGINT
+    not_null: true
+  - name: l_suppkey
+    type: BIGINT
+    not_null: true
+  - name: l_linenumber
+    type: INTEGER
+    not_null: true
+  - name: l_quantity
+    type: DOUBLE
+    not_null: true
+    min_value: 1
+    max_value: 50
+  - name: l_extendedprice
+    type: DOUBLE
+    not_null: true
+    min_value: 0
+  - name: l_discount
+    type: DOUBLE
+    not_null: true
+    min_value: 0.0
+    max_value: 0.10
+  - name: l_tax
+    type: DOUBLE
+    not_null: true
+    min_value: 0.0
+    max_value: 0.08
+  - name: l_returnflag
+    type: VARCHAR
+    allowed_values: ["R", "A", "N"]
+  - name: l_linestatus
+    type: VARCHAR
+    allowed_values: ["O", "F"]
+  - name: l_shipdate
+    type: DATE
+    not_null: true
+  - name: l_commitdate
+    type: DATE
+    not_null: true
+  - name: l_receiptdate
+    type: DATE
+    not_null: true
+  - name: l_shipinstruct
+    type: VARCHAR
+  - name: l_shipmode
+    type: VARCHAR
+    allowed_values: ["AIR", "REG AIR", "RAIL", "SHIP", "TRUCK", "MAIL", "FOB"]
+  - name: l_comment
+    type: VARCHAR
+
+quality_rules:
+  - rule: row_count
+    min: 1
+  - rule: null_rate
+    column: l_orderkey
+    max: 0.0
+  - rule: mean_range
+    column: l_discount
+    min: 0.03
+    max: 0.07
+  - rule: mean_range
+    column: l_quantity
+    min: 20
+    max: 30

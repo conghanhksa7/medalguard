@@ -1,0 +1,77 @@
+{
+  "config": "C0 (No Enforcement)",
+  "dataset": "TPC-H SF=0.1 (866,602 rows)",
+  "blast_radius_definition": "BR = |Gold rows deviating from clean reference (changed, missing or unexpected)| / |Gold rows in reference ∪ current|; CRASH -> 0 (ASSIGNED_CRASH)",
+  "overall": {
+    "detection_rate": "0/14 = 0%",
+    "false_positive_rate": "0/5",
+    "avg_blast_radius_all_faults_pct": 14.8,
+    "avg_blast_radius_silent_only_pct": 34.6,
+    "outcomes": {
+      "CRASH": 3,
+      "SILENT_PROPAGATION": 6,
+      "NEUTRALISED": 5
+    },
+    "pipeline_wall_median_ms": 6795.8,
+    "pipeline_wall_stdev_ms": 636.3,
+    "dbt_elapsed_median_ms": 1411.4,
+    "dbt_elapsed_stdev_ms": 108.6
+  },
+  "per_category": [
+    {
+      "category": "ADDITIVE",
+      "mutations": 2,
+      "detection_rate_pct": 0.0,
+      "avg_blast_radius_pct": 0.0,
+      "crash": 0,
+      "silent_propagation": 0,
+      "neutralised": 2
+    },
+    {
+      "category": "DESTRUCTIVE",
+      "mutations": 3,
+      "detection_rate_pct": 0.0,
+      "avg_blast_radius_pct": 0.0,
+      "crash": 3,
+      "silent_propagation": 0,
+      "neutralised": 0
+    },
+    {
+      "category": "TYPE_CHANGE",
+      "mutations": 3,
+      "detection_rate_pct": 0.0,
+      "avg_blast_radius_pct": 0.0,
+      "crash": 0,
+      "silent_propagation": 0,
+      "neutralised": 3
+    },
+    {
+      "category": "CONSTRAINT_BREACH",
+      "mutations": 3,
+      "detection_rate_pct": 0.0,
+      "avg_blast_radius_pct": 5.8,
+      "crash": 0,
+      "silent_propagation": 3,
+      "neutralised": 0
+    },
+    {
+      "category": "SEMANTIC_DRIFT",
+      "mutations": 3,
+      "detection_rate_pct": 0.0,
+      "avg_blast_radius_pct": 63.5,
+      "crash": 0,
+      "silent_propagation": 3,
+      "neutralised": 0
+    }
+  ],
+  "key_findings": [
+    "6/14 faults corrupt Gold while the pipeline reports SUCCESS (silent propagation): M4a_NullAndNegative, M4b_NullSmall, M4c_DuplicateKeys, M5a_MULTIPLY_100, M5b_MULTIPLY_1_5, M5c_CATEGORICAL_SHIFT.",
+    "M5a (discount x100) and M5b (x1.5) each corrupt 175/190 Gold rows (BR 92.1%).",
+    "Even tiny injections propagate: M4b injects only 5 NULL keys yet changes 5 Gold rows; M4c (5 duplicate PKs) changes 8 rows.",
+    "All 3 type mutations are NEUTRALISED: Silver CASTs restore the type, so Gold is bit-identical. The schema contract is violated but data is not corrupted — a latent risk, not an observable failure (important for interpreting Detection Rate).",
+    "All 3 destructive mutations CRASH the pipeline: protection by accident, with no diagnosis of the root cause.",
+    "Additive mutations are harmless (explicit SELECT in Silver).",
+    "Gold-row BR understates severity for small injections because Gold is aggregated; report BR together with the binary 'propagated' outcome.",
+    "Benign mutations: FPR = 0/5 trivially (C0 raises no alarms). Some benign mutations legitimately change Gold (e.g. B2 value shift) — a value-diff alone cannot separate fault from benign, which motivates contract-based validation."
+  ]
+}

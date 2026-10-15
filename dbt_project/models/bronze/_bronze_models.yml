@@ -1,0 +1,9 @@
+version: 2
+
+models:
+  - name: bronze_orders
+    description: "Raw orders from source (no transformation)"
+  - name: bronze_lineitem
+    description: "Raw lineitem from source (no transformation)"
+  - name: bronze_customer
+    description: "Raw customer from source (no transformation)"

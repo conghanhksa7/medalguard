@@ -1,0 +1,14 @@
+version: 2
+
+models:
+  - name: gold_revenue_by_nation
+    description: "Revenue aggregated by nation and year"
+    columns:
+      - name: nation
+        tests:
+          - not_null
+      - name: total_revenue
+        tests:
+          - not_null
+  - name: gold_order_priority_summary
+    description: "Order counts and revenue by priority and status"

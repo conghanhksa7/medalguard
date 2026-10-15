@@ -1,0 +1,33 @@
+version: 1
+strict_columns: false
+table: gold.gold_order_priority_summary
+source_table: silver.silver_orders
+
+columns:
+  - name: o_orderpriority
+    type: VARCHAR
+    not_null: true
+    allowed_values: ["1-URGENT", "2-HIGH", "3-MEDIUM", "4-NOT SPECIFIED", "5-LOW"]
+  - name: o_orderstatus
+    type: VARCHAR
+    not_null: true
+    allowed_values: ["O", "F", "P"]
+  - name: order_count
+    type: BIGINT
+    not_null: true
+    min_value: 1
+  - name: total_value
+    type: DOUBLE
+    not_null: true
+    min_value: 0
+  - name: avg_order_value
+    type: DOUBLE
+    not_null: true
+    min_value: 0
+
+quality_rules:
+  - rule: row_count
+    min: 1
+  - rule: null_rate
+    column: total_value
+    max: 0.0

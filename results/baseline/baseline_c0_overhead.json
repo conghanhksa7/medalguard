@@ -1,0 +1,68 @@
+{
+  "config": "C0",
+  "scale_factor": 0.1,
+  "repeat_count": 7,
+  "note": "wall = subprocess wall-clock incl. ~python/dbt CLI startup; dbt_elapsed = run_results.json elapsed_time; model_exec = sum of per-model execution_time (threads=4, so can exceed elapsed). Overhead % of later configs should be computed on BOTH wall and dbt_elapsed.",
+  "wall": {
+    "values_ms": [
+      6583.1,
+      7477.7,
+      6795.8,
+      6783.1,
+      6597.6,
+      6993.8,
+      8350.7
+    ],
+    "median_ms": 6795.8,
+    "mean_ms": 7083.1,
+    "stdev_ms": 636.3,
+    "min_ms": 6583.1,
+    "max_ms": 8350.7
+  },
+  "dbt_elapsed": {
+    "values_ms": [
+      1431.6,
+      1563.9,
+      1346.8,
+      1411.4,
+      1592.6,
+      1333.1,
+      1331.4
+    ],
+    "median_ms": 1411.4,
+    "mean_ms": 1430.1,
+    "stdev_ms": 108.6,
+    "min_ms": 1331.4,
+    "max_ms": 1592.6
+  },
+  "model_exec": {
+    "values_ms": [
+      1964.7,
+      2343.0,
+      2008.9,
+      2057.1,
+      2372.6,
+      2034.1,
+      1896.8
+    ],
+    "median_ms": 2034.1,
+    "mean_ms": 2096.7,
+    "stdev_ms": 185.9,
+    "min_ms": 1896.8,
+    "max_ms": 2372.6
+  },
+  "times_ms": [
+    6583.1,
+    7477.7,
+    6795.8,
+    6783.1,
+    6597.6,
+    6993.8,
+    8350.7
+  ],
+  "median_ms": 6795.8,
+  "mean_ms": 7083.1,
+  "stdev_ms": 636.3,
+  "min_ms": 6583.1,
+  "max_ms": 8350.7
+}

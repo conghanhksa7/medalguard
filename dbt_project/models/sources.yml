@@ -1,0 +1,99 @@
+version: 2
+
+sources:
+  - name: source
+    description: "TPC-H benchmark data (source schema - simulates production OLTP)"
+    schema: source
+    tables:
+      - name: orders
+        description: "Orders fact table (1.5M rows at SF=1)"
+        columns:
+          - name: o_orderkey
+            description: "Primary key"
+          - name: o_custkey
+            description: "FK to customer"
+          - name: o_orderstatus
+            description: "O=Open, F=Fulfilled, P=Partial"
+          - name: o_totalprice
+            description: "Net invoice amount"
+          - name: o_orderdate
+            description: "Order placement date"
+          - name: o_orderpriority
+            description: "1-URGENT to 5-LOW"
+          - name: o_clerk
+            description: "Clerk identifier"
+          - name: o_shippriority
+            description: "Shipping priority"
+          - name: o_comment
+            description: "Free text comment"
+
+      - name: lineitem
+        description: "Line items detail table (~6M rows at SF=1)"
+        columns:
+          - name: l_orderkey
+            description: "FK to orders"
+          - name: l_partkey
+            description: "FK to part"
+          - name: l_suppkey
+            description: "FK to supplier"
+          - name: l_linenumber
+            description: "Line item ordinal"
+          - name: l_quantity
+            description: "Units ordered (1-50)"
+          - name: l_extendedprice
+            description: "quantity * retail price"
+          - name: l_discount
+            description: "Discount rate (0.00 - 0.10)"
+          - name: l_tax
+            description: "Tax rate (0.00 - 0.08)"
+          - name: l_returnflag
+            description: "R=Returned, A=Accepted, N=None"
+          - name: l_linestatus
+            description: "O=Open, F=Fulfilled"
+          - name: l_shipdate
+            description: "Actual ship date"
+          - name: l_commitdate
+            description: "Promised ship date"
+          - name: l_receiptdate
+            description: "Receipt date"
+          - name: l_shipinstruct
+            description: "Shipping instruction"
+          - name: l_shipmode
+            description: "AIR, RAIL, SHIP, TRUCK, MAIL, FOB, REG AIR"
+          - name: l_comment
+            description: "Line item comment"
+
+      - name: customer
+        description: "Customer dimension table (150K rows at SF=1)"
+        columns:
+          - name: c_custkey
+            description: "Primary key"
+          - name: c_name
+            description: "Customer name"
+          - name: c_address
+            description: "Address"
+          - name: c_nationkey
+            description: "FK to nation"
+          - name: c_phone
+            description: "Phone number"
+          - name: c_acctbal
+            description: "Account balance"
+          - name: c_mktsegment
+            description: "Market segment"
+          - name: c_comment
+            description: "Comment"
+
+      - name: nation
+        description: "Nation reference table (25 rows)"
+
+      - name: region
+        description: "Region reference table (5 rows)"
+
+      - name: part
+        description: "Part dimension table (200K rows at SF=1)"
+
+      - name: supplier
+        description: "Supplier dimension table (10K rows at SF=1)"
+
+      - name: partsupp
+        description: "Part-Supplier bridge table (800K rows at SF=1)"

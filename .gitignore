@@ -1,0 +1,32 @@
+# Data
+data/
+*.duckdb
+*.duckdb.wal
+
+# Python
+__pycache__/
+.pytest_cache/
+*.pyc
+.venv/
+*.egg-info/
+
+# dbt
+dbt_project/target/
+dbt_project/logs/
+dbt_project/dbt_packages/
+dbt_project/.user.yml
+
+# Great Expectations
+gx/
+great_expectations/uncommitted/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Results (keep structure, ignore large files)
+results/raw/*.json

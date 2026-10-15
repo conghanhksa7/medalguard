@@ -1,0 +1,139 @@
+version: 2
+
+models:
+  - name: silver_orders
+    description: "Cleaned orders with enforced contracts"
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: o_orderkey
+        data_type: bigint
+        constraints:
+          - type: not_null
+          - type: primary_key
+      - name: o_custkey
+        data_type: bigint
+        constraints:
+          - type: not_null
+      - name: o_orderstatus
+        data_type: varchar
+        constraints:
+          - type: not_null
+          - type: check
+            expression: "o_orderstatus IN ('O', 'F', 'P')"
+      - name: o_totalprice
+        data_type: double
+        constraints:
+          - type: not_null
+          - type: check
+            expression: "o_totalprice >= 0"
+      - name: o_orderdate
+        data_type: date
+        constraints:
+          - type: not_null
+      - name: o_orderpriority
+        data_type: varchar
+      - name: o_clerk
+        data_type: varchar
+      - name: o_shippriority
+        data_type: integer
+
+  - name: silver_lineitem
+    description: "Cleaned lineitem with enforced contracts"
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: l_orderkey
+        data_type: bigint
+        constraints:
+          - type: not_null
+      - name: l_partkey
+        data_type: bigint
+        constraints:
+          - type: not_null
+      - name: l_suppkey
+        data_type: bigint
+        constraints:
+          - type: not_null
+      - name: l_linenumber
+        data_type: integer
+        constraints:
+          - type: not_null
+      - name: l_quantity
+        data_type: double
+        constraints:
+          - type: not_null
+          - type: check
+            expression: "l_quantity >= 1 AND l_quantity <= 50"
+      - name: l_extendedprice
+        data_type: double
+        constraints:
+          - type: not_null
+          - type: check
+            expression: "l_extendedprice >= 0"
+      - name: l_discount
+        data_type: double
+        constraints:
+          - type: not_null
+          - type: check
+            expression: "l_discount >= 0 AND l_discount <= 0.10"
+      - name: l_tax
+        data_type: double
+        constraints:
+          - type: not_null
+          - type: check
+            expression: "l_tax >= 0 AND l_tax <= 0.08"
+      - name: l_returnflag
+        data_type: varchar
+      - name: l_linestatus
+        data_type: varchar
+      - name: l_shipdate
+        data_type: date
+        constraints:
+          - type: not_null
+      - name: l_commitdate
+        data_type: date
+        constraints:
+          - type: not_null
+      - name: l_receiptdate
+        data_type: date
+        constraints:
+          - type: not_null
+      - name: l_shipinstruct
+        data_type: varchar
+      - name: l_shipmode
+        data_type: varchar
+      - name: l_comment
+        data_type: varchar
+
+  - name: silver_customer
+    description: "Cleaned customer with enforced contracts"
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: c_custkey
+        data_type: bigint
+        constraints:
+          - type: not_null
+          - type: primary_key
+      - name: c_name
+        data_type: varchar
+        constraints:
+          - type: not_null
+      - name: c_address
+        data_type: varchar
+      - name: c_nationkey
+        data_type: integer
+        constraints:
+          - type: not_null
+      - name: c_phone
+        data_type: varchar
+      - name: c_acctbal
+        data_type: double
+      - name: c_mktsegment
+        data_type: varchar
+      - name: c_comment
+        data_type: varchar

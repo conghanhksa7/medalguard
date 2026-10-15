@@ -1,0 +1,30 @@
+version: 1
+strict_columns: false   # Allow additive schema evolution
+table: silver.silver_customer
+source_table: bronze.bronze_customer
+
+columns:
+  - name: c_custkey
+    type: BIGINT
+    not_null: true
+    unique: true
+  - name: c_name
+    type: VARCHAR
+    not_null: true
+  - name: c_address
+    type: VARCHAR
+  - name: c_nationkey
+    type: INTEGER
+    not_null: true
+  - name: c_phone
+    type: VARCHAR
+  - name: c_acctbal
+    type: DOUBLE
+  - name: c_mktsegment
+    type: VARCHAR
+  - name: c_comment
+    type: VARCHAR
+
+quality_rules:
+  - rule: row_count
+    min: 1

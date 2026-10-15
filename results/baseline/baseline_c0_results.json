@@ -1,0 +1,641 @@
+[
+  {
+    "mutation": "M1a_AddSingleCol",
+    "category": "ADDITIVE",
+    "description": "Add l_promo_code VARCHAR(20) to lineitem",
+    "config": "C0",
+    "timestamp": "2026-10-03T19:38:19.249769",
+    "pipeline_status": "SUCCESS",
+    "pipeline_wall_ms": 8099.2,
+    "dbt_model_exec_ms": 2513.5,
+    "detected": false,
+    "detection_stage": "NOT_DETECTED",
+    "inject_count": 0,
+    "fault_propagated_to_gold": false,
+    "gold_deviated_rows": 0,
+    "gold_total_rows": 190,
+    "blast_radius": 0.0,
+    "gold_change_ratio": 0.0,
+    "measurement_type": "MEASURED",
+    "gold_diff_detail": {
+      "gold.gold_revenue_by_nation": {
+        "rows_union": 175,
+        "changed": 0,
+        "missing": 0,
+        "unexpected": 0,
+        "deviated": 0
+      },
+      "gold.gold_order_priority_summary": {
+        "rows_union": 15,
+        "changed": 0,
+        "missing": 0,
+        "unexpected": 0,
+        "deviated": 0
+      }
+    },
+    "error": ""
+  },
+  {
+    "mutation": "M1b_AddMultiCol",
+    "category": "ADDITIVE",
+    "description": "Add 3 columns (l_promo_code, l_warehouse_id, l_batch_ts) to lineitem",
+    "config": "C0",
+    "timestamp": "2026-10-03T19:38:32.583715",
+    "pipeline_status": "SUCCESS",
+    "pipeline_wall_ms": 10671.3,
+    "dbt_model_exec_ms": 2065.6,
+    "detected": false,
+    "detection_stage": "NOT_DETECTED",
+    "inject_count": 0,
+    "fault_propagated_to_gold": false,
+    "gold_deviated_rows": 0,
+    "gold_total_rows": 190,
+    "blast_radius": 0.0,
+    "gold_change_ratio": 0.0,
+    "measurement_type": "MEASURED",
+    "gold_diff_detail": {
+      "gold.gold_revenue_by_nation": {
+        "rows_union": 175,
+        "changed": 0,
+        "missing": 0,
+        "unexpected": 0,
+        "deviated": 0
+      },
+      "gold.gold_order_priority_summary": {
+        "rows_union": 15,
+        "changed": 0,
+        "missing": 0,
+        "unexpected": 0,
+        "deviated": 0
+      }
+    },
+    "error": ""
+  },
+  {
+    "mutation": "M2a_DropNonKey",
+    "category": "DESTRUCTIVE",
+    "description": "Drop l_tax column from lineitem (breaking change)",
+    "config": "C0",
+    "timestamp": "2026-10-03T19:38:40.808274",
+    "pipeline_status": "CRASH",
+    "pipeline_wall_ms": 5356.6,
+    "dbt_model_exec_ms": null,
+    "detected": false,
+    "detection_stage": "NOT_DETECTED",
+    "inject_count": 600000,
+    "fault_propagated_to_gold": false,
+    "gold_deviated_rows": 0,
+    "gold_total_rows": 0,
+    "blast_radius": 0.0,
+    "gold_change_ratio": 0.0,
+    "measurement_type": "ASSIGNED_CRASH",
+    "gold_diff_detail": {},
+    "error": "gs: \"l_linestatus\", \"l_partkey\", \"l_quantity\", \"l_shipdate\", \"l_commitdate\"\n  \n  LINE 19:     l_tax,\n               ^\n12:38:38  \n12:38:38    compiled code at target\\compiled\\medalguard\\models\\bronze\\bronze_lineitem.sql\n12:38:38  \n12:38:38  Done. PASS=5 WARN=0 ERROR=1 SKIP=2 NO-OP=0 REUSED=0 TOTAL=8\n"
+  },
+  {
+    "mutation": "M2b_DropKeyCol",
+    "category": "DESTRUCTIVE",
+    "description": "Drop l_orderkey (PK) from lineitem — catastrophic",
+    "config": "C0",
+    "timestamp": "2026-10-03T19:38:49.972283",
+    "pipeline_status": "CRASH",
+    "pipeline_wall_ms": 6376.9,
+    "dbt_model_exec_ms": null,
+    "detected": false,
+    "detection_stage": "NOT_DETECTED",
+    "inject_count": 600000,
+    "fault_propagated_to_gold": false,
+    "gold_deviated_rows": 0,
+    "gold_total_rows": 0,
+    "blast_radius": 0.0,
+    "gold_change_ratio": 0.0,
+    "measurement_type": "ASSIGNED_CRASH",
+    "gold_diff_detail": {},
+    "error": "partkey\", \"l_commitdate\", \"l_returnflag\", \"l_receiptdate\", \"l_suppkey\"\n  \n  LINE 12:     l_orderkey,\n               ^\n12:38:47  \n12:38:47    compiled code at target\\compiled\\medalguard\\models\\bronze\\bronze_lineitem.sql\n12:38:47  \n12:38:47  Done. PASS=5 WARN=0 ERROR=1 SKIP=2 NO-OP=0 REUSED=0 TOTAL=8\n"
+  },
+  {
+    "mutation": "M2c_RenameCol",
+    "category": "DESTRUCTIVE",
+    "description": "Rename l_discount -> l_rebate in lineitem",
+    "config": "C0",
+    "timestamp": "2026-10-03T19:38:58.565282",
+    "pipeline_status": "CRASH",
+    "pipeline_wall_ms": 5532.8,
+    "dbt_model_exec_ms": null,
+    "detected": false,
+    "detection_stage": "NOT_DETECTED",
+    "inject_count": 600000,
+    "fault_propagated_to_gold": false,
+    "gold_deviated_rows": 0,
+    "gold_total_rows": 0,
+    "blast_radius": 0.0,
+    "gold_change_ratio": 0.0,
+    "measurement_type": "ASSIGNED_CRASH",
+    "gold_diff_detail": {},
+    "error": "mment\", \"l_shipdate\", \"l_linestatus\", \"l_commitdate\", \"l_shipinstruct\"\n  \n  LINE 18:     l_discount,\n               ^\n12:38:56  \n12:38:56    compiled code at target\\compiled\\medalguard\\models\\bronze\\bronze_lineitem.sql\n12:38:56  \n12:38:56  Done. PASS=5 WARN=0 ERROR=1 SKIP=2 NO-OP=0 REUSED=0 TOTAL=8\n"
+  },
+  {
+    "mutation": "M3a_DoubleToVarchar",
+    "category": "TYPE_CHANGE",
+    "description": "Cast l_quantity DOUBLE -> VARCHAR in lineitem",
+    "config": "C0",
+    "timestamp": "2026-10-03T19:39:08.121618",
+    "pipeline_status": "SUCCESS",
+    "pipeline_wall_ms": 6226.2,
+    "dbt_model_exec_ms": 2340.2,
+    "detected": false,
+    "detection_stage": "NOT_DETECTED",
+    "inject_count": 600000,
+    "fault_propagated_to_gold": false,
+    "gold_deviated_rows": 0,
+    "gold_total_rows": 190,
+    "blast_radius": 0.0,
+    "gold_change_ratio": 0.0,
+    "measurement_type": "MEASURED",
+    "gold_diff_detail": {
+      "gold.gold_revenue_by_nation": {
+        "rows_union": 175,
+        "changed": 0,
+        "missing": 0,
+        "unexpected": 0,
+        "deviated": 0
+      },
+      "gold.gold_order_priority_summary": {
+        "rows_union": 15,
+        "changed": 0,
+        "missing": 0,
+        "unexpected": 0,
+        "deviated": 0
+      }
+    },
+    "error": ""
+  },
+  {
+    "mutation": "M3b_IntegerToDouble",
+    "category": "TYPE_CHANGE",
+    "description": "Cast l_linenumber INTEGER -> DOUBLE (widening, possibly benign)",
+    "config": "C0",
+    "timestamp": "2026-10-03T19:39:17.495190",
+    "pipeline_status": "SUCCESS",
+    "pipeline_wall_ms": 6331.7,
+    "dbt_model_exec_ms": 2477.2,
+    "detected": false,
+    "detection_stage": "NOT_DETECTED",
+    "inject_count": 600000,
+    "fault_propagated_to_gold": false,
+    "gold_deviated_rows": 0,
+    "gold_total_rows": 190,
+    "blast_radius": 0.0,
+    "gold_change_ratio": 0.0,
+    "measurement_type": "MEASURED",
+    "gold_diff_detail": {
+      "gold.gold_revenue_by_nation": {
+        "rows_union": 175,
+        "changed": 0,
+        "missing": 0,
+        "unexpected": 0,
+        "deviated": 0
+      },
+      "gold.gold_order_priority_summary": {
+        "rows_union": 15,
+        "changed": 0,
+        "missing": 0,
+        "unexpected": 0,
+        "deviated": 0
+      }
+    },
+    "error": ""
+  },
+  {
+    "mutation": "M3c_DateToVarchar",
+    "category": "TYPE_CHANGE",
+    "description": "Cast o_orderdate DATE -> VARCHAR in orders",
+    "config": "C0",
+    "timestamp": "2026-10-03T19:39:27.009880",
+    "pipeline_status": "SUCCESS",
+    "pipeline_wall_ms": 6312.2,
+    "dbt_model_exec_ms": 2352.0,
+    "detected": false,
+    "detection_stage": "NOT_DETECTED",
+    "inject_count": 150000,
+    "fault_propagated_to_gold": false,
+    "gold_deviated_rows": 0,
+    "gold_total_rows": 190,
+    "blast_radius": 0.0,
+    "gold_change_ratio": 0.0,
+    "measurement_type": "MEASURED",
+    "gold_diff_detail": {
+      "gold.gold_revenue_by_nation": {
+        "rows_union": 175,
+        "changed": 0,
+        "missing": 0,
+        "unexpected": 0,
+        "deviated": 0
+      },
+      "gold.gold_order_priority_summary": {
+        "rows_union": 15,
+        "changed": 0,
+        "missing": 0,
+        "unexpected": 0,
+        "deviated": 0
+      }
+    },
+    "error": ""
+  },
+  {
+    "mutation": "M4a_NullAndNegative",
+    "category": "CONSTRAINT_BREACH",
+    "description": "Inject 10 NULL custkey + 20 negative totalprice",
+    "config": "C0",
+    "timestamp": "2026-10-03T19:39:35.037814",
+    "pipeline_status": "SUCCESS",
+    "pipeline_wall_ms": 5778.9,
+    "dbt_model_exec_ms": 1804.4,
+    "detected": false,
+    "detection_stage": "NOT_DETECTED",
+    "inject_count": 30,
+    "fault_propagated_to_gold": true,
+    "gold_deviated_rows": 20,
+    "gold_total_rows": 190,
+    "blast_radius": 0.1053,
+    "gold_change_ratio": 0.1053,
+    "measurement_type": "MEASURED",
+    "gold_diff_detail": {
+      "gold.gold_revenue_by_nation": {
+        "rows_union": 175,
+        "changed": 10,
+        "missing": 0,
+        "unexpected": 0,
+        "deviated": 10
+      },
+      "gold.gold_order_priority_summary": {
+        "rows_union": 15,
+        "changed": 10,
+        "missing": 0,
+        "unexpected": 0,
+        "deviated": 10
+      }
+    },
+    "error": ""
+  },
+  {
+    "mutation": "M4b_NullSmall",
+    "category": "CONSTRAINT_BREACH",
+    "description": "Inject only 5 NULL o_custkey (subtle)",
+    "config": "C0",
+    "timestamp": "2026-10-03T19:39:44.355232",
+    "pipeline_status": "SUCCESS",
+    "pipeline_wall_ms": 6753.8,
+    "dbt_model_exec_ms": 2139.8,
+    "detected": false,
+    "detection_stage": "NOT_DETECTED",
+    "inject_count": 5,
+    "fault_propagated_to_gold": true,
+    "gold_deviated_rows": 5,
+    "gold_total_rows": 190,
+    "blast_radius": 0.0263,
+    "gold_change_ratio": 0.0263,
+    "measurement_type": "MEASURED",
+    "gold_diff_detail": {
+      "gold.gold_revenue_by_nation": {
+        "rows_union": 175,
+        "changed": 5,
+        "missing": 0,
+        "unexpected": 0,
+        "deviated": 5
+      },
+      "gold.gold_order_priority_summary": {
+        "rows_union": 15,
+        "changed": 0,
+        "missing": 0,
+        "unexpected": 0,
+        "deviated": 0
+      }
+    },
+    "error": ""
+  },
+  {
+    "mutation": "M4c_DuplicateKeys",
+    "category": "CONSTRAINT_BREACH",
+    "description": "Insert 5 rows with duplicate o_orderkey (PK violation)",
+    "config": "C0",
+    "timestamp": "2026-10-03T19:39:52.963585",
+    "pipeline_status": "SUCCESS",
+    "pipeline_wall_ms": 6060.5,
+    "dbt_model_exec_ms": 1991.1,
+    "detected": false,
+    "detection_stage": "NOT_DETECTED",
+    "inject_count": 5,
+    "fault_propagated_to_gold": true,
+    "gold_deviated_rows": 8,
+    "gold_total_rows": 190,
+    "blast_radius": 0.0421,
+    "gold_change_ratio": 0.0421,
+    "measurement_type": "MEASURED",
+    "gold_diff_detail": {
+      "gold.gold_revenue_by_nation": {
+        "rows_union": 175,
+        "changed": 5,
+        "missing": 0,
+        "unexpected": 0,
+        "deviated": 5
+      },
+      "gold.gold_order_priority_summary": {
+        "rows_union": 15,
+        "changed": 3,
+        "missing": 0,
+        "unexpected": 0,
+        "deviated": 3
+      }
+    },
+    "error": ""
+  },
+  {
+    "mutation": "M5a_MULTIPLY_100",
+    "category": "SEMANTIC_DRIFT",
+    "description": "Multiply l_discount * 100 (0.05 -> 5.0)",
+    "config": "C0",
+    "timestamp": "2026-10-03T19:40:01.629018",
+    "pipeline_status": "SUCCESS",
+    "pipeline_wall_ms": 6196.6,
+    "dbt_model_exec_ms": 1799.2,
+    "detected": false,
+    "detection_stage": "NOT_DETECTED",
+    "inject_count": 600000,
+    "fault_propagated_to_gold": true,
+    "gold_deviated_rows": 175,
+    "gold_total_rows": 190,
+    "blast_radius": 0.9211,
+    "gold_change_ratio": 0.9211,
+    "measurement_type": "MEASURED",
+    "gold_diff_detail": {
+      "gold.gold_revenue_by_nation": {
+        "rows_union": 175,
+        "changed": 175,
+        "missing": 0,
+        "unexpected": 0,
+        "deviated": 175
+      },
+      "gold.gold_order_priority_summary": {
+        "rows_union": 15,
+        "changed": 0,
+        "missing": 0,
+        "unexpected": 0,
+        "deviated": 0
+      }
+    },
+    "error": ""
+  },
+  {
+    "mutation": "M5b_MULTIPLY_1_5",
+    "category": "SEMANTIC_DRIFT",
+    "description": "Multiply l_discount * 1.5 (subtle, mean 0.05 -> 0.075)",
+    "config": "C0",
+    "timestamp": "2026-10-03T19:40:10.181050",
+    "pipeline_status": "SUCCESS",
+    "pipeline_wall_ms": 6364.7,
+    "dbt_model_exec_ms": 1885.9,
+    "detected": false,
+    "detection_stage": "NOT_DETECTED",
+    "inject_count": 600000,
+    "fault_propagated_to_gold": true,
+    "gold_deviated_rows": 175,
+    "gold_total_rows": 190,
+    "blast_radius": 0.9211,
+    "gold_change_ratio": 0.9211,
+    "measurement_type": "MEASURED",
+    "gold_diff_detail": {
+      "gold.gold_revenue_by_nation": {
+        "rows_union": 175,
+        "changed": 175,
+        "missing": 0,
+        "unexpected": 0,
+        "deviated": 175
+      },
+      "gold.gold_order_priority_summary": {
+        "rows_union": 15,
+        "changed": 0,
+        "missing": 0,
+        "unexpected": 0,
+        "deviated": 0
+      }
+    },
+    "error": ""
+  },
+  {
+    "mutation": "M5c_CATEGORICAL_SHIFT",
+    "category": "SEMANTIC_DRIFT",
+    "description": "Change 10 orders o_orderstatus to 'X' (not in allowed set)",
+    "config": "C0",
+    "timestamp": "2026-10-03T19:40:19.731103",
+    "pipeline_status": "SUCCESS",
+    "pipeline_wall_ms": 6946.3,
+    "dbt_model_exec_ms": 2080.0,
+    "detected": false,
+    "detection_stage": "NOT_DETECTED",
+    "inject_count": 10,
+    "fault_propagated_to_gold": true,
+    "gold_deviated_rows": 12,
+    "gold_total_rows": 195,
+    "blast_radius": 0.0615,
+    "gold_change_ratio": 0.0615,
+    "measurement_type": "MEASURED",
+    "gold_diff_detail": {
+      "gold.gold_revenue_by_nation": {
+        "rows_union": 175,
+        "changed": 0,
+        "missing": 0,
+        "unexpected": 0,
+        "deviated": 0
+      },
+      "gold.gold_order_priority_summary": {
+        "rows_union": 20,
+        "changed": 7,
+        "missing": 0,
+        "unexpected": 5,
+        "deviated": 12
+      }
+    },
+    "error": ""
+  },
+  {
+    "mutation": "B1_AddColumn",
+    "category": "BENIGN",
+    "description": "Add l_internal_note VARCHAR to lineitem (benign additive)",
+    "config": "C0",
+    "timestamp": "2026-10-03T19:40:29.332911",
+    "pipeline_status": "SUCCESS",
+    "pipeline_wall_ms": 6632.4,
+    "dbt_model_exec_ms": 2081.5,
+    "detected": false,
+    "detection_stage": "NOT_DETECTED",
+    "inject_count": 0,
+    "fault_propagated_to_gold": false,
+    "gold_deviated_rows": 0,
+    "gold_total_rows": 190,
+    "blast_radius": null,
+    "gold_change_ratio": 0.0,
+    "measurement_type": "MEASURED",
+    "gold_diff_detail": {
+      "gold.gold_revenue_by_nation": {
+        "rows_union": 175,
+        "changed": 0,
+        "missing": 0,
+        "unexpected": 0,
+        "deviated": 0
+      },
+      "gold.gold_order_priority_summary": {
+        "rows_union": 15,
+        "changed": 0,
+        "missing": 0,
+        "unexpected": 0,
+        "deviated": 0
+      }
+    },
+    "error": ""
+  },
+  {
+    "mutation": "B2_ValueInRange",
+    "category": "BENIGN",
+    "description": "Shift l_discount within range (still 0.0-0.10)",
+    "config": "C0",
+    "timestamp": "2026-10-03T19:40:38.559068",
+    "pipeline_status": "SUCCESS",
+    "pipeline_wall_ms": 6666.7,
+    "dbt_model_exec_ms": 1997.5,
+    "detected": false,
+    "detection_stage": "NOT_DETECTED",
+    "inject_count": 0,
+    "fault_propagated_to_gold": true,
+    "gold_deviated_rows": 175,
+    "gold_total_rows": 190,
+    "blast_radius": null,
+    "gold_change_ratio": 0.9211,
+    "measurement_type": "MEASURED",
+    "gold_diff_detail": {
+      "gold.gold_revenue_by_nation": {
+        "rows_union": 175,
+        "changed": 175,
+        "missing": 0,
+        "unexpected": 0,
+        "deviated": 175
+      },
+      "gold.gold_order_priority_summary": {
+        "rows_union": 15,
+        "changed": 0,
+        "missing": 0,
+        "unexpected": 0,
+        "deviated": 0
+      }
+    },
+    "error": ""
+  },
+  {
+    "mutation": "B3_InsertRows",
+    "category": "BENIGN",
+    "description": "Insert 100 valid new orders",
+    "config": "C0",
+    "timestamp": "2026-10-03T19:40:48.183916",
+    "pipeline_status": "SUCCESS",
+    "pipeline_wall_ms": 6893.6,
+    "dbt_model_exec_ms": 2448.6,
+    "detected": false,
+    "detection_stage": "NOT_DETECTED",
+    "inject_count": 0,
+    "fault_propagated_to_gold": true,
+    "gold_deviated_rows": 7,
+    "gold_total_rows": 190,
+    "blast_radius": null,
+    "gold_change_ratio": 0.0368,
+    "measurement_type": "MEASURED",
+    "gold_diff_detail": {
+      "gold.gold_revenue_by_nation": {
+        "rows_union": 175,
+        "changed": 0,
+        "missing": 0,
+        "unexpected": 0,
+        "deviated": 0
+      },
+      "gold.gold_order_priority_summary": {
+        "rows_union": 15,
+        "changed": 7,
+        "missing": 0,
+        "unexpected": 0,
+        "deviated": 7
+      }
+    },
+    "error": ""
+  },
+  {
+    "mutation": "B5_AddValidStatus",
+    "category": "BENIGN",
+    "description": "Insert orders with valid status 'O', 'F', 'P'",
+    "config": "C0",
+    "timestamp": "2026-10-03T19:40:57.769183",
+    "pipeline_status": "SUCCESS",
+    "pipeline_wall_ms": 6901.9,
+    "dbt_model_exec_ms": 2107.5,
+    "detected": false,
+    "detection_stage": "NOT_DETECTED",
+    "inject_count": 0,
+    "fault_propagated_to_gold": true,
+    "gold_deviated_rows": 5,
+    "gold_total_rows": 190,
+    "blast_radius": null,
+    "gold_change_ratio": 0.0263,
+    "measurement_type": "MEASURED",
+    "gold_diff_detail": {
+      "gold.gold_revenue_by_nation": {
+        "rows_union": 175,
+        "changed": 0,
+        "missing": 0,
+        "unexpected": 0,
+        "deviated": 0
+      },
+      "gold.gold_order_priority_summary": {
+        "rows_union": 15,
+        "changed": 5,
+        "missing": 0,
+        "unexpected": 0,
+        "deviated": 5
+      }
+    },
+    "error": ""
+  },
+  {
+    "mutation": "B7_LargeBatchInsert",
+    "category": "BENIGN",
+    "description": "Double orders table size with valid copies",
+    "config": "C0",
+    "timestamp": "2026-10-03T19:41:06.913078",
+    "pipeline_status": "SUCCESS",
+    "pipeline_wall_ms": 5938.8,
+    "dbt_model_exec_ms": 1906.9,
+    "detected": false,
+    "detection_stage": "NOT_DETECTED",
+    "inject_count": 0,
+    "fault_propagated_to_gold": true,
+    "gold_deviated_rows": 15,
+    "gold_total_rows": 190,
+    "blast_radius": null,
+    "gold_change_ratio": 0.0789,
+    "measurement_type": "MEASURED",
+    "gold_diff_detail": {
+      "gold.gold_revenue_by_nation": {
+        "rows_union": 175,
+        "changed": 0,
+        "missing": 0,
+        "unexpected": 0,
+        "deviated": 0
+      },
+      "gold.gold_order_priority_summary": {
+        "rows_union": 15,
+        "changed": 15,
+        "missing": 0,
+        "unexpected": 0,
+        "deviated": 15
+      }
+    },
+    "error": ""
+  }
+]

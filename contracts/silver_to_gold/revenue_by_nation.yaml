@@ -1,0 +1,37 @@
+version: 1
+strict_columns: false
+table: gold.gold_revenue_by_nation
+source_table: silver.silver_orders
+
+# Gate 2 contract: validates Gold layer output quality
+columns:
+  - name: nation
+    type: VARCHAR
+    not_null: true
+  - name: order_year
+    type: BIGINT
+    not_null: true
+  - name: total_orders
+    type: BIGINT
+    not_null: true
+    min_value: 1
+  - name: total_revenue
+    type: DOUBLE
+    not_null: true
+    min_value: 0
+  - name: avg_discount
+    type: DOUBLE
+    not_null: true
+    min_value: 0.0
+    max_value: 0.10    # TPC-H discount range: 0.00 - 0.10 (catches M5a drift!)
+
+quality_rules:
+  - rule: row_count
+    min: 25           # At least 25 nations expected
+  - rule: null_rate
+    column: total_revenue
+    max: 0.0
+  - rule: mean_range
+    column: avg_discount
+    min: 0.03
+    max: 0.07         # Expected mean ~0.05 for TPC-H (catches M5a: mean=5.0)
