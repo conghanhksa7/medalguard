@@ -17,6 +17,7 @@ import sys
 sys.stdout.reconfigure(encoding='utf-8')
 import os
 from pathlib import Path
+import docx
 from docx import Document
 from docx.shared import Pt
 from docx.oxml import OxmlElement, parse_xml
@@ -370,9 +371,15 @@ set_cell_shading(t6.rows[5].cells[0], BANNER_FILL)
 
 # Row 6: Evidence content (moved from Table 7)
 evidence_txt1 = "[x] GitHub/source/config   [x] Dataset/split\n[x] Log metric   [x] Chart/error cases"
-evidence_txt2 = "Link evidence: https://github.com/conghanhksa7/medalguard (Repo mã nguồn đầy đủ, cấu hình dbt, log JSON 19 thí nghiệm tại results/baseline/ và 3 biểu đồ thực nghiệm)"
 
-evidence_row_xml = f"""
+evidence_links = [
+    ("Github source: ", "https://github.com/conghanhksa7/medalguard"),
+    ("Dataset/split: ", "https://github.com/conghanhksa7/medalguard/blob/main/scripts/generate_tpch.py"),
+    ("Log metric: ", "https://github.com/conghanhksa7/medalguard/blob/main/results/baseline/baseline_c0_results.json"),
+    ("Result on test case: ", "https://github.com/conghanhksa7/medalguard/blob/main/results/baseline/blast_radius_by_mutation.png"),
+]
+
+evidence_tr = parse_xml(f"""
 <w:tr {nsdecls('w')}>
     <w:trPr><w:cantSplit/><w:jc w:val="center"/></w:trPr>
     <w:tc>
@@ -392,14 +399,45 @@ evidence_row_xml = f"""
             <w:gridSpan w:val="3"/>
             <w:tcMar><w:top w:w="80" w:type="dxa"/><w:left w:w="120" w:type="dxa"/><w:bottom w:w="80" w:type="dxa"/><w:right w:w="120" w:type="dxa"/></w:tcMar>
         </w:tcPr>
-        <w:p>
-            <w:pPr><w:spacing w:before="40" w:after="40" w:line="240" w:lineRule="auto"/></w:pPr>
-            <w:r><w:rPr><w:sz w:val="19"/><w:szCs w:val="19"/></w:rPr><w:t xml:space="preserve">{evidence_txt2}</w:t></w:r>
-        </w:p>
     </w:tc>
 </w:tr>
-"""
-t6._tbl.append(parse_xml(evidence_row_xml))
+""")
+
+tc_right = evidence_tr.xpath('.//w:tc')[1]
+part = doc.part
+
+for label, url in evidence_links:
+    r_id = part.relate_to(url, docx.opc.constants.RELATIONSHIP_TYPE.HYPERLINK, is_external=True)
+    p_xml = f"""
+    <w:p {nsdecls('w')}>
+        <w:pPr>
+            <w:spacing w:before="20" w:after="20" w:line="220" w:lineRule="auto"/>
+        </w:pPr>
+        <w:r>
+            <w:rPr>
+                <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>
+                <w:sz w:val="18"/>
+                <w:szCs w:val="18"/>
+            </w:rPr>
+            <w:t xml:space="preserve">{label}</w:t>
+        </w:r>
+        <w:hyperlink xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" r:id="{r_id}">
+            <w:r>
+                <w:rPr>
+                    <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>
+                    <w:color w:val="0563C1"/>
+                    <w:u w:val="single"/>
+                    <w:sz w:val="18"/>
+                    <w:szCs w:val="18"/>
+                </w:rPr>
+                <w:t xml:space="preserve">{url}</w:t>
+            </w:r>
+        </w:hyperlink>
+    </w:p>
+    """
+    tc_right.append(parse_xml(p_xml))
+
+t6._tbl.append(evidence_tr)
 
 # Remove Table 7
 t7 = doc.tables[7]
