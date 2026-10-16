@@ -14,6 +14,7 @@ RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def reset_db(sf=0.1):
+    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
     if os.path.exists(DB_PATH):
         os.remove(DB_PATH)
     con = duckdb.connect(DB_PATH)

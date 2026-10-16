@@ -58,6 +58,7 @@ from mutations.benign_mutations import (
 # ------------------------------------------------------------------
 def reset_db(sf=0.1):
     """Regenerate TPC-H data from scratch (deterministic)."""
+    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
     for p in (DB_PATH, DB_PATH + ".wal"):
         if os.path.exists(p):
             os.remove(p)
