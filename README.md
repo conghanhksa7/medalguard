@@ -74,7 +74,7 @@ medalguard-seminar/
 ### 1. Environment Setup
 ```bash
 # Clone the repository
-git clone <YOUR_REPO_URL>
+git clone https://github.com/conghanhksa7/medalguard.git
 cd medalguard
 
 # Create and activate virtual environment
