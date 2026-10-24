@@ -1,5 +1,6 @@
 """Violation reporting and blast radius calculation."""
 import json
+import re
 from datetime import datetime
 from pathlib import Path
 
@@ -36,12 +37,13 @@ class ViolationReporter:
         return min(affected / injected_fault_count, 1.0)
 
     def save_report(self, gate_name: str, violations: list[dict],
-                    blast_radius: float, output_dir: str = "results/raw"):
+                    blast_radius: float, output_dir: str = "results/raw/gate_reports"):
         """Save violation report to JSON file."""
         Path(output_dir).mkdir(parents=True, exist_ok=True)
         
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"{gate_name}_{timestamp}.json"
+        safe_gate_name = re.sub(r'[^\w\-_\.]', '_', gate_name)
+        filename = f"{safe_gate_name}_{timestamp}.json"
         
         report = {
             "gate": gate_name,

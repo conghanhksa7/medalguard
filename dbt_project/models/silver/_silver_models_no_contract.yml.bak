@@ -6,8 +6,13 @@ models:
     columns:
       - name: o_orderkey
         data_type: bigint
+        tests:
+          - not_null
+          - unique
       - name: o_custkey
         data_type: bigint
+        tests:
+          - not_null
       - name: o_orderstatus
         data_type: varchar
       - name: o_totalprice
@@ -31,7 +36,7 @@ models:
       - name: l_suppkey
         data_type: bigint
       - name: l_linenumber
-        data_type: integer
+        data_type: bigint
       - name: l_quantity
         data_type: double
       - name: l_extendedprice

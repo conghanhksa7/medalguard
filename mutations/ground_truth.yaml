@@ -300,14 +300,14 @@ ground_truth:
       detected: true
       blast_radius: 0.0
       detection_stage: BRONZE
-      pipeline_status: BLOCKED
-      measurement_type: ASSIGNED_BLOCK
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
     C3_standalone:
       detected: true
       blast_radius: 0.0
       detection_stage: BRONZE
-      pipeline_status: BLOCKED
-      measurement_type: ASSIGNED_BLOCK
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
 
   M4b_NULL_SMALL:
     C0:
@@ -334,14 +334,14 @@ ground_truth:
       detected: true
       blast_radius: 0.0
       detection_stage: BRONZE
-      pipeline_status: BLOCKED
-      measurement_type: ASSIGNED_BLOCK
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
     C3_standalone:
       detected: true
       blast_radius: 0.0
       detection_stage: BRONZE
-      pipeline_status: BLOCKED
-      measurement_type: ASSIGNED_BLOCK
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
 
   M4c_DUPLICATE_KEYS:
     C0:
@@ -366,14 +366,14 @@ ground_truth:
       detected: true
       blast_radius: 0.0
       detection_stage: BRONZE
-      pipeline_status: BLOCKED
-      measurement_type: ASSIGNED_BLOCK
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
     C3_standalone:
       detected: true
       blast_radius: 0.0
       detection_stage: BRONZE
-      pipeline_status: BLOCKED
-      measurement_type: ASSIGNED_BLOCK
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
 
   # ---------------- M5: SEMANTIC DRIFT ----------------
   M5a_MULTIPLY_100:
@@ -469,14 +469,14 @@ ground_truth:
       detected: true
       blast_radius: 0.0
       detection_stage: BRONZE
-      pipeline_status: BLOCKED
-      measurement_type: ASSIGNED_BLOCK
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
     C3_standalone:
       detected: true
       blast_radius: 0.0
       detection_stage: BRONZE
-      pipeline_status: BLOCKED
-      measurement_type: ASSIGNED_BLOCK
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
 
   # ---------------- BENIGN ----------------
   B1_ADD_COLUMN:

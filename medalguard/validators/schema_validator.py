@@ -45,6 +45,13 @@ class SchemaValidator:
             })
             return violations
 
+        if not actual_cols:
+            return [{
+                "type": "TABLE_NOT_FOUND",
+                "table": target_table,
+                "message": f"Table '{target_table}' not found"
+            }]
+
         # Check each column in contract
         contract_col_names = set()
         for col_spec in contract["columns"]:
@@ -68,17 +75,16 @@ class SchemaValidator:
                 })
 
         # Check for unexpected columns (schema drift)
-        # Contract versioning: strict_columns=false means additive evolution is OK
         strict_columns = contract.get("strict_columns", True)
+        allowed_extra = {c.lower() for c in contract.get("allowed_extra_columns", [])}
         for actual_col in actual_cols:
-            if actual_col not in contract_col_names:
+            if actual_col not in contract_col_names and actual_col not in allowed_extra:
                 if strict_columns:
                     violations.append({
                         "type": "UNEXPECTED_COLUMN",
                         "column": actual_col,
                         "message": f"Column '{actual_col}' found in table but not in contract (schema drift)"
                     })
-                # If strict_columns=false, additive columns are allowed (no violation)
 
         return violations
 

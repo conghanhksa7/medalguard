@@ -1,5 +1,7 @@
 version: 1
-strict_columns: false   # Allow additive schema evolution (new columns OK)
+strict_columns: true
+max_quarantine_ratio: 0.05
+allowed_extra_columns: ["o_internal_note"]
 table: silver.silver_orders
 source_table: bronze.bronze_orders
 
@@ -28,6 +30,8 @@ columns:
     type: VARCHAR
   - name: o_shippriority
     type: INTEGER
+  - name: o_comment
+    type: VARCHAR
 
 quality_rules:
   - rule: row_count

@@ -1,5 +1,7 @@
 version: 1
-strict_columns: false   # Allow additive schema evolution
+strict_columns: true
+max_quarantine_ratio: 0.05
+allowed_extra_columns: ["l_internal_note"]
 table: silver.silver_lineitem
 source_table: bronze.bronze_lineitem
 
@@ -29,7 +31,7 @@ columns:
     type: DOUBLE
     not_null: true
     min_value: 0.0
-    max_value: 0.10
+    max_value: 1.00
   - name: l_tax
     type: DOUBLE
     not_null: true

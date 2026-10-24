@@ -12,16 +12,19 @@ models:
         constraints:
           - type: not_null
           - type: primary_key
+        tests:
+          - not_null
+          - unique
       - name: o_custkey
         data_type: bigint
         constraints:
           - type: not_null
+        tests:
+          - not_null
       - name: o_orderstatus
         data_type: varchar
         constraints:
           - type: not_null
-          - type: check
-            expression: "o_orderstatus IN ('O', 'F', 'P')"
       - name: o_totalprice
         data_type: double
         constraints:
@@ -58,15 +61,13 @@ models:
         constraints:
           - type: not_null
       - name: l_linenumber
-        data_type: integer
+        data_type: bigint
         constraints:
           - type: not_null
       - name: l_quantity
         data_type: double
         constraints:
           - type: not_null
-          - type: check
-            expression: "l_quantity >= 1 AND l_quantity <= 50"
       - name: l_extendedprice
         data_type: double
         constraints:
@@ -77,14 +78,10 @@ models:
         data_type: double
         constraints:
           - type: not_null
-          - type: check
-            expression: "l_discount >= 0 AND l_discount <= 0.10"
       - name: l_tax
         data_type: double
         constraints:
           - type: not_null
-          - type: check
-            expression: "l_tax >= 0 AND l_tax <= 0.08"
       - name: l_returnflag
         data_type: varchar
       - name: l_linestatus

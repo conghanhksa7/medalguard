@@ -1,4 +1,4 @@
-"""Constraint validation: NOT NULL, value ranges, allowed values."""
+"""Constraint validation: NOT NULL, value ranges, allowed values, UNIQUE."""
 import duckdb
 
 
@@ -34,6 +34,23 @@ class ConstraintValidator:
                         })
                 except Exception:
                     pass  # Column might not exist (caught by schema validator)
+
+            # Check unique
+            if col_spec.get("unique", False):
+                try:
+                    dup_count = con.execute(
+                        f"SELECT COUNT(*) - COUNT(DISTINCT {q_col}) "
+                        f"FROM {q_table} WHERE {q_col} IS NOT NULL"
+                    ).fetchone()[0]
+                    if dup_count > 0:
+                        violations.append({
+                            "type": "UNIQUE_VIOLATION",
+                            "column": col_name,
+                            "affected_rows": int(dup_count),
+                            "message": f"Column '{col_name}' has {dup_count} duplicate key rows (contract requires UNIQUE)"
+                        })
+                except Exception:
+                    pass
 
             # Check min_value
             if "min_value" in col_spec:

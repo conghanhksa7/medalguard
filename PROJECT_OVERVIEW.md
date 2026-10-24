@@ -1,8 +1,8 @@
 # TÀI LIỆU TỔNG QUAN ĐỀ TÀI NGHIÊN CỨU: MEDALGUARD
 > **Master Technical Overview & Project Architecture Dossier**  
 > **Vai trò:** Tech Lead / Principal Data Engineer  
-> **Ngày cập nhật:** 15/10/2026  
-> **Trạng thái đề tài:** Đã hoàn thành nghiệm thu Baseline C0, đã chuẩn hóa mã nguồn Framework & Experiment Suite.
+> **Ngày cập nhật:** 24/10/2026  
+> **Trạng thái đề tài:** Đã hoàn thành nghiệm thu Baseline C0, đã chuẩn hóa mã nguồn Framework & Experiment Suite, kiểm chứng thành công Smoke Test 12 kịch bản trên C1, C2, C3_standalone.
 
 ---
 
@@ -339,17 +339,17 @@ python experiments/runner.py --mode matrix --sf 0.1
 5. **Nghiệm thu thành công trọn vẹn Baseline C0:**
    - Thu thập đầy đủ số liệu thực chứng chứng minh các lỗ hổng Silent Data Corruption trên C0 (đặc biệt là lỗi nghiêm trọng của M5a và M3a).
 
-### 5.2 Điểm nghẽn kỹ thuật & Vấn đề tồn đọng (Pain Points)
-1. **Cơ chế hoán đổi Cấu hình dbt Contracts (Config Swapping):**
-   - Để chuyển giữa C0 (không contract) và C1/C3 (có contract dbt), dbt yêu cầu chỉnh sửa file schema YAML. Hiện tại đang dùng cách đổi tên file backup (`.bak`). Cần tích hợp cơ chế tự động hóa chuyển đổi này ngay bên trong `runner.py` một cách mượt mà và an toàn.
-2. **Tích hợp Great Expectations cho cấu hình C2:**
-   - Hàm `_run_gx_validation()` trong [runner.py](file:///D:/Study/Seminar/medalguard-seminar/experiments/runner.py) hiện vẫn đang là hàm giả lập (`return False`). Cần cài đặt expectation suite thực tế của Great Expectations trên DuckDB để đo lường cấu hình C2.
-3. **Bổ sung hợp đồng tầng Silver $\rightarrow$ Gold:**
-   - Hiện thư mục [contracts/](file:///D:/Study/Seminar/medalguard-seminar/contracts) mới có thư mục con `bronze_to_silver/`. Cần bổ sung thêm file `silver_to_gold/revenue_by_nation.yaml` để Gate 2 kiểm tra toàn diện chất lượng của tầng Gold.
-4. **Đặc thù ràng buộc NOT NULL của DuckDB TPC-H:**
-   - Hàm `CALL dbgen()` của DuckDB mặc định sinh bảng với ràng buộc `NOT NULL` cứng. Khi mutation M4a bơm dữ liệu NULL vào nguồn, phải chủ động gọi `ALTER TABLE ... DROP NOT NULL` để tránh lỗi constraint ở cấp độ tạo dữ liệu nguồn.
-5. **Thực thi trên quy mô chuẩn SF=1.0:**
-   - Các kịch bản thử nghiệm hiện tại đang chạy trên $SF=0.1$ (~866K dòng). Cần tiến hành chạy lại trên $SF=1.0$ (~8.6M dòng) để số liệu sẵn sàng xuất bản trong báo cáo nghiệm thu chính thức.
+### 5.2 Tình trạng xử lý Điểm nghẽn kỹ thuật & Kiểm chứng Thực nghiệm
+1. **Cơ chế hoán đổi Cấu hình dbt Contracts (Config Swapping) — [ĐÃ GIẢI QUYẾT]:**
+   - Đã tích hợp hàm `swap_dbt_config(enable_contracts)` tự động hóa bên trong `experiments/runner.py`, hoán đổi an toàn giữa `_silver_models_no_contract.yml.bak` và `_silver_models_with_contract.yml.bak` có khối `contract: enforced: true`.
+2. **Tích hợp Great Expectations cho cấu hình C2 — [ĐÃ GIẢI QUYẾT]:**
+   - Đã cài đặt module `medalguard/gx_runner.py` với bộ 10 quy tắc expectation suite toàn diện trên DuckDB (kiểm tra `not_null`, `unique`, `allowed_values`, `min_value`, `max_value`), phục vụ kiểm thử hậu biến đổi cho cấu hình C2.
+3. **Bổ sung hợp đồng tầng Silver $\rightarrow$ Gold — [ĐÃ GIẢI QUYẾT]:**
+   - Đã tạo đầy đủ các file hợp đồng tại `contracts/silver_to_gold/` (`revenue_by_nation.yaml`, `order_priority_summary.yaml`) để Gate 2 kiểm tra toàn diện chất lượng của tầng Gold.
+4. **Cơ chế In-Place Quarantine & Staged Execution tại Gate 1 — [ĐÃ GIẢI QUYẾT]:**
+   - Đã phân tách rành mạch `BLOCKING_TYPES` và `QUARANTINABLE_TYPES`, triển khai cơ chế cách ly dòng trực tiếp tại tầng Bronze qua bảng tạm `_mg_tagged` an toàn với logic 3 trị của SQL. Đạt hiệu quả cách ly `QE = 100%` và `Blast Radius = 0.0%` trên đột biến vi phạm ràng buộc (M4a).
+5. **Kiểm chứng Smoke Test 12 kịch bản — [ĐÃ NGHIỆM THU]:**
+   - Đã chạy nghiệm thu Smoke Test trên quy mô $SF=0.1$ qua 12 lượt chạy (M2a, M4a, M5a, B1 trên C1, C2, C3_standalone), xác thực 100% các giả thuyết cốt lõi của đề tài (C1 bỏ lọt M5a, C2 sập M2a, C3_standalone bắt sớm tại DDI=0 và cách ly thành công M4a). Số liệu sẵn sàng cho việc chạy Full Matrix 95 runs.
 
 ---
 

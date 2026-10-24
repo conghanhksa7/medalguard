@@ -30,6 +30,8 @@ Thumbs.db
 
 # Results (keep structure, ignore large files)
 results/raw/*.json
+results/raw/gate_reports/
+!results/raw/.gitkeep
 
 # Local scripts & reports
 scripts/fill_baseline_form.py

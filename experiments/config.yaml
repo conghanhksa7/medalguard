@@ -1,17 +1,98 @@
 configs:
-  C0: "Baseline (no check)"
-  C1: "dbt contracts only"
-  C2: "Great Expectations only"
-  C3: "MedalGuard full (dbt + GX + MedalGuard)"
-  C3_standalone: "MedalGuard only (no dbt contracts, no GX) - for clean ablation"
+  C0:
+    description: "Baseline (no check)"
+    dbt_contracts: false
+    great_expectations: false
+    medalguard: false
+    gate_mode: "log_only"
+    enabled_validators: []
+  C1:
+    description: "dbt contracts only"
+    dbt_contracts: true
+    great_expectations: false
+    medalguard: false
+    gate_mode: "log_only"
+    enabled_validators: []
+  C2:
+    description: "Great Expectations only"
+    dbt_contracts: false
+    great_expectations: true
+    medalguard: false
+    gate_mode: "log_only"
+    enabled_validators: []
+  C3:
+    description: "MedalGuard full (dbt + GX + MedalGuard)"
+    dbt_contracts: true
+    great_expectations: true
+    medalguard: true
+    gate_mode: "quarantine"
+    enabled_validators:
+      - schema
+      - constraint
+      - semantic
+  C3_standalone:
+    description: "MedalGuard only (no dbt contracts, no GX) - for clean ablation"
+    dbt_contracts: false
+    great_expectations: false
+    medalguard: true
+    gate_mode: "quarantine"
+    enabled_validators:
+      - schema
+      - constraint
+      - semantic
 
 ablation:
-  - A1_NO_SCHEMA: "constraint + semantic only"
-  - A2_NO_CONSTRAINT: "schema + semantic only"
-  - A3_NO_SEMANTIC: "schema + constraint only"
-  - A4_SCHEMA_ONLY: "schema only"
-  - A5_CONSTRAINT_ONLY: "constraint only"
-  - A6_SEMANTIC_ONLY: "semantic only"
+  A1_NO_SCHEMA:
+    description: "constraint + semantic only"
+    dbt_contracts: false
+    great_expectations: false
+    medalguard: true
+    gate_mode: "quarantine"
+    enabled_validators:
+      - constraint
+      - semantic
+  A2_NO_CONSTRAINT:
+    description: "schema + semantic only"
+    dbt_contracts: false
+    great_expectations: false
+    medalguard: true
+    gate_mode: "quarantine"
+    enabled_validators:
+      - schema
+      - semantic
+  A3_NO_SEMANTIC:
+    description: "schema + constraint only"
+    dbt_contracts: false
+    great_expectations: false
+    medalguard: true
+    gate_mode: "quarantine"
+    enabled_validators:
+      - schema
+      - constraint
+  A4_SCHEMA_ONLY:
+    description: "schema only"
+    dbt_contracts: false
+    great_expectations: false
+    medalguard: true
+    gate_mode: "quarantine"
+    enabled_validators:
+      - schema
+  A5_CONSTRAINT_ONLY:
+    description: "constraint only"
+    dbt_contracts: false
+    great_expectations: false
+    medalguard: true
+    gate_mode: "quarantine"
+    enabled_validators:
+      - constraint
+  A6_SEMANTIC_ONLY:
+    description: "semantic only"
+    dbt_contracts: false
+    great_expectations: false
+    medalguard: true
+    gate_mode: "quarantine"
+    enabled_validators:
+      - semantic
 
 execution:
   repeat_count: 7
