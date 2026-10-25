@@ -4,7 +4,7 @@ SELECT
     l_orderkey,
     l_partkey,
     l_suppkey,
-    l_linenumber,
+    CAST(l_linenumber AS BIGINT) AS l_linenumber,
     CAST(l_quantity AS DOUBLE) AS l_quantity,
     CAST(l_extendedprice AS DOUBLE) AS l_extendedprice,
     CAST(l_discount AS DOUBLE) AS l_discount,

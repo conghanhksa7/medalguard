@@ -150,7 +150,7 @@ flowchart TD
 
 4. **False Positive Rate (FPR - Tỷ lệ báo động giả):**
    $$FPR = \frac{\sum_{j=1}^{M} \mathbb{I}(\text{Benign}_j \text{ flagged as error})}{M} \times 100\%$$
-   *Đo lường trên $M = 8$ đột biến lành tính ($B1 \dots B8$). Yêu cầu $FPR = 0\%$ khi cấu hình hợp đồng ở chế độ tương thích.*
+   *Đo lường trên $M = 5$ đột biến lành tính ($B1, B2, B3, B5, B7$). Yêu cầu $FPR = 0\%$ khi cấu hình hợp đồng ở chế độ tương thích.*
 
 5. **Pipeline Overhead (Chi phí trễ thực thi):**
    $$\text{Overhead (\%)} = \frac{\text{Median}(T_{C_x}) - \text{Median}(T_{C_0})}{\text{Median}(T_{C_0})} \times 100\%$$
@@ -279,7 +279,7 @@ D:\Study\Seminar\
     │   ├── m3_type_change.py                  <-- Đột biến đổi kiểu dữ liệu (M3a, M3b, M3c)
     │   ├── m4_constraint_breach.py            <-- Đột biến phá vỡ ràng buộc (M4a, M4b, M4c)
     │   ├── m5_semantic_drift.py               <-- Đột biến ngữ nghĩa / lệch giá trị (M5a, M5b, M5c)
-    │   ├── benign_mutations.py                <-- Đột biến lành tính thử nghiệm FPR (B1 đến B8)
+    │   ├── benign_mutations.py                <-- Đột biến lành tính thử nghiệm FPR (B1, B2, B3, B5, B7)
     │   └── ground_truth.yaml                  <-- Ma trận kết quả kỳ vọng chuẩn cho cả 4 cấu hình
     │
     ├── experiments/                           <-- HỆ THỐNG THỰC NGHIỆM TỰ ĐỘNG

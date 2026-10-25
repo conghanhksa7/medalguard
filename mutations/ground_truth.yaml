@@ -1,13 +1,3 @@
-# Ground Truth v3: Aligned with Python class names and empirical measurements
-# 
-# Fields:
-#   detected: Was the fault caught by any enforcement mechanism?
-#   blast_radius: Fraction of faulty records reaching Gold (0.0-1.0)
-#   detection_stage: Where fault was caught (NOT_DETECTED, BRONZE, SILVER, SILVER_CONTRACT, GOLD)
-#   pipeline_status: SUCCESS | CRASH | BLOCKED | PARTIAL
-#   measurement_type: MEASURED | ASSIGNED_BLOCK | ASSIGNED_CRASH
-#   notes: Explanation of expected behavior
-
 ground_truth:
   M1a_AddSingleCol:
     C0:
@@ -280,8 +270,7 @@ ground_truth:
       detection_stage: SILVER
       pipeline_status: BLOCKED
       measurement_type: ASSIGNED_BLOCK
-      notes: dbt contracts enforce NOT NULL on o_custkey and CHECK o_totalprice >=
-        0
+      notes: dbt contracts enforce NOT NULL on o_custkey and CHECK o_totalprice >= 0
     C2:
       detected: true
       blast_radius: 0.0
@@ -420,7 +409,7 @@ ground_truth:
       detection_stage: NOT_DETECTED
       pipeline_status: SUCCESS
       measurement_type: MEASURED
-      notes: Values 0.00-0.15 fall within row check [0.0, 1.00]; GX misses semantic
+      notes: Values bounded by LEAST(discount*1.5, 0.10) fall within [0.0, 0.10]; GX passes; only SemanticValidator catches
         drift
     C3:
       detected: true
@@ -558,37 +547,6 @@ ground_truth:
       detection_stage: NOT_DETECTED
       pipeline_status: SUCCESS
       measurement_type: MEASURED
-  B4_ReorderCols:
-    C0:
-      detected: false
-      blast_radius: 0.0
-      detection_stage: NOT_DETECTED
-      pipeline_status: SUCCESS
-      measurement_type: MEASURED
-    C1:
-      detected: false
-      blast_radius: 0.0
-      detection_stage: NOT_DETECTED
-      pipeline_status: SUCCESS
-      measurement_type: MEASURED
-    C2:
-      detected: false
-      blast_radius: 0.0
-      detection_stage: NOT_DETECTED
-      pipeline_status: SUCCESS
-      measurement_type: MEASURED
-    C3:
-      detected: false
-      blast_radius: 0.0
-      detection_stage: NOT_DETECTED
-      pipeline_status: SUCCESS
-      measurement_type: MEASURED
-    C3_standalone:
-      detected: false
-      blast_radius: 0.0
-      detection_stage: NOT_DETECTED
-      pipeline_status: SUCCESS
-      measurement_type: MEASURED
   B5_AddValidStatus:
     C0:
       detected: false
@@ -620,69 +578,7 @@ ground_truth:
       detection_stage: NOT_DETECTED
       pipeline_status: SUCCESS
       measurement_type: MEASURED
-  B6_IncreasePrecision:
-    C0:
-      detected: false
-      blast_radius: 0.0
-      detection_stage: NOT_DETECTED
-      pipeline_status: SUCCESS
-      measurement_type: MEASURED
-    C1:
-      detected: false
-      blast_radius: 0.0
-      detection_stage: NOT_DETECTED
-      pipeline_status: SUCCESS
-      measurement_type: MEASURED
-    C2:
-      detected: false
-      blast_radius: 0.0
-      detection_stage: NOT_DETECTED
-      pipeline_status: SUCCESS
-      measurement_type: MEASURED
-    C3:
-      detected: false
-      blast_radius: 0.0
-      detection_stage: NOT_DETECTED
-      pipeline_status: SUCCESS
-      measurement_type: MEASURED
-    C3_standalone:
-      detected: false
-      blast_radius: 0.0
-      detection_stage: NOT_DETECTED
-      pipeline_status: SUCCESS
-      measurement_type: MEASURED
   B7_LargeBatchInsert:
-    C0:
-      detected: false
-      blast_radius: 0.0
-      detection_stage: NOT_DETECTED
-      pipeline_status: SUCCESS
-      measurement_type: MEASURED
-    C1:
-      detected: false
-      blast_radius: 0.0
-      detection_stage: NOT_DETECTED
-      pipeline_status: SUCCESS
-      measurement_type: MEASURED
-    C2:
-      detected: false
-      blast_radius: 0.0
-      detection_stage: NOT_DETECTED
-      pipeline_status: SUCCESS
-      measurement_type: MEASURED
-    C3:
-      detected: false
-      blast_radius: 0.0
-      detection_stage: NOT_DETECTED
-      pipeline_status: SUCCESS
-      measurement_type: MEASURED
-    C3_standalone:
-      detected: false
-      blast_radius: 0.0
-      detection_stage: NOT_DETECTED
-      pipeline_status: SUCCESS
-      measurement_type: MEASURED
-  B8_WhitespaceValues:
     C0:
       detected: false
       blast_radius: 0.0

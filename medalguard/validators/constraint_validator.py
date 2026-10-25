@@ -1,5 +1,12 @@
 """Constraint validation: NOT NULL, value ranges, allowed values, UNIQUE."""
 import duckdb
+from ..utils import quote_identifier, quote_table, parse_table_ref
+
+NUMERIC_TEMPORAL = (
+    "INT", "BIGINT", "INTEGER", "SMALLINT", "TINYINT", "HUGEINT",
+    "DOUBLE", "DECIMAL", "NUMERIC", "FLOAT", "REAL",
+    "DATE", "TIMESTAMP", "TIME"
+)
 
 
 class ConstraintValidator:
@@ -11,13 +18,30 @@ class ConstraintValidator:
         
         Returns list of violation dicts with affected_rows count.
         """
-        from ..utils import quote_identifier, quote_table
         violations = []
         q_table = quote_table(table)
+        schema_name, table_name = parse_table_ref(table)
 
-        for col_spec in contract["columns"]:
+        try:
+            rows = con.execute(
+                "SELECT column_name, data_type "
+                "FROM information_schema.columns "
+                f"WHERE table_schema = '{schema_name}' AND table_name = '{table_name}'"
+            ).fetchall()
+            actual_cols = {row[0].lower(): row[1].upper() for row in rows}
+        except Exception as e:
+            actual_cols = {}
+
+        if not actual_cols:
+            return []
+
+        for col_spec in contract.get("columns", []):
             col_name = col_spec["name"]
+            if col_name.lower() not in actual_cols:
+                continue  # Missing column handled by SchemaValidator
+
             q_col = quote_identifier(col_name)
+            actual_type = actual_cols[col_name.lower()]
 
             # Check NOT NULL
             if col_spec.get("not_null", False):
@@ -32,8 +56,8 @@ class ConstraintValidator:
                             "affected_rows": null_count,
                             "message": f"Column '{col_name}' has {null_count} NULL values (contract requires NOT NULL)"
                         })
-                except Exception:
-                    pass  # Column might not exist (caught by schema validator)
+                except Exception as e:
+                    raise RuntimeError(f"Constraint query failed on {table}.{col_name}: {e}") from e
 
             # Check unique
             if col_spec.get("unique", False):
@@ -49,42 +73,44 @@ class ConstraintValidator:
                             "affected_rows": int(dup_count),
                             "message": f"Column '{col_name}' has {dup_count} duplicate key rows (contract requires UNIQUE)"
                         })
-                except Exception:
-                    pass
+                except Exception as e:
+                    raise RuntimeError(f"Constraint query failed on {table}.{col_name}: {e}") from e
 
             # Check min_value
             if "min_value" in col_spec:
-                try:
-                    below_count = con.execute(
-                        f"SELECT COUNT(*) FROM {q_table} WHERE {q_col} < {col_spec['min_value']}"
-                    ).fetchone()[0]
-                    if below_count > 0:
-                        violations.append({
-                            "type": "RANGE_VIOLATION",
-                            "column": col_name,
-                            "constraint": f">= {col_spec['min_value']}",
-                            "affected_rows": below_count,
-                            "message": f"Column '{col_name}' has {below_count} values below minimum {col_spec['min_value']}"
-                        })
-                except Exception:
-                    pass
+                if any(t in actual_type for t in NUMERIC_TEMPORAL):
+                    try:
+                        below_count = con.execute(
+                            f"SELECT COUNT(*) FROM {q_table} WHERE {q_col} < {col_spec['min_value']}"
+                        ).fetchone()[0]
+                        if below_count > 0:
+                            violations.append({
+                                "type": "RANGE_VIOLATION",
+                                "column": col_name,
+                                "constraint": f">= {col_spec['min_value']}",
+                                "affected_rows": below_count,
+                                "message": f"Column '{col_name}' has {below_count} values below minimum {col_spec['min_value']}"
+                            })
+                    except Exception as e:
+                        raise RuntimeError(f"Constraint query failed on {table}.{col_name}: {e}") from e
 
             # Check max_value
             if "max_value" in col_spec:
-                try:
-                    above_count = con.execute(
-                        f"SELECT COUNT(*) FROM {q_table} WHERE {q_col} > {col_spec['max_value']}"
-                    ).fetchone()[0]
-                    if above_count > 0:
-                        violations.append({
-                            "type": "RANGE_VIOLATION",
-                            "column": col_name,
-                            "constraint": f"<= {col_spec['max_value']}",
-                            "affected_rows": above_count,
-                            "message": f"Column '{col_name}' has {above_count} values above maximum {col_spec['max_value']}"
-                        })
-                except Exception:
-                    pass
+                if any(t in actual_type for t in NUMERIC_TEMPORAL):
+                    try:
+                        above_count = con.execute(
+                            f"SELECT COUNT(*) FROM {q_table} WHERE {q_col} > {col_spec['max_value']}"
+                        ).fetchone()[0]
+                        if above_count > 0:
+                            violations.append({
+                                "type": "RANGE_VIOLATION",
+                                "column": col_name,
+                                "constraint": f"<= {col_spec['max_value']}",
+                                "affected_rows": above_count,
+                                "message": f"Column '{col_name}' has {above_count} values above maximum {col_spec['max_value']}"
+                            })
+                    except Exception as e:
+                        raise RuntimeError(f"Constraint query failed on {table}.{col_name}: {e}") from e
 
             # Check allowed_values
             if "allowed_values" in col_spec:
@@ -103,7 +129,7 @@ class ConstraintValidator:
                             "affected_rows": invalid_count,
                             "message": f"Column '{col_name}' has {invalid_count} values not in {allowed}"
                         })
-                except Exception:
-                    pass
+                except Exception as e:
+                    raise RuntimeError(f"Constraint query failed on {table}.{col_name}: {e}") from e
 
         return violations

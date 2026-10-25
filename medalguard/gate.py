@@ -21,8 +21,9 @@ from .utils import quote_identifier, quote_table, parse_table_ref
 
 class ContractViolationError(Exception):
     """Raised when MedalGuard gate blocks a pipeline due to contract violations."""
-    def __init__(self, violations: list[dict]):
+    def __init__(self, violations: list[dict], validation_time_ms: float = 0.0):
         self.violations = violations
+        self.validation_time_ms = validation_time_ms
         super().__init__(f"Contract violated: {len(violations)} violations found")
 
 
@@ -63,16 +64,58 @@ class ContractGate:
 
     def __init__(self, gate_name: str, contract_path: str,
                  db_path: str, mode: str = "log_only",
-                 enabled_validators: set | None = None):
+                 enabled_validators: set | None = None,
+                 save_reports: bool = True,
+                 experiment_id: str = ""):
         self.gate_name = gate_name
         self.contract = load_contract(contract_path)
         self.db_path = db_path
         self.mode = mode
         self.enabled_validators = set(enabled_validators) if enabled_validators is not None else self.ALL_VALIDATORS
+        self.save_reports = save_reports
+        self.experiment_id = experiment_id
         self.schema_validator = SchemaValidator()
         self.constraint_validator = ConstraintValidator()
         self.semantic_validator = SemanticValidator()
         self.reporter = ViolationReporter()
+
+    def _build_violation_conditions(self, violations: list[dict]) -> tuple[list[str], list[str]]:
+        """Build SQL condition strings and reason cases for quarantinable violations."""
+        conditions = []
+        reason_cases = []
+        for v in violations:
+            v_type = v.get("type")
+            if v_type not in self.QUARANTINABLE_TYPES:
+                continue
+            col = v.get("column")
+            if not col:
+                continue
+            q_col = quote_identifier(col)
+
+            cond = None
+            reason_label = f"{v_type}:{col}"
+
+            if v_type == "NULL_VIOLATION":
+                cond = f"({q_col} IS NULL)"
+            elif v_type == "RANGE_VIOLATION":
+                constraint = v.get("constraint", "")
+                if ">=" in constraint:
+                    min_val = constraint.replace(">=", "").strip()
+                    cond = f"({q_col} IS NOT NULL AND {q_col} < {min_val})"
+                elif "<=" in constraint:
+                    max_val = constraint.replace("<=", "").strip()
+                    cond = f"({q_col} IS NOT NULL AND {q_col} > {max_val})"
+            elif v_type == "ALLOWED_VALUES_VIOLATION":
+                allowed = v.get("allowed", [])
+                values_str = ", ".join(f"'{val}'" for val in allowed)
+                cond = f"({q_col} IS NOT NULL AND {q_col} NOT IN ({values_str}))"
+            elif v_type == "UNIQUE_VIOLATION":
+                cond = f"(ROW_NUMBER() OVER (PARTITION BY {q_col} ORDER BY {q_col}) > 1)"
+
+            if cond:
+                conditions.append(cond)
+                reason_cases.append(f"CASE WHEN {cond} THEN '{reason_label}' END")
+        return conditions, reason_cases
 
     def validate_pre_transform(self, source_table: str, injected_fault_count: int = 0) -> ValidationResult:
         """Run Gate 1: pre-transform validation on source (Bronze).
@@ -100,19 +143,21 @@ class ContractGate:
                 con, source_table, source_table, self.contract
             )
 
-        elapsed_ms = (time.perf_counter() - start) * 1000
-
         quarantined_rows = 0
         passed = len(violations) == 0
 
         has_blocking_violation = any(v.get("type") in self.BLOCKING_TYPES for v in violations)
+        conditions, reason_cases = self._build_violation_conditions(violations)
 
         if violations and not has_blocking_violation:
             q_table_full = quote_table(source_table)
             total_rows = con.execute(f"SELECT COUNT(*) FROM {q_table_full}").fetchone()[0]
-            affected_sum = sum(v.get("affected_rows", 0) for v in violations)
+            where_bad = " OR ".join(conditions)
+            distinct_bad_rows = con.execute(
+                f"SELECT COUNT(*) FROM (SELECT COALESCE({where_bad}, FALSE) AS _bad FROM {q_table_full}) WHERE _bad"
+            ).fetchone()[0] if conditions else 0
             max_ratio = float(self.contract.get("max_quarantine_ratio", 0.05))
-            if total_rows > 0 and (affected_sum / total_rows) > max_ratio:
+            if total_rows > 0 and (distinct_bad_rows / total_rows) > max_ratio:
                 has_blocking_violation = True
 
         measurement_type = MeasurementType.MEASURED
@@ -123,8 +168,13 @@ class ContractGate:
                 measurement_type = MeasurementType.ASSIGNED_BLOCK
                 blast_radius = 0.0
                 con.close()
-                self.reporter.save_report(self.gate_name, violations, blast_radius)
-                raise ContractViolationError(violations)
+                elapsed_ms = round((time.perf_counter() - start) * 1000, 1)
+                if self.save_reports:
+                    self.reporter.save_report(
+                        self.gate_name, violations, blast_radius, experiment_id=self.experiment_id
+                    )
+                err = ContractViolationError(violations, validation_time_ms=elapsed_ms)
+                raise err
             elif self.mode == "quarantine" and not has_blocking_violation:
                 quarantined_rows = self._quarantine_bad_records(con, violations, source_table)
         else:
@@ -136,6 +186,7 @@ class ContractGate:
                 con.execute(f"CREATE OR REPLACE VIEW {q_schema}.{q_clean} AS SELECT * FROM {q_schema}.{q_table}")
 
         con.close()
+        elapsed_ms = round((time.perf_counter() - start) * 1000, 1)
 
         result = ValidationResult(
             gate_name=self.gate_name,
@@ -148,9 +199,10 @@ class ContractGate:
             quarantined_rows=quarantined_rows
         )
 
-        self.reporter.save_report(
-            self.gate_name, violations, blast_radius
-        )
+        if self.save_reports:
+            self.reporter.save_report(
+                self.gate_name, violations, blast_radius, experiment_id=self.experiment_id
+            )
 
         return result
 
@@ -182,7 +234,7 @@ class ContractGate:
             )
 
         con.close()
-        elapsed_ms = (time.perf_counter() - start) * 1000
+        elapsed_ms = round((time.perf_counter() - start) * 1000, 1)
 
         blast_radius = self.reporter.calculate_blast_radius(
             injected_fault_count, self.db_path, target_table, violations
@@ -206,12 +258,14 @@ class ContractGate:
             quarantined_rows=0
         )
 
-        self.reporter.save_report(
-            self.gate_name, violations, blast_radius
-        )
+        if self.save_reports:
+            self.reporter.save_report(
+                self.gate_name, violations, blast_radius, experiment_id=self.experiment_id
+            )
 
         if self.mode == "block" and not passed:
-            raise ContractViolationError(violations)
+            err = ContractViolationError(violations, validation_time_ms=elapsed_ms)
+            raise err
 
         return result
 
@@ -231,55 +285,31 @@ class ContractGate:
         q_clean = quote_identifier(f"{table_name}_clean")
         q_quarantine = quote_identifier(f"{table_name}_rejected")
 
-        conditions = []
-        for v in violations:
-            col = v.get("column")
-            if not col:
-                continue
-
-            q_col = quote_identifier(col)
-            v_type = v.get("type")
-
-            if v_type == "NULL_VIOLATION":
-                conditions.append(f"({q_col} IS NULL)")
-            elif v_type == "RANGE_VIOLATION":
-                constraint = v.get("constraint", "")
-                if ">=" in constraint:
-                    min_val = constraint.replace(">=", "").strip()
-                    conditions.append(f"({q_col} IS NOT NULL AND {q_col} < {min_val})")
-                elif "<=" in constraint:
-                    max_val = constraint.replace("<=", "").strip()
-                    conditions.append(f"({q_col} IS NOT NULL AND {q_col} > {max_val})")
-            elif v_type == "ALLOWED_VALUES_VIOLATION":
-                allowed = v.get("allowed", [])
-                values_str = ", ".join(f"'{val}'" for val in allowed)
-                conditions.append(
-                    f"({q_col} IS NOT NULL AND {q_col} NOT IN ({values_str}))"
-                )
-            elif v_type == "UNIQUE_VIOLATION":
-                conditions.append(
-                    f"(ROW_NUMBER() OVER (PARTITION BY {q_col} ORDER BY {q_col}) > 1)"
-                )
+        conditions, reason_cases = self._build_violation_conditions(violations)
 
         if not conditions:
             con.execute(f"CREATE OR REPLACE VIEW {q_schema}.{q_clean} AS SELECT * FROM {q_schema}.{q_table}")
             return 0
 
         where_bad = " OR ".join(conditions)
+        reasons_expr = f"CONCAT_WS('; ', {', '.join(reason_cases)})"
         gate_name_escaped = self.gate_name.replace("'", "''")
 
         # 1. Tag bad records into temp table
         con.execute(f"""
             CREATE OR REPLACE TEMP TABLE _mg_tagged AS
             SELECT *,
-                   COALESCE({where_bad}, FALSE) AS _mg_is_bad
+                   COALESCE({where_bad}, FALSE) AS _mg_is_bad,
+                   {reasons_expr} AS _mg_quarantine_reason
             FROM {q_schema}.{q_table}
         """)
 
         # 2. Write bad records to quarantine table
         con.execute(f"""
             CREATE OR REPLACE TABLE quarantine.{q_quarantine} AS
-            SELECT * EXCLUDE (_mg_is_bad),
+            SELECT * EXCLUDE (_mg_is_bad, _mg_quarantine_reason),
+                   TRUE AS _is_quarantined,
+                   _mg_quarantine_reason AS _quarantine_reason,
                    CURRENT_TIMESTAMP AS _quarantined_at,
                    '{gate_name_escaped}' AS _quarantined_by
             FROM _mg_tagged
@@ -293,7 +323,7 @@ class ContractGate:
         # 3. Overwrite source table with clean records directly
         con.execute(f"""
             CREATE OR REPLACE TABLE {q_schema}.{q_table} AS
-            SELECT * EXCLUDE (_mg_is_bad)
+            SELECT * EXCLUDE (_mg_is_bad, _mg_quarantine_reason)
             FROM _mg_tagged
             WHERE NOT _mg_is_bad
         """)
@@ -385,4 +415,4 @@ if __name__ == "__main__":
         for v in e.violations:
             print(f"  - [{v.get('type')}] {v.get('column', '')}: {v.get('message', '')}")
         print("===============================")
-        sys.exit(0)
+        sys.exit(2)

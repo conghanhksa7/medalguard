@@ -31,7 +31,7 @@ columns:
     type: DOUBLE
     not_null: true
     min_value: 0.0
-    max_value: 1.00
+    max_value: 0.10
   - name: l_tax
     type: DOUBLE
     not_null: true

@@ -26,8 +26,8 @@ def run_gx_silver_suite(db_path: str) -> tuple[bool, list[dict]]:
          "SELECT COUNT(*) FROM silver.silver_lineitem WHERE l_quantity < 1 OR l_quantity > 50"),
         ("ExpectColumnValuesToBeBetween(l_extendedprice, min=0)",
          "SELECT COUNT(*) FROM silver.silver_lineitem WHERE l_extendedprice < 0"),
-        ("ExpectColumnValuesToBeBetween(l_discount, 0.0, 1.00)",
-         "SELECT COUNT(*) FROM silver.silver_lineitem WHERE l_discount < 0.0 OR l_discount > 1.00"),
+        ("ExpectColumnValuesToBeBetween(l_discount, 0.0, 0.10)",
+         "SELECT COUNT(*) FROM silver.silver_lineitem WHERE l_discount < 0.0 OR l_discount > 0.10"),
         ("ExpectColumnValuesToBeBetween(l_tax, 0.0, 0.08)",
          "SELECT COUNT(*) FROM silver.silver_lineitem WHERE l_tax < 0.0 OR l_tax > 0.08"),
     ]

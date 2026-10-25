@@ -1,5 +1,11 @@
 """Semantic drift detection: statistical distribution anomalies."""
 import duckdb
+from ..utils import quote_identifier, quote_table, parse_table_ref
+
+NUMERIC_TYPES = (
+    "INT", "BIGINT", "INTEGER", "SMALLINT", "TINYINT", "HUGEINT",
+    "DOUBLE", "DECIMAL", "NUMERIC", "FLOAT", "REAL"
+)
 
 
 class SemanticValidator:
@@ -11,18 +17,40 @@ class SemanticValidator:
         
         Supports rules: mean_range, null_rate, row_count.
         """
-        from ..utils import quote_identifier, quote_table
         violations = []
+        schema_name, table_name = parse_table_ref(target_table)
+
+        try:
+            rows = con.execute(
+                "SELECT column_name, data_type "
+                "FROM information_schema.columns "
+                f"WHERE table_schema = '{schema_name}' AND table_name = '{table_name}'"
+            ).fetchall()
+            actual_cols = {row[0].lower(): row[1].upper() for row in rows}
+        except Exception:
+            actual_cols = {}
+
+        if not actual_cols:
+            return []
 
         for rule in contract.get("quality_rules", []):
             rule_type = rule["rule"]
 
             if rule_type == "mean_range":
+                col = rule["column"]
+                if col.lower() not in actual_cols:
+                    continue
+                actual_type = actual_cols[col.lower()]
+                if not any(t in actual_type for t in NUMERIC_TYPES):
+                    continue
                 violations += self._check_mean_range(
                     con, target_table, rule["column"],
                     rule["min"], rule["max"]
                 )
             elif rule_type == "null_rate":
+                col = rule["column"]
+                if col.lower() not in actual_cols:
+                    continue
                 violations += self._check_null_rate(
                     con, target_table, rule["column"], rule["max"]
                 )
@@ -35,7 +63,6 @@ class SemanticValidator:
 
     def _check_mean_range(self, con, table, column, expected_min, expected_max) -> list:
         """Check if column mean falls within expected range."""
-        from ..utils import quote_identifier, quote_table
         q_table = quote_table(table)
         q_col = quote_identifier(column)
         try:
@@ -52,13 +79,12 @@ class SemanticValidator:
                     "actual_mean": round(actual_mean, 6),
                     "message": f"Column '{column}' mean = {actual_mean:.6f}, expected in [{expected_min}, {expected_max}] (semantic drift detected)"
                 }]
-        except Exception:
-            pass
+        except Exception as e:
+            raise RuntimeError(f"Semantic check failed on {table}: {e}") from e
         return []
 
     def _check_null_rate(self, con, table, column, max_rate) -> list:
         """Check if null rate exceeds maximum allowed."""
-        from ..utils import quote_identifier, quote_table
         q_table = quote_table(table)
         q_col = quote_identifier(column)
         try:
@@ -76,13 +102,12 @@ class SemanticValidator:
                     "actual_rate": round(actual_rate, 6),
                     "message": f"Column '{column}' null rate = {actual_rate:.4%}, exceeds max {max_rate:.4%}"
                 }]
-        except Exception:
-            pass
+        except Exception as e:
+            raise RuntimeError(f"Semantic check failed on {table}: {e}") from e
         return []
 
     def _check_row_count(self, con, table, min_rows) -> list:
         """Check if table has minimum number of rows."""
-        from ..utils import quote_table
         q_table = quote_table(table)
         try:
             count = con.execute(f"SELECT COUNT(*) FROM {q_table}").fetchone()[0]
@@ -94,6 +119,6 @@ class SemanticValidator:
                     "actual_count": count,
                     "message": f"Table '{table}' has {count} rows, expected at least {min_rows}"
                 }]
-        except Exception:
-            pass
+        except Exception as e:
+            raise RuntimeError(f"Semantic check failed on {table}: {e}") from e
         return []

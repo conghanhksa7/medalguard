@@ -36,11 +36,11 @@ class M3a_DoubleToVarchar(BaseMutation):
 
 
 class M3b_IntegerToDouble(BaseMutation):
-    """Widen l_linenumber from INTEGER to DOUBLE (may be benign)."""
+    """Cast l_linenumber BIGINT -> DOUBLE in lineitem (widening, possibly benign)."""
 
     @property
     def description(self):
-        return "Cast l_linenumber INTEGER -> DOUBLE (widening, possibly benign)"
+        return "Cast l_linenumber BIGINT -> DOUBLE in lineitem (widening, possibly benign)"
 
     @property
     def category(self):

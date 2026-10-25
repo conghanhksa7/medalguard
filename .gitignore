@@ -32,6 +32,8 @@ Thumbs.db
 results/raw/*.json
 results/raw/gate_reports/
 !results/raw/.gitkeep
+!results/summary/
+!results/baseline/
 
 # Local scripts & reports
 scripts/fill_baseline_form.py

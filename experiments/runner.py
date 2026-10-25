@@ -1,16 +1,17 @@
 """MedalGuard Experiment Runner — Staged Pipeline Execution.
 
-Implements the corrected experiment flow:
+Implements the corrected staged experiment flow:
   1. Reset database to clean TPC-H state
   2. Apply mutation to source schema
   3. Swap dbt contract config
   4. Stage 1: dbt run --select tag:bronze
-  5. MedalGuard Gate 1: validate_pre_transform (quarantine / block)
-  6. Stage 2: dbt run --select tag:silver tag:gold
-  7. MedalGuard Gate 2: validate post-transform
-  8. GX validation: run_gx_silver_suite (for C2 / C3)
-  9. Measure Blast Radius & Quarantine Effectiveness
-  10. Revert mutation & restore dbt config
+  5. Gate 1 (Pre-transform Bronze -> Silver): validate_pre_transform (quarantine / block)
+  6. Stage 2: dbt run --select tag:silver
+  7. Post-Silver check: Great Expectations suite (C2 / C3) before Gold
+  8. Stage 3: dbt run --select tag:gold
+  9. Gate 2 (Post-transform Silver -> Gold): validate post-transform
+  10. Measure Blast Radius & Quarantine Effectiveness
+  11. Revert mutation & restore dbt config
 """
 import os
 import sys
@@ -77,10 +78,12 @@ class ExperimentResult:
     pipeline_status: str = "SUCCESS"    # SUCCESS | BLOCKED | CRASH | PARTIAL
     measurement_type: str = "MEASURED"  # MEASURED | ASSIGNED_BLOCK | ASSIGNED_CRASH
 
-    # 7 Metrics
+    # Metrics
     detected: bool = False
     blast_radius: float = 0.0
+    source_fault_leakage: float = 0.0
     detection_depth: int = -1           # 0=Gate1, 1=Silver contract, 2=Gate2/GX, -1=NOT_DETECTED
+    detection_depth_index: int = -1     # Canonical alias for detection_depth
     detection_stage: str = "NOT_DETECTED" # PRE_TRANSFORM | SILVER_CONTRACT | POST_TRANSFORM | NOT_DETECTED
     false_positive: bool = False        # For benign mutations only
     pipeline_wall_ms: float = 0.0
@@ -89,6 +92,8 @@ class ExperimentResult:
     quarantined_rows: int = 0
     quarantine_effective: bool = False   # Gold contains only clean data?
     quarantine_effectiveness_pct: float = 0.0
+    quarantine_recall: float | None = None
+    clean_rows_preserved_pct: float = 100.0
 
     # Gate details
     gate1_violations: int = 0
@@ -138,6 +143,9 @@ def swap_dbt_config(dbt_contracts_enabled: bool, project_dir: str = DBT_PROJECT)
 
 def run_dbt(select: str, project_dir: str = DBT_PROJECT) -> tuple[str, float, float, str]:
     """Run dbt with given select, return (status, wall_ms, dbt_elapsed_ms, error_msg)."""
+    rr = Path(project_dir) / "target" / "run_results.json"
+    rr.unlink(missing_ok=True)
+
     start = time.perf_counter()
     try:
         res = subprocess.run(
@@ -155,13 +163,12 @@ def run_dbt(select: str, project_dir: str = DBT_PROJECT) -> tuple[str, float, fl
 
     wall_ms = (time.perf_counter() - start) * 1000
     dbt_elapsed_ms = 0.0
-    try:
-        rr = Path(project_dir) / "target" / "run_results.json"
-        if rr.exists():
+    if status == "SUCCESS" and rr.exists():
+        try:
             data = json.loads(rr.read_text(encoding="utf-8"))
             dbt_elapsed_ms = round(data.get("elapsed_time", 0) * 1000, 1)
-    except Exception:
-        pass
+        except Exception:
+            pass
 
     return status, wall_ms, dbt_elapsed_ms, error_msg
 
@@ -200,9 +207,22 @@ def diff_gold(reference: dict, current: dict) -> tuple[float, int, int, dict]:
     per_table, dev_total, row_total = {}, 0, 0
     for tbl, (keys, metrics) in GOLD_TABLES.items():
         ref, cur = reference.get(tbl), current.get(tbl)
-        if cur is None or ref is None:
-            per_table[tbl] = {"status": "MISSING"}
+        if ref is None:
+            raise ValueError(f"Reference Gold table missing: {tbl}")
+        if cur is None:
+            missing = len(ref)
+            per_table[tbl] = {
+                "status": "MISSING",
+                "rows_union": missing,
+                "changed": 0,
+                "missing": missing,
+                "unexpected": 0,
+                "deviated": missing,
+            }
+            dev_total += missing
+            row_total += missing
             continue
+
         ref_k = ref.copy()
         cur_k = cur.copy()
         for k in keys:
@@ -284,6 +304,9 @@ def run_single_experiment(
         timestamp=datetime.now().isoformat(),
     )
 
+    exp_t0 = time.perf_counter()
+    t0 = exp_t0
+
     try:
         # Bước 1: Reset DB và apply mutation
         reset_database(DB_PATH, scale_factor)
@@ -296,27 +319,27 @@ def run_single_experiment(
 
         t0 = time.perf_counter()
 
-        # Bước 2 (Stage 1): Run bronze
+        # Chặng 1 (Stage 1): Run bronze
         st_b, wall_b, el_b, err_b = run_dbt("tag:bronze")
-        result.dbt_elapsed_ms = round(el_b, 1)
+        result.dbt_elapsed_ms += el_b
         if st_b == "CRASH":
             result.pipeline_status = "CRASH"
             result.measurement_type = "ASSIGNED_CRASH"
             result.blast_radius = 0.0
+            result.source_fault_leakage = 0.0
             result.error_message = f"Bronze crash: {err_b}"
+            result.validation_ms = round(result.validation_ms, 1)
+            result.dbt_elapsed_ms = round(result.dbt_elapsed_ms, 1)
             result.pipeline_wall_ms = round((time.perf_counter() - t0) * 1000, 1)
-            swap_dbt_config(False)
-            _revert_mutation(mutation)
             return result
 
-        # Bước 3 (Gate 1 — nếu medalguard_on):
+        # Gate 1: Pre-transform validation on Bronze (nếu medalguard_on)
         if medalguard_on:
             contracts = [
                 ("orders", os.path.join(CONTRACTS_DIR, "bronze_to_silver", "orders.yaml"), "bronze.bronze_orders"),
                 ("lineitem", os.path.join(CONTRACTS_DIR, "bronze_to_silver", "lineitem.yaml"), "bronze.bronze_lineitem"),
                 ("customer", os.path.join(CONTRACTS_DIR, "bronze_to_silver", "customer.yaml"), "bronze.bronze_customer"),
             ]
-            g1_blocked = False
             for name, cpath, tbl in contracts:
                 g1 = ContractGate(
                     gate_name=f"B->S:{name}",
@@ -324,60 +347,98 @@ def run_single_experiment(
                     db_path=DB_PATH,
                     mode=gate_mode,
                     enabled_validators=enabled_validators,
+                    experiment_id=exp_id,
                 )
                 t_g1 = time.perf_counter()
                 try:
                     res1 = g1.validate_pre_transform(tbl, injected_fault_count=getattr(mutation, "injected_fault_count", 0))
-                    result.validation_ms += (res1.validation_time_ms if hasattr(res1, "validation_time_ms") and res1.validation_time_ms else (time.perf_counter() - t_g1) * 1000)
+                    val_time = getattr(res1, "validation_time_ms", 0.0) or ((time.perf_counter() - t_g1) * 1000)
+                    result.validation_ms += val_time
                     result.gate1_violations += len(res1.violations)
                     result.quarantined_rows += res1.quarantined_rows
                     if not res1.passed and not result.detected:
                         result.detected = True
                         result.detection_stage = "PRE_TRANSFORM"
                         result.detection_depth = 0
+                        result.detection_depth_index = 0
                 except ContractViolationError as e:
-                    result.validation_ms += (time.perf_counter() - t_g1) * 1000
-                    g1_blocked = True
+                    val_time = getattr(e, "validation_time_ms", 0.0) or ((time.perf_counter() - t_g1) * 1000)
+                    result.validation_ms += val_time
+                    result.gate1_violations += len(e.violations)
                     result.detected = True
                     result.detection_stage = "PRE_TRANSFORM"
                     result.detection_depth = 0
-                    result.gate1_violations += len(e.violations)
-                    break
+                    result.detection_depth_index = 0
+                    result.pipeline_status = "BLOCKED"
+                    result.measurement_type = "ASSIGNED_BLOCK"
+                    result.blast_radius = 0.0
+                    result.source_fault_leakage = 0.0
+                    result.validation_ms = round(result.validation_ms, 1)
+                    result.dbt_elapsed_ms = round(result.dbt_elapsed_ms, 1)
+                    result.pipeline_wall_ms = round((time.perf_counter() - t0) * 1000, 1)
+                    return result
 
-            if g1_blocked:
-                result.pipeline_status = "BLOCKED"
-                result.measurement_type = "ASSIGNED_BLOCK"
-                result.blast_radius = 0.0
-                result.validation_ms = round(result.validation_ms, 1)
-                result.pipeline_wall_ms = round((time.perf_counter() - t0) * 1000, 1)
-                swap_dbt_config(False)
-                _revert_mutation(mutation)
-                return result
-
-        # Bước 4 (Stage 2): Run silver and gold
-        st_sg, wall_sg, el_sg, err_sg = run_dbt("tag:silver tag:gold")
-        result.dbt_elapsed_ms = round(result.dbt_elapsed_ms + el_sg, 1)
-        if st_sg == "CRASH":
+        # Chặng 2 (Stage 2): Run silver
+        st_s, wall_s, el_s, err_s = run_dbt("tag:silver")
+        result.dbt_elapsed_ms += el_s
+        if st_s == "CRASH":
             if dbt_contracts_on:
                 if not result.detected:
                     result.detected = True
                     result.detection_stage = "SILVER_CONTRACT"
                     result.detection_depth = 1
+                    result.detection_depth_index = 1
                 result.pipeline_status = "BLOCKED"
                 result.measurement_type = "ASSIGNED_BLOCK"
                 result.blast_radius = 0.0
+                result.source_fault_leakage = 0.0
             else:
                 result.pipeline_status = "CRASH"
                 result.measurement_type = "ASSIGNED_CRASH"
                 result.blast_radius = 0.0
-            result.error_message = f"Silver/Gold error: {err_sg}"
+                result.source_fault_leakage = 0.0
+            result.error_message = f"Silver error: {err_s}"
             result.validation_ms = round(result.validation_ms, 1)
+            result.dbt_elapsed_ms = round(result.dbt_elapsed_ms, 1)
             result.pipeline_wall_ms = round((time.perf_counter() - t0) * 1000, 1)
-            swap_dbt_config(False)
-            _revert_mutation(mutation)
             return result
 
-        # Bước 5 (Gate 2 — nếu medalguard_on):
+        # Post-Silver Check (Great Expectations Suite, nếu gx_on)
+        # Chạy ngay sau Silver và TRƯỚC KHI chạy tag:gold!
+        if gx_on:
+            t_gx0 = time.perf_counter()
+            gx_violated, gx_viols = run_gx_silver_suite(DB_PATH)
+            result.validation_ms += (time.perf_counter() - t_gx0) * 1000
+            result.gx_violations = len(gx_viols)
+            if gx_violated and not result.detected:
+                result.detected = True
+                result.detection_stage = "POST_TRANSFORM"
+                result.detection_depth = 2
+                result.detection_depth_index = 2
+                result.pipeline_status = "BLOCKED"
+                result.measurement_type = "ASSIGNED_BLOCK"
+                result.blast_radius = 0.0
+                result.source_fault_leakage = 0.0
+                result.validation_ms = round(result.validation_ms, 1)
+                result.dbt_elapsed_ms = round(result.dbt_elapsed_ms, 1)
+                result.pipeline_wall_ms = round((time.perf_counter() - t0) * 1000, 1)
+                return result
+
+        # Chặng 3 (Stage 3): Run gold
+        st_g, wall_g, el_g, err_g = run_dbt("tag:gold")
+        result.dbt_elapsed_ms += el_g
+        if st_g == "CRASH":
+            result.pipeline_status = "CRASH"
+            result.measurement_type = "ASSIGNED_CRASH"
+            result.blast_radius = 0.0
+            result.source_fault_leakage = 0.0
+            result.error_message = f"Gold error: {err_g}"
+            result.validation_ms = round(result.validation_ms, 1)
+            result.dbt_elapsed_ms = round(result.dbt_elapsed_ms, 1)
+            result.pipeline_wall_ms = round((time.perf_counter() - t0) * 1000, 1)
+            return result
+
+        # Gate 2: Post-transform Gold Validation (nếu medalguard_on)
         if medalguard_on:
             g2_contracts = [
                 ("revenue_by_nation", os.path.join(CONTRACTS_DIR, "silver_to_gold", "revenue_by_nation.yaml"), "silver.silver_orders", "gold.gold_revenue_by_nation"),
@@ -391,33 +452,22 @@ def run_single_experiment(
                         db_path=DB_PATH,
                         mode="log_only",
                         enabled_validators=enabled_validators,
+                        experiment_id=exp_id,
                     )
                     t_g2 = time.perf_counter()
                     res2 = g2.validate(s_tbl, g_tbl, injected_fault_count=getattr(mutation, "injected_fault_count", 0))
-                    result.validation_ms += (res2.validation_time_ms if hasattr(res2, "validation_time_ms") and res2.validation_time_ms else (time.perf_counter() - t_g2) * 1000)
+                    val_time = getattr(res2, "validation_time_ms", 0.0) or ((time.perf_counter() - t_g2) * 1000)
+                    result.validation_ms += val_time
                     result.gate2_violations += len(res2.violations)
                     if not res2.passed and not result.detected:
                         result.detected = True
                         result.detection_stage = "POST_TRANSFORM"
                         result.detection_depth = 2
-                        result.pipeline_status = "BLOCKED"
-                        result.measurement_type = "ASSIGNED_BLOCK"
+                        result.detection_depth_index = 2
 
-        # Bước 6 (Great Expectations — nếu gx_on):
-        if gx_on:
-            t_gx0 = time.perf_counter()
-            gx_violated, gx_viols = run_gx_silver_suite(DB_PATH)
-            result.validation_ms += (time.perf_counter() - t_gx0) * 1000
-            result.gx_violations = len(gx_viols)
-            if gx_violated and not result.detected:
-                result.detected = True
-                result.detection_stage = "POST_TRANSFORM"
-                result.detection_depth = 2
-                result.pipeline_status = "BLOCKED"
-                result.measurement_type = "ASSIGNED_BLOCK"
-
-        # Bước 7 (Đo Blast Radius & Quarantine Effectiveness):
+        # Đo Blast Radius tại Gold
         br, dev_rows, total_rows, _ = diff_gold(reference, snapshot_gold(DB_PATH))
+        injected_cnt = getattr(mutation, "injected_fault_count", 0)
 
         if result.quarantined_rows > 0:
             leaked_det, _ = run_gx_silver_suite(DB_PATH)
@@ -425,21 +475,31 @@ def run_single_experiment(
                 result.quarantine_effective = True
                 result.quarantine_effectiveness_pct = 100.0
                 result.blast_radius = 0.0
+                result.source_fault_leakage = 0.0
                 result.pipeline_status = "SUCCESS"
                 result.measurement_type = "MEASURED"
                 result.gold_residual_diff_ratio = round(br, 4)
+                result.clean_rows_preserved_pct = 100.0
+                if injected_cnt > 0:
+                    result.quarantine_recall = round(result.quarantined_rows / injected_cnt, 4)
             else:
                 result.quarantine_effective = False
                 result.quarantine_effectiveness_pct = 0.0
                 result.blast_radius = round(br, 4)
+                result.source_fault_leakage = round(br, 4)
                 result.pipeline_status = "SUCCESS"
                 result.measurement_type = "MEASURED"
                 result.gold_residual_diff_ratio = round(br, 4)
+                result.clean_rows_preserved_pct = 100.0
+                if injected_cnt > 0:
+                    result.quarantine_recall = round(result.quarantined_rows / injected_cnt, 4)
         elif result.pipeline_status == "BLOCKED":
             result.blast_radius = 0.0
+            result.source_fault_leakage = 0.0
             result.measurement_type = "ASSIGNED_BLOCK"
         else:
             result.blast_radius = 0.0 if is_benign else round(br, 4)
+            result.source_fault_leakage = 0.0 if is_benign else round(br, 4)
             result.measurement_type = "MEASURED"
             result.pipeline_status = "SUCCESS"
 
@@ -447,6 +507,7 @@ def run_single_experiment(
             result.false_positive = True
 
         result.validation_ms = round(result.validation_ms, 1)
+        result.dbt_elapsed_ms = round(result.dbt_elapsed_ms, 1)
         result.pipeline_wall_ms = round((time.perf_counter() - t0) * 1000, 1)
 
     except Exception as e:
@@ -454,6 +515,7 @@ def run_single_experiment(
         result.measurement_type = "ASSIGNED_CRASH"
         result.error_message = str(e)[:500]
         result.validation_ms = round(result.validation_ms, 1)
+        result.dbt_elapsed_ms = round(result.dbt_elapsed_ms, 1)
         result.pipeline_wall_ms = round((time.perf_counter() - t0) * 1000, 1)
 
     finally:
@@ -478,6 +540,23 @@ def _load_config() -> dict:
     """Load experiment config from YAML."""
     with open(CONFIG_PATH, "r", encoding="utf-8") as f:
         return yaml.safe_load(f)
+
+
+def generate_smoke_markdown_table(results: list[ExperimentResult]) -> str:
+    """Format smoke test results as GitHub markdown table."""
+    lines = [
+        "| Config | Mutation | Pipeline Status | Detected | DDI | Detection Stage | Quarantined Rows | QE (%) | Blast Radius | Wall-clock (ms) | dbt (ms) | Validation (ms) |",
+        "|:---|:---|:---:|:---:|:---:|:---|:---:|:---:|:---:|:---:|:---:|:---:|",
+    ]
+    for r in results:
+        qe_str = f"{r.quarantine_effectiveness_pct:.0f}%" if r.quarantined_rows > 0 else "N/A"
+        br_str = f"{r.blast_radius:.1%}"
+        lines.append(
+            f"| **{r.config_name}** | `{r.mutation_name}` | `{r.pipeline_status}` | **{r.detected}** | {r.detection_depth_index} | "
+            f"`{r.detection_stage}` | {r.quarantined_rows} | {qe_str} | **{br_str}** | "
+            f"{r.pipeline_wall_ms:,.0f} | {r.dbt_elapsed_ms:,.0f} | {r.validation_ms:,.0f} |"
+        )
+    return "\n".join(lines) + "\n"
 
 
 # ---------------------------------------------------------------------------
@@ -533,11 +612,11 @@ def main():
             M5a_MULTIPLY_100(args.sf),
             B1_AddColumn(args.sf),
         ]
-        smoke_config_names = ["C1", "C2", "C3_standalone"]
+        smoke_config_names = ["C1", "C2", "C3_standalone", "C3"]
 
-        print("\n" + "=" * 90)
+        print("\n" + "=" * 95)
         print(f"  MEDALGUARD SMOKE TEST: {len(smoke_mutations)} mutations × {len(smoke_config_names)} configs (SF={args.sf})")
-        print("=" * 90)
+        print("=" * 95)
 
         results = []
         for cfg_name in smoke_config_names:
@@ -558,15 +637,28 @@ def main():
                       f"stage={res.detection_stage:<16} Q={res.quarantined_rows:<2} BR={res.blast_radius:>6.1%}")
 
         # Summary Table
-        print("\n" + "=" * 122)
+        print("\n" + "=" * 135)
         print(f"{'Config':<15} {'Mutation':<22} {'Status':<9} {'Det':<6} {'DDI':<5} {'Stage':<16} {'Q_Rows':<7} {'QE':<7} {'BlastRadius':<11} {'Wall(ms)':<9} {'dbt(ms)':<8} {'val(ms)':<8}")
-        print("-" * 122)
+        print("-" * 135)
         for r in results:
             qe_str = f"{r.quarantine_effectiveness_pct:.0f}%" if r.quarantined_rows > 0 else "N/A"
             br_str = f"{r.blast_radius:.1%}"
             print(f"{r.config_name:<15} {r.mutation_name:<22} {r.pipeline_status:<9} {r.detected!s:<6} {r.detection_depth:<5} "
                   f"{r.detection_stage:<16} {r.quarantined_rows:<7} {qe_str:<7} {br_str:<11} {r.pipeline_wall_ms:<9.0f} {r.dbt_elapsed_ms:<8.0f} {r.validation_ms:<8.0f}")
-        print("=" * 122)
+        print("=" * 135)
+
+        # Save summary JSON and Markdown table
+        summary_dir = Path(PROJECT_ROOT) / "results" / "summary"
+        summary_dir.mkdir(parents=True, exist_ok=True)
+        summary_json_path = summary_dir / "smoke_test_results.json"
+        with open(summary_json_path, "w", encoding="utf-8") as f:
+            json.dump([r.to_dict() for r in results], f, indent=2, default=str)
+        print(f"Saved summary JSON to {summary_json_path}")
+
+        summary_md_path = summary_dir / "smoke_test_table.md"
+        with open(summary_md_path, "w", encoding="utf-8") as f:
+            f.write(generate_smoke_markdown_table(results))
+        print(f"Saved summary Markdown table to {summary_md_path}")
         print("\nSmoke test completed successfully!")
 
     elif args.mode == "single":
@@ -609,7 +701,7 @@ def main():
         print(f"Mutation:         {res.mutation_name} ({res.category})")
         print(f"Configuration:    {res.config_name}")
         print(f"Pipeline Status:  {res.pipeline_status}")
-        print(f"Detected:         {res.detected} (Stage: {res.detection_stage}, DDI: {res.detection_depth})")
+        print(f"Detected:         {res.detected} (Stage: {res.detection_stage}, DDI: {res.detection_depth_index})")
         print(f"Quarantined Rows: {res.quarantined_rows}")
         if res.quarantined_rows > 0:
             print(f"Quarantine Eff.:  {res.quarantine_effectiveness_pct:.1f}%")
@@ -644,41 +736,74 @@ def main():
                       f"stage={res.detection_stage:<16} Q={res.quarantined_rows:<2} BR={res.blast_radius:>6.1%}")
 
         # Summary Table
-        print("\n" + "=" * 122)
+        print("\n" + "=" * 135)
         print(f"{'Config':<15} {'Mutation':<22} {'Status':<9} {'Det':<6} {'DDI':<5} {'Stage':<16} {'Q_Rows':<7} {'QE':<7} {'BlastRadius':<11} {'Wall(ms)':<9} {'dbt(ms)':<8} {'val(ms)':<8}")
-        print("-" * 122)
+        print("-" * 135)
         for r in results:
             qe_str = f"{r.quarantine_effectiveness_pct:.0f}%" if r.quarantined_rows > 0 else "N/A"
             br_str = f"{r.blast_radius:.1%}"
             print(f"{r.config_name:<15} {r.mutation_name:<22} {r.pipeline_status:<9} {r.detected!s:<6} {r.detection_depth:<5} "
                   f"{r.detection_stage:<16} {r.quarantined_rows:<7} {qe_str:<7} {br_str:<11} {r.pipeline_wall_ms:<9.0f} {r.dbt_elapsed_ms:<8.0f} {r.validation_ms:<8.0f}")
-        print("=" * 122)
+        print("=" * 135)
         print("\nFull Matrix execution completed successfully!")
 
     elif args.mode == "overhead":
+        overhead_configs = ["C0", "C1", "C2", "C3_standalone", "C3"]
         repeat_count = args.runs
         print("\n" + "=" * 80)
-        print(f"  MEDALGUARD OVERHEAD BENCHMARK: {repeat_count} clean runs (SF={args.sf})")
+        print(f"  MEDALGUARD OVERHEAD BENCHMARK: {repeat_count} clean runs per config across {len(overhead_configs)} configs (SF={args.sf})")
         print("=" * 80)
-        durations = []
-        dbt_durations = []
-        for i in range(1, repeat_count + 1):
-            reset_database(DB_PATH, args.sf)
-            swap_dbt_config(False)
-            t_start = time.perf_counter()
-            st, wall, el, err = run_dbt("tag:bronze tag:silver tag:gold")
-            wall_ms = (time.perf_counter() - t_start) * 1000
-            durations.append(wall_ms)
-            dbt_durations.append(el)
-            print(f"  Run {i}/{repeat_count}: status={st} wall={wall_ms:.1f}ms dbt_elapsed={el:.1f}ms")
 
-        median_wall = statistics.median(durations)
-        median_dbt = statistics.median(dbt_durations)
-        stdev_dbt = statistics.stdev(dbt_durations) if len(dbt_durations) > 1 else 0.0
-        print("-" * 80)
-        print(f"  Median Wall-clock Time: {median_wall:.1f} ms")
-        print(f"  Median dbt Execution:   {median_dbt:.1f} ms (std: {stdev_dbt:.1f} ms)")
-        print("=" * 80)
+        class CleanNoOpMutation:
+            name = "CLEAN_DATA"
+            category = "BENIGN"
+            injected_fault_count = 0
+            def apply(self, con): pass
+            def revert(self, con): pass
+
+        clean_mut = CleanNoOpMutation()
+        overhead_summary = {}
+
+        for cfg_name in overhead_configs:
+            cfg = configs[cfg_name]
+            print(f"\n--- Benchmarking {cfg_name} ({cfg.get('description', '')}) [{repeat_count} runs] ---")
+            wall_list, dbt_list, val_list = [], [], []
+
+            for i in range(1, repeat_count + 1):
+                res = run_single_experiment(
+                    mutation=clean_mut,
+                    config=cfg,
+                    config_name=cfg_name,
+                    reference=reference,
+                    scale_factor=args.sf,
+                    run_index=i,
+                )
+                wall_list.append(res.pipeline_wall_ms)
+                dbt_list.append(res.dbt_elapsed_ms)
+                val_list.append(res.validation_ms)
+                print(f"  Run {i}/{repeat_count}: wall={res.pipeline_wall_ms:.1f}ms dbt={res.dbt_elapsed_ms:.1f}ms val={res.validation_ms:.1f}ms")
+
+            med_wall = statistics.median(wall_list)
+            med_dbt = statistics.median(dbt_list)
+            med_val = statistics.median(val_list)
+            overhead_summary[cfg_name] = {
+                "runs": repeat_count,
+                "median_wall_ms": round(med_wall, 1),
+                "median_dbt_ms": round(med_dbt, 1),
+                "median_val_ms": round(med_val, 1),
+                "wall_runs": wall_list,
+                "dbt_runs": dbt_list,
+                "val_runs": val_list,
+            }
+            print(f"  --> {cfg_name} Median: Wall={med_wall:.1f}ms, dbt={med_dbt:.1f}ms, Val={med_val:.1f}ms")
+
+        # Save overhead summary
+        summary_dir = Path(PROJECT_ROOT) / "results" / "summary"
+        summary_dir.mkdir(parents=True, exist_ok=True)
+        overhead_json_path = summary_dir / "overhead_results.json"
+        with open(overhead_json_path, "w", encoding="utf-8") as f:
+            json.dump(overhead_summary, f, indent=2, default=str)
+        print(f"\nSaved overhead benchmark to {overhead_json_path}")
 
 
 if __name__ == "__main__":
