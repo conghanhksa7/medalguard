@@ -16,7 +16,7 @@ columns:
     type: BIGINT
     not_null: true
   - name: l_linenumber
-    type: INTEGER
+    type: BIGINT
     not_null: true
   - name: l_quantity
     type: DOUBLE

@@ -362,18 +362,27 @@ if __name__ == "__main__":
     src_tbl = gate.contract.get("source_table", "bronze.orders")
     tgt_tbl = gate.contract.get("table", "silver.orders")
 
-    if args.pre_transform:
-        res = gate.validate_pre_transform(src_tbl)
-    else:
-        res = gate.validate(src_tbl, tgt_tbl)
+    try:
+        if args.pre_transform:
+            res = gate.validate_pre_transform(src_tbl)
+        else:
+            res = gate.validate(src_tbl, tgt_tbl)
 
-    print("\n--- Validation Result ---")
-    print(f"Passed:           {res.passed}")
-    print(f"Violations count: {len(res.violations)}")
-    print(f"Quarantined rows: {res.quarantined_rows}")
-    print(f"Measurement type: {res.measurement_type.value}")
-    if res.violations:
-        print("\nViolations:")
-        for v in res.violations:
-            print(f"  - [{v.get('type')}] {v.get('column', '')}: {v.get('rule', '')} (details: {v})")
-    print("===============================")
+        print("\n--- Validation Result ---")
+        print(f"Passed:           {res.passed}")
+        print(f"Violations count: {len(res.violations)}")
+        print(f"Quarantined rows: {res.quarantined_rows}")
+        print(f"Measurement type: {res.measurement_type.value if hasattr(res.measurement_type, 'value') else res.measurement_type}")
+        if res.violations:
+            print("\nViolations:")
+            for v in res.violations:
+                print(f"  - [{v.get('type')}] {v.get('column', '')}: {v.get('rule', '')} (details: {v})")
+        print("===============================")
+    except ContractViolationError as e:
+        print("\n--- Validation Result [PIPELINE BLOCKED BY GATE] ---")
+        print(f"Passed:           False")
+        print(f"Violations count: {len(e.violations)}")
+        for v in e.violations:
+            print(f"  - [{v.get('type')}] {v.get('column', '')}: {v.get('message', '')}")
+        print("===============================")
+        sys.exit(0)

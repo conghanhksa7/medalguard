@@ -18,6 +18,13 @@ def generate_tpch(db_path: str, scale_factor: float = 1.0):
     
     con = duckdb.connect(db_path)
     
+    # Clean up any leftover schemas from previous experiments
+    con.execute("DROP SCHEMA IF EXISTS quarantine CASCADE")
+    con.execute("DROP SCHEMA IF EXISTS bronze CASCADE")
+    con.execute("DROP SCHEMA IF EXISTS silver CASCADE")
+    con.execute("DROP SCHEMA IF EXISTS gold CASCADE")
+    con.execute("DROP SCHEMA IF EXISTS source CASCADE")
+
     # Create source schema (simulates production OLTP database)
     con.execute("CREATE SCHEMA IF NOT EXISTS source")
     

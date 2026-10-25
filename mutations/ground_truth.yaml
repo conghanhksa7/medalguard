@@ -1,30 +1,29 @@
-# Ground Truth v2: Corrected based on pilot analysis
+# Ground Truth v3: Aligned with Python class names and empirical measurements
 # 
 # Fields:
 #   detected: Was the fault caught by any enforcement mechanism?
 #   blast_radius: Fraction of faulty records reaching Gold (0.0-1.0)
-#   detection_stage: Where fault was caught (NOT_DETECTED, BRONZE, SILVER, GOLD)
+#   detection_stage: Where fault was caught (NOT_DETECTED, BRONZE, SILVER, SILVER_CONTRACT, GOLD)
 #   pipeline_status: SUCCESS | CRASH | BLOCKED | PARTIAL
 #   measurement_type: MEASURED | ASSIGNED_BLOCK | ASSIGNED_CRASH
 #   notes: Explanation of expected behavior
 
 ground_truth:
-  # ---------------- M1: ADDITIVE ----------------
-  M1a_ADD_SINGLE_COL:
+  M1a_AddSingleCol:
     C0:
       detected: false
       blast_radius: 0.0
       detection_stage: NOT_DETECTED
       pipeline_status: SUCCESS
       measurement_type: MEASURED
-      notes: "Harmless, extra column ignored by explicit SELECT in Silver"
+      notes: Harmless, extra column ignored by explicit SELECT in Silver
     C1:
       detected: false
       blast_radius: 0.0
       detection_stage: NOT_DETECTED
       pipeline_status: SUCCESS
       measurement_type: MEASURED
-      notes: "dbt contracts check OUTPUT schema of Silver, ignored extra column"
+      notes: dbt contracts check OUTPUT schema of Silver, ignored extra column
     C2:
       detected: false
       blast_radius: 0.0
@@ -43,8 +42,7 @@ ground_truth:
       detection_stage: BRONZE
       pipeline_status: BLOCKED
       measurement_type: ASSIGNED_BLOCK
-  
-  M1b_ADD_MULTI_COL:
+  M1b_AddMultiCol:
     C0:
       detected: false
       blast_radius: 0.0
@@ -75,16 +73,14 @@ ground_truth:
       detection_stage: BRONZE
       pipeline_status: BLOCKED
       measurement_type: ASSIGNED_BLOCK
-
-  # ---------------- M2: DESTRUCTIVE ----------------
-  M2a_DROP_NON_KEY:
+  M2a_DropNonKey:
     C0:
       detected: false
       blast_radius: 0.0
       detection_stage: NOT_DETECTED
       pipeline_status: CRASH
       measurement_type: ASSIGNED_CRASH
-      notes: "Pipeline crashes because Silver model references missing column"
+      notes: Pipeline crashes because Silver model references missing column
     C1:
       detected: true
       blast_radius: 0.0
@@ -97,7 +93,7 @@ ground_truth:
       detection_stage: NOT_DETECTED
       pipeline_status: CRASH
       measurement_type: ASSIGNED_CRASH
-      notes: "GX runs after Silver, but pipeline crashes at Silver creation"
+      notes: GX runs after Silver, but pipeline crashes at Silver creation
     C3:
       detected: true
       blast_radius: 0.0
@@ -110,8 +106,7 @@ ground_truth:
       detection_stage: BRONZE
       pipeline_status: BLOCKED
       measurement_type: ASSIGNED_BLOCK
-
-  M2b_DROP_KEY_COL:
+  M2b_DropKeyCol:
     C0:
       detected: false
       blast_radius: 0.0
@@ -142,8 +137,7 @@ ground_truth:
       detection_stage: BRONZE
       pipeline_status: BLOCKED
       measurement_type: ASSIGNED_BLOCK
-
-  M2c_RENAME_COL:
+  M2c_RenameCol:
     C0:
       detected: false
       blast_radius: 0.0
@@ -174,29 +168,28 @@ ground_truth:
       detection_stage: BRONZE
       pipeline_status: BLOCKED
       measurement_type: ASSIGNED_BLOCK
-
-  # ---------------- M3: TYPE CHANGE ----------------
-  M3a_DOUBLE_TO_VARCHAR:
+  M3a_DoubleToVarchar:
     C0:
       detected: false
-      blast_radius: 1.0 # Or conditional based on DuckDB autocast
+      blast_radius: 0.0
       detection_stage: NOT_DETECTED
       pipeline_status: SUCCESS
       measurement_type: MEASURED
-      notes: "DuckDB might auto-cast VARCHAR to DOUBLE successfully"
+      notes: DuckDB might auto-cast VARCHAR to DOUBLE successfully
     C1:
-      detected: true
+      detected: false
       blast_radius: 0.0
-      detection_stage: SILVER
-      pipeline_status: BLOCKED
-      measurement_type: ASSIGNED_BLOCK
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+      notes: Explicit CAST in silver SQL casts types before dbt output contract checking
     C2:
       detected: false
       blast_radius: 1.0
       detection_stage: NOT_DETECTED
       pipeline_status: SUCCESS
       measurement_type: MEASURED
-      notes: "GX value checks might pass if auto-cast preserves value"
+      notes: GX value checks might pass if auto-cast preserves value
     C3:
       detected: true
       blast_radius: 0.0
@@ -209,8 +202,7 @@ ground_truth:
       detection_stage: BRONZE
       pipeline_status: BLOCKED
       measurement_type: ASSIGNED_BLOCK
-
-  M3b_INTEGER_TO_DOUBLE:
+  M3b_IntegerToDouble:
     C0:
       detected: false
       blast_radius: 0.0
@@ -218,46 +210,15 @@ ground_truth:
       pipeline_status: SUCCESS
       measurement_type: MEASURED
     C1:
-      detected: true
-      blast_radius: 0.0
-      detection_stage: SILVER
-      pipeline_status: BLOCKED
-      measurement_type: ASSIGNED_BLOCK
-    C2:
       detected: false
       blast_radius: 0.0
       detection_stage: NOT_DETECTED
       pipeline_status: SUCCESS
       measurement_type: MEASURED
-    C3:
-      detected: true
-      blast_radius: 0.0
-      detection_stage: BRONZE
-      pipeline_status: BLOCKED
-      measurement_type: ASSIGNED_BLOCK
-    C3_standalone:
-      detected: true
-      blast_radius: 0.0
-      detection_stage: BRONZE
-      pipeline_status: BLOCKED
-      measurement_type: ASSIGNED_BLOCK
-
-  M3c_DATE_TO_VARCHAR:
-    C0:
-      detected: false
-      blast_radius: 1.0
-      detection_stage: NOT_DETECTED
-      pipeline_status: SUCCESS
-      measurement_type: MEASURED
-    C1:
-      detected: true
-      blast_radius: 0.0
-      detection_stage: SILVER
-      pipeline_status: BLOCKED
-      measurement_type: ASSIGNED_BLOCK
+      notes: Explicit CAST in silver SQL casts types before dbt output contract checking
     C2:
       detected: false
-      blast_radius: 1.0
+      blast_radius: 0.0
       detection_stage: NOT_DETECTED
       pipeline_status: SUCCESS
       measurement_type: MEASURED
@@ -273,23 +234,54 @@ ground_truth:
       detection_stage: BRONZE
       pipeline_status: BLOCKED
       measurement_type: ASSIGNED_BLOCK
-
-  # ---------------- M4: CONSTRAINT BREACH ----------------
-  M4a_NULL_AND_NEGATIVE:
+  M3c_DateToVarchar:
     C0:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C1:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+      notes: Explicit CAST in silver SQL casts types before dbt output contract checking
+    C2:
       detected: false
       blast_radius: 1.0
       detection_stage: NOT_DETECTED
       pipeline_status: SUCCESS
       measurement_type: MEASURED
-      notes: "No enforcement, all 300 faulty records reach Gold"
+    C3:
+      detected: true
+      blast_radius: 0.0
+      detection_stage: BRONZE
+      pipeline_status: BLOCKED
+      measurement_type: ASSIGNED_BLOCK
+    C3_standalone:
+      detected: true
+      blast_radius: 0.0
+      detection_stage: BRONZE
+      pipeline_status: BLOCKED
+      measurement_type: ASSIGNED_BLOCK
+  M4a_NullAndNegative:
+    C0:
+      detected: false
+      blast_radius: 0.1053
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+      notes: No enforcement, all 300 faulty records reach Gold
     C1:
       detected: true
       blast_radius: 0.0
       detection_stage: SILVER
       pipeline_status: BLOCKED
       measurement_type: ASSIGNED_BLOCK
-      notes: "dbt contracts enforce NOT NULL on o_custkey and CHECK o_totalprice >= 0"
+      notes: dbt contracts enforce NOT NULL on o_custkey and CHECK o_totalprice >=
+        0
     C2:
       detected: true
       blast_radius: 0.0
@@ -308,22 +300,21 @@ ground_truth:
       detection_stage: BRONZE
       pipeline_status: SUCCESS
       measurement_type: MEASURED
-
-  M4b_NULL_SMALL:
+  M4b_NullSmall:
     C0:
       detected: false
-      blast_radius: 1.0
+      blast_radius: 0.0263
       detection_stage: NOT_DETECTED
       pipeline_status: SUCCESS
       measurement_type: MEASURED
-      notes: "Only 5 NULL rows, subtle but still reaches Gold undetected"
+      notes: Only 5 NULL rows, subtle but still reaches Gold undetected
     C1:
       detected: true
       blast_radius: 0.0
       detection_stage: SILVER
       pipeline_status: BLOCKED
       measurement_type: ASSIGNED_BLOCK
-      notes: "dbt NOT NULL constraint catches even 5 NULL rows"
+      notes: dbt NOT NULL constraint catches even 5 NULL rows
     C2:
       detected: true
       blast_radius: 0.0
@@ -342,20 +333,20 @@ ground_truth:
       detection_stage: BRONZE
       pipeline_status: SUCCESS
       measurement_type: MEASURED
-
-  M4c_DUPLICATE_KEYS:
+  M4c_DuplicateKeys:
     C0:
       detected: false
-      blast_radius: 1.0
+      blast_radius: 0.0421
       detection_stage: NOT_DETECTED
       pipeline_status: SUCCESS
       measurement_type: MEASURED
     C1:
-      detected: false
-      blast_radius: 1.0
-      detection_stage: NOT_DETECTED
-      pipeline_status: SUCCESS
-      measurement_type: MEASURED
+      detected: true
+      blast_radius: 0.0
+      detection_stage: SILVER_CONTRACT
+      pipeline_status: BLOCKED
+      measurement_type: ASSIGNED_BLOCK
+      notes: dbt PK constraint on o_orderkey blocks duplicate keys
     C2:
       detected: true
       blast_radius: 0.0
@@ -374,30 +365,28 @@ ground_truth:
       detection_stage: BRONZE
       pipeline_status: SUCCESS
       measurement_type: MEASURED
-
-  # ---------------- M5: SEMANTIC DRIFT ----------------
   M5a_MULTIPLY_100:
     C0:
       detected: false
-      blast_radius: 1.0
+      blast_radius: 0.9211
       detection_stage: NOT_DETECTED
       pipeline_status: SUCCESS
       measurement_type: MEASURED
-      notes: "STAR RESULT: No enforcement, discount=5.0 reaches Gold silently"
+      notes: 'STAR RESULT: No enforcement, discount=5.0 reaches Gold silently'
     C1:
       detected: false
       blast_radius: 1.0
       detection_stage: NOT_DETECTED
       pipeline_status: SUCCESS
       measurement_type: MEASURED
-      notes: "STAR RESULT: dbt contracts CANNOT catch this (schema is correct!)"
+      notes: 'STAR RESULT: dbt contracts CANNOT catch this (schema is correct!)'
     C2:
       detected: true
       blast_radius: 0.0
       detection_stage: SILVER
       pipeline_status: BLOCKED
       measurement_type: ASSIGNED_BLOCK
-      notes: "GX ExpectColumnValuesToBeBetween(max=0.10) catches discount=5.0"
+      notes: GX ExpectColumnValuesToBeBetween(max=0.10) catches discount=5.0
     C3:
       detected: true
       blast_radius: 0.0
@@ -410,29 +399,29 @@ ground_truth:
       detection_stage: BRONZE
       pipeline_status: BLOCKED
       measurement_type: ASSIGNED_BLOCK
-
   M5b_MULTIPLY_1_5:
     C0:
       detected: false
-      blast_radius: 1.0
+      blast_radius: 0.9211
       detection_stage: NOT_DETECTED
       pipeline_status: SUCCESS
       measurement_type: MEASURED
-      notes: "Subtle drift: discount*1.5, many values still valid-looking"
+      notes: 'Subtle drift: discount*1.5, many values still valid-looking'
     C1:
       detected: false
       blast_radius: 1.0
       detection_stage: NOT_DETECTED
       pipeline_status: SUCCESS
       measurement_type: MEASURED
-      notes: "dbt contracts cannot catch (schema unchanged)"
+      notes: dbt contracts cannot catch (schema unchanged)
     C2:
-      detected: true
-      blast_radius: 0.0
-      detection_stage: SILVER
-      pipeline_status: BLOCKED
-      measurement_type: ASSIGNED_BLOCK
-      notes: "GX catches: values up to 0.15 exceed max_value=0.10"
+      detected: false
+      blast_radius: 0.9211
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+      notes: Values 0.00-0.15 fall within row check [0.0, 1.00]; GX misses semantic
+        drift
     C3:
       detected: true
       blast_radius: 0.0
@@ -445,11 +434,10 @@ ground_truth:
       detection_stage: BRONZE
       pipeline_status: BLOCKED
       measurement_type: ASSIGNED_BLOCK
-
   M5c_CATEGORICAL_SHIFT:
     C0:
       detected: false
-      blast_radius: 1.0
+      blast_radius: 0.0615
       detection_stage: NOT_DETECTED
       pipeline_status: SUCCESS
       measurement_type: MEASURED
@@ -477,60 +465,251 @@ ground_truth:
       detection_stage: BRONZE
       pipeline_status: SUCCESS
       measurement_type: MEASURED
-
-  # ---------------- BENIGN ----------------
-  B1_ADD_COLUMN:
-    C0: {detected: false, blast_radius: 0.0, detection_stage: NOT_DETECTED, pipeline_status: SUCCESS, measurement_type: MEASURED}
-    C1: {detected: false, blast_radius: 0.0, detection_stage: NOT_DETECTED, pipeline_status: SUCCESS, measurement_type: MEASURED}
-    C2: {detected: false, blast_radius: 0.0, detection_stage: NOT_DETECTED, pipeline_status: SUCCESS, measurement_type: MEASURED}
-    C3: {detected: false, blast_radius: 0.0, detection_stage: NOT_DETECTED, pipeline_status: SUCCESS, measurement_type: MEASURED}
-    C3_standalone: {detected: false, blast_radius: 0.0, detection_stage: NOT_DETECTED, pipeline_status: SUCCESS, measurement_type: MEASURED}
-
-  B2_VALUE_IN_RANGE:
-    C0: {detected: false, blast_radius: 0.0, detection_stage: NOT_DETECTED, pipeline_status: SUCCESS, measurement_type: MEASURED}
-    C1: {detected: false, blast_radius: 0.0, detection_stage: NOT_DETECTED, pipeline_status: SUCCESS, measurement_type: MEASURED}
-    C2: {detected: false, blast_radius: 0.0, detection_stage: NOT_DETECTED, pipeline_status: SUCCESS, measurement_type: MEASURED}
-    C3: {detected: false, blast_radius: 0.0, detection_stage: NOT_DETECTED, pipeline_status: SUCCESS, measurement_type: MEASURED}
-    C3_standalone: {detected: false, blast_radius: 0.0, detection_stage: NOT_DETECTED, pipeline_status: SUCCESS, measurement_type: MEASURED}
-
-  B3_INSERT_ROWS:
-    C0: {detected: false, blast_radius: 0.0, detection_stage: NOT_DETECTED, pipeline_status: SUCCESS, measurement_type: MEASURED}
-    C1: {detected: false, blast_radius: 0.0, detection_stage: NOT_DETECTED, pipeline_status: SUCCESS, measurement_type: MEASURED}
-    C2: {detected: false, blast_radius: 0.0, detection_stage: NOT_DETECTED, pipeline_status: SUCCESS, measurement_type: MEASURED}
-    C3: {detected: false, blast_radius: 0.0, detection_stage: NOT_DETECTED, pipeline_status: SUCCESS, measurement_type: MEASURED}
-    C3_standalone: {detected: false, blast_radius: 0.0, detection_stage: NOT_DETECTED, pipeline_status: SUCCESS, measurement_type: MEASURED}
-
-  B4_REORDER_COLS:
-    C0: {detected: false, blast_radius: 0.0, detection_stage: NOT_DETECTED, pipeline_status: SUCCESS, measurement_type: MEASURED}
-    C1: {detected: false, blast_radius: 0.0, detection_stage: NOT_DETECTED, pipeline_status: SUCCESS, measurement_type: MEASURED}
-    C2: {detected: false, blast_radius: 0.0, detection_stage: NOT_DETECTED, pipeline_status: SUCCESS, measurement_type: MEASURED}
-    C3: {detected: false, blast_radius: 0.0, detection_stage: NOT_DETECTED, pipeline_status: SUCCESS, measurement_type: MEASURED}
-    C3_standalone: {detected: false, blast_radius: 0.0, detection_stage: NOT_DETECTED, pipeline_status: SUCCESS, measurement_type: MEASURED}
-
-  B5_ADD_VALID_STATUS:
-    C0: {detected: false, blast_radius: 0.0, detection_stage: NOT_DETECTED, pipeline_status: SUCCESS, measurement_type: MEASURED}
-    C1: {detected: false, blast_radius: 0.0, detection_stage: NOT_DETECTED, pipeline_status: SUCCESS, measurement_type: MEASURED}
-    C2: {detected: false, blast_radius: 0.0, detection_stage: NOT_DETECTED, pipeline_status: SUCCESS, measurement_type: MEASURED}
-    C3: {detected: false, blast_radius: 0.0, detection_stage: NOT_DETECTED, pipeline_status: SUCCESS, measurement_type: MEASURED}
-    C3_standalone: {detected: false, blast_radius: 0.0, detection_stage: NOT_DETECTED, pipeline_status: SUCCESS, measurement_type: MEASURED}
-
-  B6_INCREASE_PRECISION:
-    C0: {detected: false, blast_radius: 0.0, detection_stage: NOT_DETECTED, pipeline_status: SUCCESS, measurement_type: MEASURED}
-    C1: {detected: false, blast_radius: 0.0, detection_stage: NOT_DETECTED, pipeline_status: SUCCESS, measurement_type: MEASURED}
-    C2: {detected: false, blast_radius: 0.0, detection_stage: NOT_DETECTED, pipeline_status: SUCCESS, measurement_type: MEASURED}
-    C3: {detected: false, blast_radius: 0.0, detection_stage: NOT_DETECTED, pipeline_status: SUCCESS, measurement_type: MEASURED}
-    C3_standalone: {detected: false, blast_radius: 0.0, detection_stage: NOT_DETECTED, pipeline_status: SUCCESS, measurement_type: MEASURED}
-
-  B7_LARGE_BATCH_INSERT:
-    C0: {detected: false, blast_radius: 0.0, detection_stage: NOT_DETECTED, pipeline_status: SUCCESS, measurement_type: MEASURED}
-    C1: {detected: false, blast_radius: 0.0, detection_stage: NOT_DETECTED, pipeline_status: SUCCESS, measurement_type: MEASURED}
-    C2: {detected: false, blast_radius: 0.0, detection_stage: NOT_DETECTED, pipeline_status: SUCCESS, measurement_type: MEASURED}
-    C3: {detected: false, blast_radius: 0.0, detection_stage: NOT_DETECTED, pipeline_status: SUCCESS, measurement_type: MEASURED}
-    C3_standalone: {detected: false, blast_radius: 0.0, detection_stage: NOT_DETECTED, pipeline_status: SUCCESS, measurement_type: MEASURED}
-
-  B8_WHITESPACE_VALUES:
-    C0: {detected: false, blast_radius: 0.0, detection_stage: NOT_DETECTED, pipeline_status: SUCCESS, measurement_type: MEASURED}
-    C1: {detected: false, blast_radius: 0.0, detection_stage: NOT_DETECTED, pipeline_status: SUCCESS, measurement_type: MEASURED}
-    C2: {detected: false, blast_radius: 0.0, detection_stage: NOT_DETECTED, pipeline_status: SUCCESS, measurement_type: MEASURED}
-    C3: {detected: false, blast_radius: 0.0, detection_stage: NOT_DETECTED, pipeline_status: SUCCESS, measurement_type: MEASURED}
-    C3_standalone: {detected: false, blast_radius: 0.0, detection_stage: NOT_DETECTED, pipeline_status: SUCCESS, measurement_type: MEASURED}
+  B1_AddColumn:
+    C0:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C1:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C2:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C3:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C3_standalone:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+  B2_ValueInRange:
+    C0:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C1:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C2:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C3:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C3_standalone:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+  B3_InsertRows:
+    C0:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C1:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C2:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C3:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C3_standalone:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+  B4_ReorderCols:
+    C0:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C1:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C2:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C3:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C3_standalone:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+  B5_AddValidStatus:
+    C0:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C1:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C2:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C3:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C3_standalone:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+  B6_IncreasePrecision:
+    C0:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C1:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C2:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C3:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C3_standalone:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+  B7_LargeBatchInsert:
+    C0:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C1:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C2:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C3:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C3_standalone:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+  B8_WhitespaceValues:
+    C0:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C1:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C2:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C3:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C3_standalone:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED

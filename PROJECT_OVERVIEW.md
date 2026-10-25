@@ -77,12 +77,12 @@ flowchart TD
 
     subgraph S2 ["2. Gate 1: Bronze -> Silver Boundary"]
         BRONZE --> G1{"MedalGuard Gate 1 (B->S)\nvalidate_pre_transform()"}
-        G1 -->|Phát hiện lỗi| QUAR[("quarantine.orders_rejected")]
-        G1 -->|Lọc sạch| CLEAN[("view: bronze.orders_clean")]
+        G1 -->|Cách ly dòng lỗi| QUAR[("quarantine.<table_name>_rejected")]
+        G1 -->|Ghi đè In-Place| CLEAN_TBL[("Bảng sạch: bronze.<table_name>\n(+ View bronze.<table_name>_clean)")]
     end
 
     subgraph S3 ["3. Silver Transformation"]
-        CLEAN -->|dbt run --select tag:silver| SILVER[("Silver Layer (Cleaned)")]
+        CLEAN_TBL -->|dbt run --select tag:silver| SILVER[("Silver Layer (Cleaned)")]
     end
 
     subgraph S4 ["4. Gate 2: Silver -> Gold Boundary"]
@@ -106,10 +106,10 @@ flowchart TD
 2. **Schema Validator (`schema_validator.py`):** Kiểm tra cấu trúc bảng so với hợp đồng (bắt lỗi cột bị xóa, cột bị đổi tên, cột bị lệch kiểu dữ liệu hoặc cột lạ xuất hiện).
 3. **Constraint Validator (`constraint_validator.py`):** Kiểm tra giá trị các bản ghi (NULL violation, Out-of-Range violation, Allowed Values violation, Duplicate Keys).
 4. **Semantic Validator (`semantic_validator.py`):** Phân tích trôi dạt ngữ nghĩa và phân bố thống kê (độ trôi trung bình `mean_range`, đột biến `null_rate`, sụt giảm `row_count`).
-5. **Cơ chế Quarantine (Phân luồng & Cách ly):**
+5. **Cơ chế Quarantine (Phân luồng & Cách ly tại chỗ - In-Place Quarantine):**
    - Tự động trích xuất các dòng vi phạm lưu vào schema `quarantine.<table_name>_rejected` kèm timestamp và tác nhân cách ly.
-   - Sinh ra Dynamic View `<schema>.<table_name>_clean` chỉ chứa các bản ghi hợp lệ.
-   - Các model biến đổi tầng sau chỉ đọc từ Clean View này, đảm bảo dữ liệu bẩn bị chặn đứng ngay trước khi vào Silver/Gold.
+   - Sử dụng bảng tạm `_mg_tagged` để ghi đè dữ liệu sạch trực tiếp vào bảng `bronze.<table_name>`, đồng thời tạo dynamic view `<schema>.<table_name>_clean`.
+   - Nhờ cơ chế In-Place Quarantine này, các model dbt tầng Silver tự động đọc dữ liệu sạch mà không cần thay đổi câu lệnh SQL hoặc cấu hình `ref()`, đảm bảo tính tương thích 100% với pipeline hiện hữu.
 
 ---
 
@@ -228,26 +228,30 @@ D:\Study\Seminar\
 │
 └── medalguard-seminar/                        <-- WORKSPACE MÃ NGUỒN CHÍNH
     ├── requirements.txt                       <-- Khai báo thư viện (duckdb, dbt-core, dbt-duckdb...)
-    ├── README.md                              <-- Hướng dẫn nhanh cho repo
+    ├── README.md                              <-- Hướng dẫn nhanh cho repo & Báo cáo kết quả
     │
     ├── contracts/                             <-- Khai báo Data Contracts (YAML)
-    │   └── bronze_to_silver/
-    │       ├── orders.yaml                    <-- Hợp đồng ranh giới B->S cho bảng orders
-    │       ├── lineitem.yaml                  <-- Hợp đồng ranh giới B->S cho bảng lineitem
-    │       └── customer.yaml                  <-- Hợp đồng ranh giới B->S cho bảng customer
+    │   ├── bronze_to_silver/
+    │   │   ├── orders.yaml                    <-- Hợp đồng ranh giới B->S cho bảng orders
+    │   │   ├── lineitem.yaml                  <-- Hợp đồng ranh giới B->S cho bảng lineitem
+    │   │   └── customer.yaml                  <-- Hợp đồng ranh giới B->S cho bảng customer
+    │   └── silver_to_gold/
+    │       ├── revenue_by_nation.yaml         <-- Hợp đồng ranh giới S->G cho bảng gold_revenue_by_nation
+    │       └── order_priority_summary.yaml    <-- Hợp đồng ranh giới S->G cho bảng gold_order_priority_summary
     │
     ├── dbt_project/                           <-- Dự án dbt-core cho kiến trúc Medallion
-    │   ├── dbt_project.yml                    <-- Cấu hình project dbt
+    │   ├── dbt_project.yml                    <-- Cấu hình project dbt (tags: bronze, silver, gold)
     │   ├── profiles.yml                       <-- Cấu hình kết nối DuckDB
     │   └── models/
     │       ├── sources.yml                    <-- Khai báo bảng nguồn TPC-H trong DuckDB
-    │       ├── bronze/                        <-- Tầng Bronze: Ingestion nguyên bản
+    │       ├── bronze/                        <-- Tầng Bronze: Ingestion nguyên bản (SELECT *)
     │       │   ├── bronze_orders.sql
     │       │   ├── bronze_lineitem.sql
     │       │   └── bronze_customer.sql
     │       ├── silver/                        <-- Tầng Silver: Làm sạch & Ép kiểu
-    │       │   ├── _silver_models.yml         <-- Active model configuration (C0 no-contract)
-    │       │   ├── _silver_models_with_contract.yml.bak  <-- Backup dùng cho cấu hình C1 & C3
+    │       │   ├── _silver_models.yml         <-- Active model configuration (đồng bộ test & contract)
+    │       │   ├── _silver_models_no_contract.yml.bak    <-- Cấu hình C0/C2/C3s (không dbt contracts)
+    │       │   ├── _silver_models_with_contract.yml.bak  <-- Cấu hình C1 (có dbt contracts enforced)
     │       │   ├── silver_orders.sql
     │       │   ├── silver_lineitem.sql
     │       │   └── silver_customer.sql
@@ -260,8 +264,9 @@ D:\Study\Seminar\
     │   ├── __init__.py
     │   ├── config.py                          <-- Parser nạp hợp đồng YAML
     │   ├── utils.py                           <-- Tiện ích chống SQL Injection & trích xuất identifier
-    │   ├── gate.py                            <-- ContractGate: Điều phối xác thực & cách ly Quarantine
+    │   ├── gate.py                            <-- ContractGate: Điều phối xác thực & In-Place Quarantine
     │   ├── reporter.py                        <-- Tính toán Blast Radius chuẩn hóa & xuất log JSON
+    │   ├── gx_runner.py                       <-- Runner kiểm thử Great Expectations 10 quy tắc cho C2
     │   └── validators/                        <-- Các module kiểm tra thành phần
     │       ├── schema_validator.py            <-- Kiểm tra Schema drift & trôi dạt cấu trúc
     │       ├── constraint_validator.py        <-- Kiểm tra vi phạm miền giá trị, null, unique
@@ -279,18 +284,27 @@ D:\Study\Seminar\
     │
     ├── experiments/                           <-- HỆ THỐNG THỰC NGHIỆM TỰ ĐỘNG
     │   ├── config.yaml                        <-- Cấu hình ma trận benchmark, stress test, ablation
-    │   └── runner.py                          <-- Runner điều phối Staged Pipeline, Cold Start, Randomize
+    │   └── runner.py                          <-- Runner điều phối Staged Pipeline (smoke, single, matrix, overhead)
     │
     ├── scripts/                               <-- CÁC KỊCH BẢN THỰC THI NHANH
     │   ├── generate_tpch.py                   <-- Sinh dữ liệu TPC-H vào DuckDB (hỗ trợ scale factor)
     │   ├── run_baseline.py                    <-- Kịch bản chạy kiểm thử nhanh C0 baseline
     │   ├── measure_overhead.py                <-- Kịch bản đo độ trễ đường ống (Overhead 7 runs)
-    │   └── verify_gold.py                     <-- Kịch bản kiểm tra chất lượng dữ liệu tầng Gold
+    │   ├── verify_gold.py                     <-- Kịch bản kiểm tra chất lượng dữ liệu tầng Gold
+    │   ├── visualize_baseline.py              <-- Tạo biểu đồ trực quan hóa kết quả baseline
+    │   └── fill_baseline_form.py              <-- Điền tự động số liệu vào form nghiệm thu baseline
     │
     └── results/                               <-- KẾT QUẢ THỰC NGHIỆM & LOGS
-        └── baseline/
-            ├── baseline_c0_results.json       <-- Chi tiết log chạy của từng mutation trên C0
-            └── baseline_c0_overhead.json      <-- Chi tiết 7 lần lặp đo thời gian chạy của C0
+        ├── baseline/
+        │   ├── baseline_c0_results.json       <-- Chi tiết log chạy của từng mutation trên C0
+        │   ├── baseline_c0_summary.json       <-- Bảng tổng hợp số liệu C0
+        │   ├── baseline_c0_overhead.json      <-- Chi tiết 7 lần lặp đo thời gian chạy của C0
+        │   ├── blast_radius_by_mutation.png   <-- Biểu đồ Blast Radius từng mutation
+        │   ├── outcome_by_category.png        <-- Biểu đồ phân bổ Fault Outcome
+        │   └── pipeline_overhead.png          <-- Biểu đồ phân tích Overhead đường ống
+        └── raw/
+            ├── *.json                         <-- Log kết quả các kịch bản thực nghiệm
+            └── gate_reports/                  <-- Chi tiết vi phạm từng Gate qua các lần kiểm tra
 ```
 
 ### 4.2 Hướng dẫn Vận hành Đường ống (Pipeline Commands)
@@ -329,7 +343,7 @@ python experiments/runner.py --mode matrix --sf 0.1
 ### 5.1 Những việc đã hoàn thành xuất sắc
 1. **Kiến trúc Staged Pipeline đã giải quyết lỗi chí mạng (Critical Fix #1):**
    - Đã tách `dbt run` thành 2 giai đoạn: `Bronze -> Gate 1 -> Silver -> Gate 2 -> Gold`.
-   - Cơ chế Quarantine hoạt động chuẩn xác: tạo view sạch `_clean` cho dbt đọc, cô lập dòng lỗi vào `quarantine.<table_name>_rejected`.
+   - Cơ chế In-Place Quarantine hoạt động chuẩn xác: ghi đè dữ liệu sạch trực tiếp vào bảng `bronze.<table_name>` qua bảng tạm `_mg_tagged` (đồng thời tạo view sạch `_clean`), cô lập dòng lỗi vào `quarantine.<table_name>_rejected`.
 2. **Thống nhất định nghĩa toán học Blast Radius (Critical Fix #2):**
    - Đã thống nhất công thức $BR$ theo Gold-row granularity (`diff_gold()` đối sánh với Clean Reference 190 dòng, dung sai `1e-9`) và chuẩn hóa 3 kiểu nhãn đo lường `MeasurementType` (`MEASURED`, `ASSIGNED_BLOCK`, `ASSIGNED_CRASH`).
 3. **Mã nguồn Đột biến (Mutation Suite) hoàn chỉnh:**

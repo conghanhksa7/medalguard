@@ -348,6 +348,7 @@ def run_single_experiment(
                 result.pipeline_status = "BLOCKED"
                 result.measurement_type = "ASSIGNED_BLOCK"
                 result.blast_radius = 0.0
+                result.validation_ms = round(result.validation_ms, 1)
                 result.pipeline_wall_ms = round((time.perf_counter() - t0) * 1000, 1)
                 swap_dbt_config(False)
                 _revert_mutation(mutation)
@@ -370,6 +371,7 @@ def run_single_experiment(
                 result.measurement_type = "ASSIGNED_CRASH"
                 result.blast_radius = 0.0
             result.error_message = f"Silver/Gold error: {err_sg}"
+            result.validation_ms = round(result.validation_ms, 1)
             result.pipeline_wall_ms = round((time.perf_counter() - t0) * 1000, 1)
             swap_dbt_config(False)
             _revert_mutation(mutation)
@@ -451,6 +453,7 @@ def run_single_experiment(
         result.pipeline_status = "CRASH"
         result.measurement_type = "ASSIGNED_CRASH"
         result.error_message = str(e)[:500]
+        result.validation_ms = round(result.validation_ms, 1)
         result.pipeline_wall_ms = round((time.perf_counter() - t0) * 1000, 1)
 
     finally:
@@ -491,6 +494,8 @@ def main():
     parser.add_argument("--no-randomize", action="store_true", help="Disable randomization")
     parser.add_argument("--mutation", type=str, help="Specific mutation name")
     parser.add_argument("--config", type=str, help="Specific config name")
+    parser.add_argument("--save", action="store_true", help="Save experiment result to JSON in results/raw")
+    parser.add_argument("--runs", type=int, default=7, help="Number of repetitions for overhead mode (default 7)")
 
     args = parser.parse_args()
 
@@ -504,6 +509,18 @@ def main():
     from mutations.m4_constraint_breach import M4a_NullAndNegative, M4b_NullSmall, M4c_DuplicateKeys
     from mutations.m5_semantic_drift import M5a_MULTIPLY_100, M5b_MULTIPLY_1_5, M5c_CATEGORICAL_SHIFT
     from mutations.benign_mutations import B1_AddColumn, B2_ValueInRange, B3_InsertRows, B5_AddValidStatus, B7_LargeBatchInsert
+
+    all_mutations_list = [
+        M1a_AddSingleCol(args.sf), M1b_AddMultiCol(args.sf),
+        M2a_DropNonKey(args.sf), M2b_DropKeyCol(args.sf), M2c_RenameCol(args.sf),
+        M3a_DoubleToVarchar(args.sf), M3b_IntegerToDouble(args.sf), M3c_DateToVarchar(args.sf),
+        M4a_NullAndNegative(args.sf), M4b_NullSmall(args.sf), M4c_DuplicateKeys(args.sf),
+        M5a_MULTIPLY_100(args.sf), M5b_MULTIPLY_1_5(args.sf), M5c_CATEGORICAL_SHIFT(args.sf),
+        B1_AddColumn(args.sf), B2_ValueInRange(args.sf), B3_InsertRows(args.sf),
+        B5_AddValidStatus(args.sf), B7_LargeBatchInsert(args.sf),
+    ]
+    mutation_map = {m.name: m for m in all_mutations_list}
+    all_configs_map = {**configs, **full_cfg.get("ablation", {})}
 
     print("Building/loading clean Gold reference...")
     reference = build_clean_reference(args.sf, DB_PATH)
@@ -552,8 +569,116 @@ def main():
         print("=" * 122)
         print("\nSmoke test completed successfully!")
 
+    elif args.mode == "single":
+        if not args.mutation:
+            print("Error: --mutation is required for single mode. Available choices:")
+            print(", ".join(mutation_map.keys()))
+            sys.exit(1)
+        if not args.config:
+            print("Error: --config is required for single mode. Available choices:")
+            print(", ".join(all_configs_map.keys()))
+            sys.exit(1)
+
+        if args.mutation not in mutation_map:
+            print(f"Error: Unknown mutation '{args.mutation}'. Available choices: {list(mutation_map.keys())}")
+            sys.exit(1)
+        if args.config not in all_configs_map:
+            print(f"Error: Unknown config '{args.config}'. Available choices: {list(all_configs_map.keys())}")
+            sys.exit(1)
+
+        target_mut = mutation_map[args.mutation]
+        target_cfg = all_configs_map[args.config]
+
+        print(f"\nRunning Single Experiment: {target_mut.name} on {args.config} (SF={args.sf})...")
+        res = run_single_experiment(
+            mutation=target_mut,
+            config=target_cfg,
+            config_name=args.config,
+            reference=reference,
+            scale_factor=args.sf,
+        )
+
+        if args.save:
+            _save_result(res)
+            print("Saved result to results/raw/")
+
+        print("\n" + "=" * 60)
+        print("  SINGLE EXPERIMENT RESULT")
+        print("=" * 60)
+        print(f"Experiment ID:    {res.experiment_id}")
+        print(f"Mutation:         {res.mutation_name} ({res.category})")
+        print(f"Configuration:    {res.config_name}")
+        print(f"Pipeline Status:  {res.pipeline_status}")
+        print(f"Detected:         {res.detected} (Stage: {res.detection_stage}, DDI: {res.detection_depth})")
+        print(f"Quarantined Rows: {res.quarantined_rows}")
+        if res.quarantined_rows > 0:
+            print(f"Quarantine Eff.:  {res.quarantine_effectiveness_pct:.1f}%")
+        print(f"Blast Radius:     {res.blast_radius:.1%}")
+        print(f"Pipeline Wall:    {res.pipeline_wall_ms:.1f} ms")
+        print(f"dbt Elapsed:      {res.dbt_elapsed_ms:.1f} ms")
+        print(f"Validation Time:  {res.validation_ms:.1f} ms")
+        if res.error_message:
+            print(f"Error Message:    {res.error_message}")
+        print("=" * 60)
+
     elif args.mode == "matrix":
-        print("Matrix mode placeholder for Task 4")
+        print("\n" + "=" * 90)
+        print(f"  MEDALGUARD FULL MATRIX: {len(all_mutations_list)} mutations × {len(configs)} configs (SF={args.sf})")
+        print("=" * 90)
+
+        results = []
+        for cfg_name, cfg in configs.items():
+            print(f"\n--- Running Config: {cfg_name} ({cfg.get('description', '')}) ---")
+            for mut in all_mutations_list:
+                print(f"  Testing {mut.name}...")
+                res = run_single_experiment(
+                    mutation=mut,
+                    config=cfg,
+                    config_name=cfg_name,
+                    reference=reference,
+                    scale_factor=args.sf,
+                )
+                results.append(res)
+                _save_result(res)
+                print(f"    -> status={res.pipeline_status:<8} det={res.detected!s:<5} DDI={res.detection_depth:<2} "
+                      f"stage={res.detection_stage:<16} Q={res.quarantined_rows:<2} BR={res.blast_radius:>6.1%}")
+
+        # Summary Table
+        print("\n" + "=" * 122)
+        print(f"{'Config':<15} {'Mutation':<22} {'Status':<9} {'Det':<6} {'DDI':<5} {'Stage':<16} {'Q_Rows':<7} {'QE':<7} {'BlastRadius':<11} {'Wall(ms)':<9} {'dbt(ms)':<8} {'val(ms)':<8}")
+        print("-" * 122)
+        for r in results:
+            qe_str = f"{r.quarantine_effectiveness_pct:.0f}%" if r.quarantined_rows > 0 else "N/A"
+            br_str = f"{r.blast_radius:.1%}"
+            print(f"{r.config_name:<15} {r.mutation_name:<22} {r.pipeline_status:<9} {r.detected!s:<6} {r.detection_depth:<5} "
+                  f"{r.detection_stage:<16} {r.quarantined_rows:<7} {qe_str:<7} {br_str:<11} {r.pipeline_wall_ms:<9.0f} {r.dbt_elapsed_ms:<8.0f} {r.validation_ms:<8.0f}")
+        print("=" * 122)
+        print("\nFull Matrix execution completed successfully!")
+
+    elif args.mode == "overhead":
+        repeat_count = args.runs
+        print("\n" + "=" * 80)
+        print(f"  MEDALGUARD OVERHEAD BENCHMARK: {repeat_count} clean runs (SF={args.sf})")
+        print("=" * 80)
+        durations = []
+        dbt_durations = []
+        for i in range(1, repeat_count + 1):
+            reset_database(DB_PATH, args.sf)
+            swap_dbt_config(False)
+            t_start = time.perf_counter()
+            st, wall, el, err = run_dbt("tag:bronze tag:silver tag:gold")
+            wall_ms = (time.perf_counter() - t_start) * 1000
+            durations.append(wall_ms)
+            dbt_durations.append(el)
+            print(f"  Run {i}/{repeat_count}: status={st} wall={wall_ms:.1f}ms dbt_elapsed={el:.1f}ms")
+
+        median_wall = statistics.median(durations)
+        median_dbt = statistics.median(dbt_durations)
+        stdev_dbt = statistics.stdev(dbt_durations) if len(dbt_durations) > 1 else 0.0
+        print("-" * 80)
+        print(f"  Median Wall-clock Time: {median_wall:.1f} ms")
+        print(f"  Median dbt Execution:   {median_dbt:.1f} ms (std: {stdev_dbt:.1f} ms)")
+        print("=" * 80)
 
 
 if __name__ == "__main__":
