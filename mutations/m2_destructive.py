@@ -1,13 +1,13 @@
-"""M2: Destructive mutations — Drop or rename existing columns."""
+"""M2: Destructive mutations — Drop or rename critical columns."""
 from mutations.base import BaseMutation
 
 
 class M2a_DropNonKey(BaseMutation):
-    """Drop a non-key column (l_tax) from lineitem."""
+    """Drop l_discount (used in revenue calculations)."""
 
     @property
     def description(self):
-        return "Drop l_tax column from lineitem (breaking change)"
+        return "Drop l_discount from lineitem (used in revenue)"
 
     @property
     def category(self):
@@ -35,7 +35,7 @@ class M2a_DropNonKey(BaseMutation):
 
     def apply(self, con):
         con.execute("CREATE TABLE IF NOT EXISTS source._lineitem_backup AS SELECT * FROM source.lineitem")
-        con.execute("ALTER TABLE source.lineitem DROP COLUMN l_tax")
+        con.execute("ALTER TABLE source.lineitem DROP COLUMN l_discount")
         self.applied = True
 
     def revert(self, con):
@@ -46,11 +46,11 @@ class M2a_DropNonKey(BaseMutation):
 
 
 class M2b_DropKeyCol(BaseMutation):
-    """Drop a primary key column (l_orderkey) from lineitem."""
+    """Drop l_orderkey (PRIMARY/FOREIGN KEY — breaks pipeline completely)."""
 
     @property
     def description(self):
-        return "Drop l_orderkey (PK) from lineitem — catastrophic"
+        return "Drop l_orderkey from lineitem (PK/FK — catastrophic)"
 
     @property
     def category(self):
@@ -135,11 +135,11 @@ class M2c_RenameCol(BaseMutation):
 
 
 class M2d_DropCustomerNationKey(BaseMutation):
-    """Drop foreign key column c_nationkey from customer (breaking join)."""
+    """Drop foreign key column c_nationkey from customer (breaks nation revenue join)."""
 
     @property
     def description(self):
-        return "Drop foreign key column c_nationkey from customer (breaking join)"
+        return "Drop foreign key c_nationkey from customer (breaks nation revenue join)"
 
     @property
     def category(self):

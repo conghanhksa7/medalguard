@@ -1,13 +1,13 @@
-"""M3: Type change mutations — Change column data types."""
+"""M3: Type change mutations — Alter column types in source tables."""
 from mutations.base import BaseMutation
 
 
 class M3a_DoubleToVarchar(BaseMutation):
-    """Change l_quantity from DOUBLE to VARCHAR (incompatible)."""
+    """Change l_extendedprice from DOUBLE to VARCHAR."""
 
     @property
     def description(self):
-        return "Cast l_quantity DOUBLE -> VARCHAR in lineitem"
+        return "Cast l_extendedprice DOUBLE -> VARCHAR in lineitem"
 
     @property
     def category(self):
@@ -38,8 +38,8 @@ class M3a_DoubleToVarchar(BaseMutation):
         con.execute("""
             CREATE OR REPLACE TABLE source.lineitem AS
             SELECT
-                * EXCLUDE (l_quantity),
-                CAST(l_quantity AS VARCHAR) AS l_quantity
+                * EXCLUDE (l_extendedprice),
+                CAST(l_extendedprice AS VARCHAR) AS l_extendedprice
             FROM source._lineitem_backup
         """)
         self.applied = True
@@ -52,11 +52,11 @@ class M3a_DoubleToVarchar(BaseMutation):
 
 
 class M3b_IntegerToDouble(BaseMutation):
-    """Cast l_linenumber BIGINT -> DOUBLE in lineitem (widening, possibly benign)."""
+    """Change l_suppkey from INTEGER/BIGINT to DOUBLE (widening, subtle)."""
 
     @property
     def description(self):
-        return "Cast l_linenumber BIGINT -> DOUBLE in lineitem (widening, possibly benign)"
+        return "Cast l_suppkey BIGINT -> DOUBLE in lineitem (subtle widening)"
 
     @property
     def category(self):
@@ -87,8 +87,8 @@ class M3b_IntegerToDouble(BaseMutation):
         con.execute("""
             CREATE OR REPLACE TABLE source.lineitem AS
             SELECT
-                * EXCLUDE (l_linenumber),
-                CAST(l_linenumber AS DOUBLE) AS l_linenumber
+                * EXCLUDE (l_suppkey),
+                CAST(l_suppkey AS DOUBLE) AS l_suppkey
             FROM source._lineitem_backup
         """)
         self.applied = True
@@ -101,7 +101,7 @@ class M3b_IntegerToDouble(BaseMutation):
 
 
 class M3c_DateToVarchar(BaseMutation):
-    """Change o_orderdate from DATE to VARCHAR in orders."""
+    """Change o_orderdate from DATE to VARCHAR ('YYYY-MM-DD')."""
 
     @property
     def description(self):

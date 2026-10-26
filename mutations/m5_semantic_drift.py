@@ -1,13 +1,13 @@
-"""M5: Semantic drift mutations — Schema unchanged, values wrong."""
+"""M5: Semantic drift mutations — Value shifts that preserve schema but violate domain semantics."""
 from mutations.base import BaseMutation
 
 
 class M5a_MULTIPLY_100(BaseMutation):
-    """Multiply l_discount by 100: 0.05 -> 5.0 (obvious drift)."""
+    """Multiply l_extendedprice by 100 — extreme drift."""
 
     @property
     def description(self):
-        return "Multiply l_discount * 100 (0.05 -> 5.0)"
+        return "Multiply l_extendedprice by 100 (extreme semantic drift)"
 
     @property
     def category(self):
@@ -34,21 +34,23 @@ class M5a_MULTIPLY_100(BaseMutation):
         return int(6_000_000 * self.sf)
 
     def apply(self, con):
-        con.execute("UPDATE source.lineitem SET l_discount = l_discount * 100")
+        con.execute("CREATE TABLE IF NOT EXISTS source._lineitem_backup AS SELECT * FROM source.lineitem")
+        con.execute("UPDATE source.lineitem SET l_extendedprice = l_extendedprice * 100")
         self.applied = True
 
     def revert(self, con):
         if self.applied:
-            con.execute("UPDATE source.lineitem SET l_discount = l_discount / 100")
+            con.execute("DROP TABLE IF EXISTS source.lineitem")
+            con.execute("ALTER TABLE source._lineitem_backup RENAME TO lineitem")
             self.applied = False
 
 
 class M5b_MULTIPLY_1_5(BaseMutation):
-    """Multiply l_discount by 1.5: subtle drift, mean ~0.05 -> ~0.075."""
+    """Multiply l_extendedprice by 1.5 — moderate drift."""
 
     @property
     def description(self):
-        return "Multiply l_discount * 1.5 (subtle, mean 0.05 -> 0.075)"
+        return "Multiply l_extendedprice by 1.5 (moderate semantic drift)"
 
     @property
     def category(self):
@@ -76,7 +78,7 @@ class M5b_MULTIPLY_1_5(BaseMutation):
 
     def apply(self, con):
         con.execute("CREATE TABLE IF NOT EXISTS source._lineitem_backup AS SELECT * FROM source.lineitem")
-        con.execute("UPDATE source.lineitem SET l_discount = LEAST(l_discount * 1.5, 0.10)")
+        con.execute("UPDATE source.lineitem SET l_extendedprice = l_extendedprice * 1.5")
         self.applied = True
 
     def revert(self, con):
@@ -87,11 +89,11 @@ class M5b_MULTIPLY_1_5(BaseMutation):
 
 
 class M5c_CATEGORICAL_SHIFT(BaseMutation):
-    """Add new orderstatus 'X' not in allowed values [O, F, P]."""
+    """Insert 10 rows with unlisted status 'X'."""
 
     @property
     def description(self):
-        return f"Change {int(100 * self.sf)} orders o_orderstatus to 'X' (not in allowed set)"
+        return "Insert 10 rows with invalid orderstatus 'X'"
 
     @property
     def category(self):
@@ -115,32 +117,35 @@ class M5c_CATEGORICAL_SHIFT(BaseMutation):
 
     @property
     def injected_fault_count(self):
-        return int(100 * self.sf)
+        return 10
 
     def apply(self, con):
-        n = int(100 * self.sf)
+        con.execute("CREATE TABLE IF NOT EXISTS source._orders_backup AS SELECT * FROM source.orders")
+        max_key = con.execute("SELECT MAX(o_orderkey) FROM source.orders").fetchone()[0]
         con.execute(f"""
-            UPDATE source.orders
-            SET o_orderstatus = 'X'
-            WHERE o_orderkey IN (
-                SELECT o_orderkey FROM source.orders ORDER BY o_orderkey LIMIT {n}
-            )
+            INSERT INTO source.orders
+            SELECT
+                o_orderkey + {max_key + 1},
+                o_custkey, 'X', o_totalprice, o_orderdate,
+                o_orderpriority, o_clerk, o_shippriority, o_comment
+            FROM source.orders
+            LIMIT 10
         """)
         self.applied = True
 
     def revert(self, con):
         if self.applied:
-            con.execute("LOAD tpch;")
-            con.execute(f"CALL dbgen(sf={self.sf}, schema='source', overwrite=true)")
+            con.execute("DROP TABLE IF EXISTS source.orders")
+            con.execute("ALTER TABLE source._orders_backup RENAME TO orders")
             self.applied = False
 
 
 class M5d_LineitemTaxSpike(BaseMutation):
-    """Multiply l_tax * 10 in lineitem (0.04 -> 0.40, exceeds max 0.08)."""
+    """Multiply l_tax * 10 in lineitem (tax rate unit error: 0.04 -> 0.40)."""
 
     @property
     def description(self):
-        return "Multiply l_tax * 10 in lineitem (0.04 -> 0.40, exceeds max 0.08)"
+        return "Multiply l_tax * 10 in lineitem (tax rate unit error: 0.04 -> 0.40)"
 
     @property
     def category(self):
@@ -152,7 +157,7 @@ class M5d_LineitemTaxSpike(BaseMutation):
 
     @property
     def schema_version(self) -> str:
-        return "v1.0-semantic"
+        return "v1.0-stat-drift"
 
     @property
     def target_table(self) -> str:
@@ -179,11 +184,11 @@ class M5d_LineitemTaxSpike(BaseMutation):
 
 
 class M5e_ShipmodeInvalidCode(BaseMutation):
-    """Inject invalid l_shipmode='DRONE' rows in lineitem."""
+    """Change lineitem l_shipmode values to unlisted code 'DRONE'."""
 
     @property
     def description(self):
-        return f"Inject {max(5, int(150 * self.sf))} invalid l_shipmode='DRONE' rows in lineitem"
+        return f"Change {max(1, int(150 * self.sf))} lineitem l_shipmode values to unlisted code 'DRONE'"
 
     @property
     def category(self):
@@ -195,7 +200,7 @@ class M5e_ShipmodeInvalidCode(BaseMutation):
 
     @property
     def schema_version(self) -> str:
-        return "v1.0-semantic"
+        return "v1.0-domain-drift"
 
     @property
     def target_table(self) -> str:
@@ -207,7 +212,7 @@ class M5e_ShipmodeInvalidCode(BaseMutation):
 
     @property
     def injected_fault_count(self):
-        return max(5, int(150 * self.sf))
+        return max(1, int(150 * self.sf))
 
     def apply(self, con):
         n = self.injected_fault_count

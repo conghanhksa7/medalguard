@@ -30,6 +30,15 @@ def run_gx_silver_suite(db_path: str) -> tuple[bool, list[dict]]:
          "SELECT COUNT(*) FROM silver.silver_lineitem WHERE l_discount < 0.0 OR l_discount > 0.10"),
         ("ExpectColumnValuesToBeBetween(l_tax, 0.0, 0.08)",
          "SELECT COUNT(*) FROM silver.silver_lineitem WHERE l_tax < 0.0 OR l_tax > 0.08"),
+        ("ExpectColumnValuesToBeInSet(l_shipmode, ['AIR','REG AIR','RAIL','SHIP','TRUCK','MAIL','FOB'])",
+         "SELECT COUNT(*) FROM silver.silver_lineitem WHERE l_shipmode IS NOT NULL AND l_shipmode NOT IN ('AIR','REG AIR','RAIL','SHIP','TRUCK','MAIL','FOB')"),
+        # silver_customer expectations
+        ("ExpectColumnValuesToNotBeNull(c_custkey)",
+         "SELECT COUNT(*) FROM silver.silver_customer WHERE c_custkey IS NULL"),
+        ("ExpectColumnValuesToBeUnique(c_custkey)",
+         "SELECT COUNT(*) - COUNT(DISTINCT c_custkey) FROM silver.silver_customer WHERE c_custkey IS NOT NULL"),
+        ("ExpectColumnValuesToNotBeNull(c_nationkey)",
+         "SELECT COUNT(*) FROM silver.silver_customer WHERE c_nationkey IS NULL"),
     ]
 
     for exp_name, sql in checks:

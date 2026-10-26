@@ -37,9 +37,9 @@
       "category": "ADDITIVE",
       "target_table": "customer",
       "severity": "HIGH",
-      "schema_version": "v1.1-unregistered-pii",
+      "schema_version": "v1.1-pii-leak",
       "injected_fault_count": 0,
-      "description": "Add unregistered sensitive column c_tax_ssn VARCHAR to customer"
+      "description": "Add unregistered PII column c_tax_ssn VARCHAR(20) to customer"
     },
     {
       "index": 4,
@@ -51,7 +51,7 @@
       "severity": "MEDIUM",
       "schema_version": "v1.1-unregistered",
       "injected_fault_count": 0,
-      "description": "Add unregistered column o_debug_payload VARCHAR to orders"
+      "description": "Add unregistered shadow column o_debug_payload VARCHAR to orders"
     },
     {
       "index": 5,
@@ -63,7 +63,7 @@
       "severity": "CRITICAL",
       "schema_version": "v2.0-breaking",
       "injected_fault_count": 600000,
-      "description": "Drop l_tax column from lineitem (breaking change)"
+      "description": "Drop l_discount from lineitem (used in revenue)"
     },
     {
       "index": 6,
@@ -75,7 +75,7 @@
       "severity": "CRITICAL",
       "schema_version": "v2.0-breaking",
       "injected_fault_count": 600000,
-      "description": "Drop l_orderkey (PK) from lineitem \u2014 catastrophic"
+      "description": "Drop l_orderkey from lineitem (PK/FK \u2014 catastrophic)"
     },
     {
       "index": 7,
@@ -99,7 +99,7 @@
       "severity": "CRITICAL",
       "schema_version": "v2.0-breaking",
       "injected_fault_count": 15000,
-      "description": "Drop foreign key column c_nationkey from customer (breaking join)"
+      "description": "Drop foreign key c_nationkey from customer (breaks nation revenue join)"
     },
     {
       "index": 9,
@@ -123,7 +123,7 @@
       "severity": "HIGH",
       "schema_version": "v2.0-type-drift",
       "injected_fault_count": 600000,
-      "description": "Cast l_quantity DOUBLE -> VARCHAR in lineitem"
+      "description": "Cast l_extendedprice DOUBLE -> VARCHAR in lineitem"
     },
     {
       "index": 11,
@@ -135,7 +135,7 @@
       "severity": "MEDIUM",
       "schema_version": "v2.0-type-drift",
       "injected_fault_count": 600000,
-      "description": "Cast l_linenumber BIGINT -> DOUBLE in lineitem (widening, possibly benign)"
+      "description": "Cast l_suppkey BIGINT -> DOUBLE in lineitem (subtle widening)"
     },
     {
       "index": 12,
@@ -181,7 +181,7 @@
       "category": "CONSTRAINT_BREACH",
       "target_table": "orders",
       "severity": "HIGH",
-      "schema_version": "v1.0-constraint",
+      "schema_version": "v1.0-row-fault",
       "injected_fault_count": 30,
       "description": "Inject 10 NULL custkey + 20 negative totalprice"
     },
@@ -193,7 +193,7 @@
       "category": "CONSTRAINT_BREACH",
       "target_table": "orders",
       "severity": "MEDIUM",
-      "schema_version": "v1.0-constraint",
+      "schema_version": "v1.0-row-fault",
       "injected_fault_count": 5,
       "description": "Inject only 5 NULL o_custkey (subtle)"
     },
@@ -205,9 +205,9 @@
       "category": "CONSTRAINT_BREACH",
       "target_table": "orders",
       "severity": "HIGH",
-      "schema_version": "v1.0-constraint",
+      "schema_version": "v1.0-row-fault",
       "injected_fault_count": 5,
-      "description": "Insert 5 rows with duplicate o_orderkey (PK violation)"
+      "description": "Inject 5 duplicate o_orderkey rows"
     },
     {
       "index": 18,
@@ -217,9 +217,9 @@
       "category": "CONSTRAINT_BREACH",
       "target_table": "lineitem",
       "severity": "HIGH",
-      "schema_version": "v1.0-constraint",
+      "schema_version": "v1.0-row-fault",
       "injected_fault_count": 25,
-      "description": "Inject 25 negative l_quantity rows (-5) in lineitem"
+      "description": "Inject 25 negative l_quantity (-5.0) rows into lineitem"
     },
     {
       "index": 19,
@@ -229,9 +229,9 @@
       "category": "CONSTRAINT_BREACH",
       "target_table": "customer",
       "severity": "HIGH",
-      "schema_version": "v1.0-constraint",
+      "schema_version": "v1.0-row-fault",
       "injected_fault_count": 10,
-      "description": "Insert 10 duplicate c_custkey rows in customer"
+      "description": "Insert 10 duplicate c_custkey rows into customer"
     },
     {
       "index": 20,
@@ -243,7 +243,7 @@
       "severity": "CRITICAL",
       "schema_version": "v1.0-semantic",
       "injected_fault_count": 600000,
-      "description": "Multiply l_discount * 100 (0.05 -> 5.0)"
+      "description": "Multiply l_extendedprice by 100 (extreme semantic drift)"
     },
     {
       "index": 21,
@@ -255,7 +255,7 @@
       "severity": "HIGH",
       "schema_version": "v1.0-semantic",
       "injected_fault_count": 600000,
-      "description": "Multiply l_discount * 1.5 (subtle, mean 0.05 -> 0.075)"
+      "description": "Multiply l_extendedprice by 1.5 (moderate semantic drift)"
     },
     {
       "index": 22,
@@ -267,7 +267,7 @@
       "severity": "HIGH",
       "schema_version": "v1.0-semantic",
       "injected_fault_count": 10,
-      "description": "Change 10 orders o_orderstatus to 'X' (not in allowed set)"
+      "description": "Insert 10 rows with invalid orderstatus 'X'"
     },
     {
       "index": 23,
@@ -277,9 +277,9 @@
       "category": "SEMANTIC_DRIFT",
       "target_table": "lineitem",
       "severity": "CRITICAL",
-      "schema_version": "v1.0-semantic",
+      "schema_version": "v1.0-stat-drift",
       "injected_fault_count": 600000,
-      "description": "Multiply l_tax * 10 in lineitem (0.04 -> 0.40, exceeds max 0.08)"
+      "description": "Multiply l_tax * 10 in lineitem (tax rate unit error: 0.04 -> 0.40)"
     },
     {
       "index": 24,
@@ -289,9 +289,9 @@
       "category": "SEMANTIC_DRIFT",
       "target_table": "lineitem",
       "severity": "MEDIUM",
-      "schema_version": "v1.0-semantic",
+      "schema_version": "v1.0-domain-drift",
       "injected_fault_count": 15,
-      "description": "Inject 15 invalid l_shipmode='DRONE' rows in lineitem"
+      "description": "Change 15 lineitem l_shipmode values to unlisted code 'DRONE'"
     },
     {
       "index": 25,
@@ -337,7 +337,7 @@
       "category": "BENIGN",
       "target_table": "orders",
       "severity": "BENIGN",
-      "schema_version": "v1.1-compatible",
+      "schema_version": "v1.1-reorder",
       "injected_fault_count": 0,
       "description": "Recreate orders table with columns in different order"
     },
@@ -361,7 +361,7 @@
       "category": "BENIGN",
       "target_table": "orders",
       "severity": "BENIGN",
-      "schema_version": "v1.1-compatible",
+      "schema_version": "v1.1-widening",
       "injected_fault_count": 0,
       "description": "Widen o_totalprice precision (benign type widening)"
     },
@@ -385,7 +385,7 @@
       "category": "BENIGN",
       "target_table": "orders",
       "severity": "BENIGN",
-      "schema_version": "v1.1-compatible",
+      "schema_version": "v1.0-benign-data",
       "injected_fault_count": 0,
       "description": "Add trailing spaces to o_comment (still valid values)"
     },
@@ -397,7 +397,7 @@
       "category": "BENIGN",
       "target_table": "orders",
       "severity": "BENIGN",
-      "schema_version": "v1.1-compatible",
+      "schema_version": "v1.1-allowlisted",
       "injected_fault_count": 0,
       "description": "Add allowed extra column o_internal_note VARCHAR to orders"
     },
@@ -409,33 +409,33 @@
       "category": "BENIGN",
       "target_table": "customer",
       "severity": "BENIGN",
-      "schema_version": "v1.1-compatible",
+      "schema_version": "v1.1-allowlisted",
       "injected_fault_count": 0,
       "description": "Add allowed extra column c_internal_note VARCHAR to customer"
     },
     {
       "index": 35,
-      "name": "B11_LineitemQuantityInRange",
+      "name": "B11_QuantityInRange",
       "suite": "Expanded",
       "is_core": false,
       "category": "BENIGN",
       "target_table": "lineitem",
       "severity": "BENIGN",
-      "schema_version": "v1.1-compatible",
+      "schema_version": "v1.0-benign-data",
       "injected_fault_count": 0,
-      "description": "Update l_quantity = 26 for 200 rows in lineitem (valid range [1, 50])"
+      "description": "Update l_quantity = 26.0 for 50 rows in lineitem (valid range [1, 50])"
     },
     {
       "index": 36,
-      "name": "B12_CustomerAcctbalUpdate",
+      "name": "B12_CustomerBalUpdate",
       "suite": "Expanded",
       "is_core": false,
       "category": "BENIGN",
       "target_table": "customer",
       "severity": "BENIGN",
-      "schema_version": "v1.1-compatible",
+      "schema_version": "v1.0-benign-data",
       "injected_fault_count": 0,
-      "description": "Update c_acctbal = c_acctbal + 10.0 for 50 rows in customer"
+      "description": "Update c_acctbal = 2500.00 for 50 rows in customer (valid range [-1000, 10000])"
     }
   ],
   "verification_test_expanded_17": [
@@ -620,7 +620,7 @@
       "verification_status": "PASS"
     },
     {
-      "name": "B11_LineitemQuantityInRange",
+      "name": "B11_QuantityInRange",
       "category": "BENIGN",
       "is_benign": true,
       "status": "SUCCESS",
@@ -632,7 +632,7 @@
       "verification_status": "PASS"
     },
     {
-      "name": "B12_CustomerAcctbalUpdate",
+      "name": "B12_CustomerBalUpdate",
       "category": "BENIGN",
       "is_benign": true,
       "status": "SUCCESS",

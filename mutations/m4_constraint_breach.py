@@ -20,7 +20,7 @@ class M4a_NullAndNegative(BaseMutation):
 
     @property
     def schema_version(self) -> str:
-        return "v1.0-constraint"
+        return "v1.0-row-fault"
 
     @property
     def target_table(self) -> str:
@@ -85,7 +85,7 @@ class M4b_NullSmall(BaseMutation):
 
     @property
     def schema_version(self) -> str:
-        return "v1.0-constraint"
+        return "v1.0-row-fault"
 
     @property
     def target_table(self) -> str:
@@ -100,9 +100,7 @@ class M4b_NullSmall(BaseMutation):
         return 5  # Fixed small count regardless of SF
 
     def apply(self, con):
-        # DuckDB dbgen creates tables with NOT NULL constraints by default
         con.execute("ALTER TABLE source.orders ALTER o_custkey DROP NOT NULL")
-
         con.execute("""
             UPDATE source.orders
             SET o_custkey = NULL
@@ -120,11 +118,11 @@ class M4b_NullSmall(BaseMutation):
 
 
 class M4c_DuplicateKeys(BaseMutation):
-    """Insert rows with duplicate o_orderkey values."""
+    """Insert 5 duplicate o_orderkey rows into source.orders."""
 
     @property
     def description(self):
-        return f"Insert {int(50 * self.sf)} rows with duplicate o_orderkey (PK violation)"
+        return "Inject 5 duplicate o_orderkey rows"
 
     @property
     def category(self):
@@ -136,7 +134,7 @@ class M4c_DuplicateKeys(BaseMutation):
 
     @property
     def schema_version(self) -> str:
-        return "v1.0-constraint"
+        return "v1.0-row-fault"
 
     @property
     def target_table(self) -> str:
@@ -148,32 +146,35 @@ class M4c_DuplicateKeys(BaseMutation):
 
     @property
     def injected_fault_count(self):
-        return int(50 * self.sf)
+        return 5
 
     def apply(self, con):
-        n_dupes = int(50 * self.sf)
-        # Copy first N rows and re-insert (creates duplicates)
-        con.execute(f"""
+        con.execute("""
+            CREATE TABLE IF NOT EXISTS source._orders_backup AS
+            SELECT * FROM source.orders
+        """)
+        # Duplicate the first 5 rows
+        con.execute("""
             INSERT INTO source.orders
             SELECT * FROM source.orders
             ORDER BY o_orderkey
-            LIMIT {n_dupes}
+            LIMIT 5
         """)
         self.applied = True
 
     def revert(self, con):
         if self.applied:
-            con.execute("LOAD tpch;")
-            con.execute(f"CALL dbgen(sf={self.sf}, schema='source', overwrite=true)")
+            con.execute("DROP TABLE IF EXISTS source.orders")
+            con.execute("ALTER TABLE source._orders_backup RENAME TO orders")
             self.applied = False
 
 
 class M4d_LineitemNegativeQty(BaseMutation):
-    """Inject negative l_quantity rows (-5) in lineitem."""
+    """Inject negative l_quantity (-5.0) rows into lineitem."""
 
     @property
     def description(self):
-        return f"Inject {max(5, int(250 * self.sf))} negative l_quantity rows (-5) in lineitem"
+        return f"Inject {max(1, int(250 * self.sf))} negative l_quantity (-5.0) rows into lineitem"
 
     @property
     def category(self):
@@ -185,7 +186,7 @@ class M4d_LineitemNegativeQty(BaseMutation):
 
     @property
     def schema_version(self) -> str:
-        return "v1.0-constraint"
+        return "v1.0-row-fault"
 
     @property
     def target_table(self) -> str:
@@ -197,7 +198,7 @@ class M4d_LineitemNegativeQty(BaseMutation):
 
     @property
     def injected_fault_count(self):
-        return max(5, int(250 * self.sf))
+        return max(1, int(250 * self.sf))
 
     def apply(self, con):
         n = self.injected_fault_count
@@ -211,7 +212,7 @@ class M4d_LineitemNegativeQty(BaseMutation):
         """)
         con.execute("""
             UPDATE source.lineitem
-            SET l_quantity = -5
+            SET l_quantity = -5.0
             WHERE (l_orderkey, l_linenumber) IN (
                 SELECT l_orderkey, l_linenumber FROM _bad_keys
             )
@@ -227,11 +228,11 @@ class M4d_LineitemNegativeQty(BaseMutation):
 
 
 class M4e_CustomerDuplicateKeys(BaseMutation):
-    """Insert rows with duplicate c_custkey in customer."""
+    """Insert duplicate c_custkey rows into customer."""
 
     @property
     def description(self):
-        return f"Insert {max(5, int(100 * self.sf))} duplicate c_custkey rows in customer"
+        return f"Insert {max(1, int(100 * self.sf))} duplicate c_custkey rows into customer"
 
     @property
     def category(self):
@@ -243,7 +244,7 @@ class M4e_CustomerDuplicateKeys(BaseMutation):
 
     @property
     def schema_version(self) -> str:
-        return "v1.0-constraint"
+        return "v1.0-row-fault"
 
     @property
     def target_table(self) -> str:
@@ -255,7 +256,7 @@ class M4e_CustomerDuplicateKeys(BaseMutation):
 
     @property
     def injected_fault_count(self):
-        return max(5, int(100 * self.sf))
+        return max(1, int(100 * self.sf))
 
     def apply(self, con):
         n = self.injected_fault_count

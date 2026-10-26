@@ -593,10 +593,10 @@ def main():
 
     # Import mutations
     from mutations import get_mutation_suite
-    core_f, core_b = get_mutation_suite(sf=args.sf, suite="core")
-    exp_f, exp_b = get_mutation_suite(sf=args.sf, suite="expanded")
-    all_available_map = {m.name: m for m in (exp_f + exp_b)}
-    active_mutations_list = exp_f + exp_b if args.suite == "expanded" else core_f + core_b
+    core_mutations = get_mutation_suite(sf=args.sf, suite="core")
+    expanded_mutations = get_mutation_suite(sf=args.sf, suite="expanded")
+    all_available_map = {m.name: m for m in expanded_mutations}
+    active_mutations_list = expanded_mutations if args.suite in ("expanded", "all") else core_mutations
     mutation_map = {m.name: m for m in active_mutations_list}
     all_configs_map = {**configs, **full_cfg.get("ablation", {})}
 

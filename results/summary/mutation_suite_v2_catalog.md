@@ -8,7 +8,7 @@
 |:---:|:---|:---:|:---|:---:|:---:|:---:|:---:|
 | 1 | `M1a_AddSingleCol` | **Core** | `ADDITIVE` | `lineitem` | `MEDIUM` | `v1.1-unregistered` | 0 |
 | 2 | `M1b_AddMultiCol` | **Core** | `ADDITIVE` | `lineitem` | `MEDIUM` | `v1.2-unregistered` | 0 |
-| 3 | `M1c_AddCustomerPiiCol` | **Expanded** | `ADDITIVE` | `customer` | `HIGH` | `v1.1-unregistered-pii` | 0 |
+| 3 | `M1c_AddCustomerPiiCol` | **Expanded** | `ADDITIVE` | `customer` | `HIGH` | `v1.1-pii-leak` | 0 |
 | 4 | `M1d_AddOrdersShadowCol` | **Expanded** | `ADDITIVE` | `orders` | `MEDIUM` | `v1.1-unregistered` | 0 |
 | 5 | `M2a_DropNonKey` | **Core** | `DESTRUCTIVE` | `lineitem` | `CRITICAL` | `v2.0-breaking` | 600,000 |
 | 6 | `M2b_DropKeyCol` | **Core** | `DESTRUCTIVE` | `lineitem` | `CRITICAL` | `v2.0-breaking` | 600,000 |
@@ -20,28 +20,28 @@
 | 12 | `M3c_DateToVarchar` | **Core** | `TYPE_CHANGE` | `orders` | `HIGH` | `v2.0-type-drift` | 150,000 |
 | 13 | `M3d_CustomerAcctbalToVarchar` | **Expanded** | `TYPE_CHANGE` | `customer` | `HIGH` | `v2.0-type-drift` | 15,000 |
 | 14 | `M3e_OrdersCustkeyToVarchar` | **Expanded** | `TYPE_CHANGE` | `orders` | `CRITICAL` | `v2.0-type-drift` | 150,000 |
-| 15 | `M4a_NullAndNegative` | **Core** | `CONSTRAINT_BREACH` | `orders` | `HIGH` | `v1.0-constraint` | 30 |
-| 16 | `M4b_NullSmall` | **Core** | `CONSTRAINT_BREACH` | `orders` | `MEDIUM` | `v1.0-constraint` | 5 |
-| 17 | `M4c_DuplicateKeys` | **Core** | `CONSTRAINT_BREACH` | `orders` | `HIGH` | `v1.0-constraint` | 5 |
-| 18 | `M4d_LineitemNegativeQty` | **Expanded** | `CONSTRAINT_BREACH` | `lineitem` | `HIGH` | `v1.0-constraint` | 25 |
-| 19 | `M4e_CustomerDuplicateKeys` | **Expanded** | `CONSTRAINT_BREACH` | `customer` | `HIGH` | `v1.0-constraint` | 10 |
+| 15 | `M4a_NullAndNegative` | **Core** | `CONSTRAINT_BREACH` | `orders` | `HIGH` | `v1.0-row-fault` | 30 |
+| 16 | `M4b_NullSmall` | **Core** | `CONSTRAINT_BREACH` | `orders` | `MEDIUM` | `v1.0-row-fault` | 5 |
+| 17 | `M4c_DuplicateKeys` | **Core** | `CONSTRAINT_BREACH` | `orders` | `HIGH` | `v1.0-row-fault` | 5 |
+| 18 | `M4d_LineitemNegativeQty` | **Expanded** | `CONSTRAINT_BREACH` | `lineitem` | `HIGH` | `v1.0-row-fault` | 25 |
+| 19 | `M4e_CustomerDuplicateKeys` | **Expanded** | `CONSTRAINT_BREACH` | `customer` | `HIGH` | `v1.0-row-fault` | 10 |
 | 20 | `M5a_MULTIPLY_100` | **Core** | `SEMANTIC_DRIFT` | `lineitem` | `CRITICAL` | `v1.0-semantic` | 600,000 |
 | 21 | `M5b_MULTIPLY_1_5` | **Core** | `SEMANTIC_DRIFT` | `lineitem` | `HIGH` | `v1.0-semantic` | 600,000 |
 | 22 | `M5c_CATEGORICAL_SHIFT` | **Core** | `SEMANTIC_DRIFT` | `orders` | `HIGH` | `v1.0-semantic` | 10 |
-| 23 | `M5d_LineitemTaxSpike` | **Expanded** | `SEMANTIC_DRIFT` | `lineitem` | `CRITICAL` | `v1.0-semantic` | 600,000 |
-| 24 | `M5e_ShipmodeInvalidCode` | **Expanded** | `SEMANTIC_DRIFT` | `lineitem` | `MEDIUM` | `v1.0-semantic` | 15 |
+| 23 | `M5d_LineitemTaxSpike` | **Expanded** | `SEMANTIC_DRIFT` | `lineitem` | `CRITICAL` | `v1.0-stat-drift` | 600,000 |
+| 24 | `M5e_ShipmodeInvalidCode` | **Expanded** | `SEMANTIC_DRIFT` | `lineitem` | `MEDIUM` | `v1.0-domain-drift` | 15 |
 | 25 | `B1_AddColumn` | **Core** | `BENIGN` | `lineitem` | `BENIGN` | `v1.1-compatible` | 0 |
 | 26 | `B2_ValueInRange` | **Core** | `BENIGN` | `lineitem` | `BENIGN` | `v1.1-compatible` | 0 |
 | 27 | `B3_InsertRows` | **Core** | `BENIGN` | `orders` | `BENIGN` | `v1.1-compatible` | 0 |
-| 28 | `B4_ReorderCols` | **Expanded** | `BENIGN` | `orders` | `BENIGN` | `v1.1-compatible` | 0 |
+| 28 | `B4_ReorderCols` | **Expanded** | `BENIGN` | `orders` | `BENIGN` | `v1.1-reorder` | 0 |
 | 29 | `B5_AddValidStatus` | **Core** | `BENIGN` | `orders` | `BENIGN` | `v1.1-compatible` | 0 |
-| 30 | `B6_IncreasePrecision` | **Expanded** | `BENIGN` | `orders` | `BENIGN` | `v1.1-compatible` | 0 |
+| 30 | `B6_IncreasePrecision` | **Expanded** | `BENIGN` | `orders` | `BENIGN` | `v1.1-widening` | 0 |
 | 31 | `B7_LargeBatchInsert` | **Core** | `BENIGN` | `orders` | `BENIGN` | `v1.1-compatible` | 0 |
-| 32 | `B8_WhitespaceValues` | **Expanded** | `BENIGN` | `orders` | `BENIGN` | `v1.1-compatible` | 0 |
-| 33 | `B9_AddOrdersAuditCol` | **Expanded** | `BENIGN` | `orders` | `BENIGN` | `v1.1-compatible` | 0 |
-| 34 | `B10_AddCustomerAuditCol` | **Expanded** | `BENIGN` | `customer` | `BENIGN` | `v1.1-compatible` | 0 |
-| 35 | `B11_LineitemQuantityInRange` | **Expanded** | `BENIGN` | `lineitem` | `BENIGN` | `v1.1-compatible` | 0 |
-| 36 | `B12_CustomerAcctbalUpdate` | **Expanded** | `BENIGN` | `customer` | `BENIGN` | `v1.1-compatible` | 0 |
+| 32 | `B8_WhitespaceValues` | **Expanded** | `BENIGN` | `orders` | `BENIGN` | `v1.0-benign-data` | 0 |
+| 33 | `B9_AddOrdersAuditCol` | **Expanded** | `BENIGN` | `orders` | `BENIGN` | `v1.1-allowlisted` | 0 |
+| 34 | `B10_AddCustomerAuditCol` | **Expanded** | `BENIGN` | `customer` | `BENIGN` | `v1.1-allowlisted` | 0 |
+| 35 | `B11_QuantityInRange` | **Expanded** | `BENIGN` | `lineitem` | `BENIGN` | `v1.0-benign-data` | 0 |
+| 36 | `B12_CustomerBalUpdate` | **Expanded** | `BENIGN` | `customer` | `BENIGN` | `v1.0-benign-data` | 0 |
 
 ## 2. Kết Quả Kiểm Chứng Gate 1 Trên 17 Kịch Bản Mở Rộng Mới
 
@@ -62,5 +62,5 @@
 | `B8_WhitespaceValues` | Benign | `SUCCESS` | **False** | -1 | `NOT_DETECTED` | 0 | 0 | **PASS** |
 | `B9_AddOrdersAuditCol` | Benign | `SUCCESS` | **False** | -1 | `NOT_DETECTED` | 0 | 0 | **PASS** |
 | `B10_AddCustomerAuditCol` | Benign | `SUCCESS` | **False** | -1 | `NOT_DETECTED` | 0 | 0 | **PASS** |
-| `B11_LineitemQuantityInRange` | Benign | `SUCCESS` | **False** | -1 | `NOT_DETECTED` | 0 | 0 | **PASS** |
-| `B12_CustomerAcctbalUpdate` | Benign | `SUCCESS` | **False** | -1 | `NOT_DETECTED` | 0 | 0 | **PASS** |
+| `B11_QuantityInRange` | Benign | `SUCCESS` | **False** | -1 | `NOT_DETECTED` | 0 | 0 | **PASS** |
+| `B12_CustomerBalUpdate` | Benign | `SUCCESS` | **False** | -1 | `NOT_DETECTED` | 0 | 0 | **PASS** |

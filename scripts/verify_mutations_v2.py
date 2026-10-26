@@ -1,11 +1,11 @@
 """Verification script for MedalGuard Mutation Suite v2 (36 scenarios).
 
 Verifies:
-1. get_mutation_suite(sf=0.1, suite="core") returns exactly 14 harmful + 5 benign = 19 scenarios.
-2. get_mutation_suite(sf=0.1, suite="expanded") returns exactly 24 harmful + 12 benign = 36 scenarios.
+1. get_mutation_suite(sf=0.1, suite="core") returns exactly 19 scenarios (14 harmful + 5 benign).
+2. get_mutation_suite(sf=0.1, suite="expanded") returns exactly 36 scenarios (24 harmful + 12 benign).
 3. Prints complete 36-mutation catalog.
 4. Executes Gate 1 test on all 17 expanded mutations:
-   - 10 Harmful: all detected (quarantined or blocked).
+   - 10 Harmful: all detected (7 BLOCKED, 3 QUARANTINED).
    - 7 Benign: all pass (detected = False, FPR = 0%).
 5. Outputs results to results/summary/mutation_suite_v2_catalog.json and .md.
 """
@@ -32,26 +32,33 @@ def main():
     print("=" * 100)
 
     # 1. Verify suite counts
-    core_faults, core_benigns = get_mutation_suite(sf=sf, suite="core")
-    exp_faults, exp_benigns = get_mutation_suite(sf=sf, suite="expanded")
+    core_mutations = get_mutation_suite(sf=sf, suite="core")
+    exp_mutations = get_mutation_suite(sf=sf, suite="expanded")
+
+    core_faults = [m for m in core_mutations if m.category != "BENIGN"]
+    core_benigns = [m for m in core_mutations if m.category == "BENIGN"]
+    exp_faults = [m for m in exp_mutations if m.category != "BENIGN"]
+    exp_benigns = [m for m in exp_mutations if m.category == "BENIGN"]
 
     n_core_f, n_core_b = len(core_faults), len(core_benigns)
     n_exp_f, n_exp_b = len(exp_faults), len(exp_benigns)
 
     print(f"\n[1] SUITE COUNT VERIFICATION:")
-    print(f"  • Core Suite:     {n_core_f} Harmful + {n_core_b} Benign = {n_core_f + n_core_b} scenarios")
-    print(f"  • Expanded Suite: {n_exp_f} Harmful + {n_exp_b} Benign = {n_exp_f + n_exp_b} scenarios")
+    print(f"  • Core Suite:     {n_core_f} Harmful + {n_core_b} Benign = {len(core_mutations)} scenarios")
+    print(f"  • Expanded Suite: {n_exp_f} Harmful + {n_exp_b} Benign = {len(exp_mutations)} scenarios")
 
+    assert len(core_mutations) == 19, f"Core suite count mismatch: expected 19, got {len(core_mutations)}"
+    assert len(exp_mutations) == 36, f"Expanded suite count mismatch: expected 36, got {len(exp_mutations)}"
     assert (n_core_f, n_core_b) == (14, 5), f"Core suite mismatch: expected (14, 5), got ({n_core_f}, {n_core_b})"
     assert (n_exp_f, n_exp_b) == (24, 12), f"Expanded suite mismatch: expected (24, 12), got ({n_exp_f}, {n_exp_b})"
     print("  --> OK: Suite counts match specifications 100%!")
 
     # 2. Build 36-scenario Catalog
-    all_36 = exp_faults + exp_benigns
+    all_36 = exp_mutations
     catalog = []
     print("\n[2] COMPLETE 36-SCENARIO CATALOG:")
-    print(f"{'Idx':<4} {'Name':<28} {'Suite':<7} {'Category':<18} {'Target Table':<13} {'Severity':<9} {'Schema Ver':<18} {'Faults':<8}")
-    print("-" * 115)
+    print(f"{'Idx':<4} {'Name':<28} {'Suite':<7} {'Category':<18} {'Target Table':<13} {'Severity':<9} {'Schema Ver':<22} {'Faults':<8}")
+    print("-" * 120)
 
     for idx, m in enumerate(all_36, 1):
         suite_type = "Core" if m.is_core else "Expanded"
@@ -68,8 +75,8 @@ def main():
             "description": m.description,
         }
         catalog.append(cat_info)
-        print(f"{idx:<4} {m.name:<28} {suite_type:<7} {m.category:<18} {m.target_table:<13} {m.severity:<9} {m.schema_version:<18} {m.injected_fault_count:<8}")
-    print("-" * 115)
+        print(f"{idx:<4} {m.name:<28} {suite_type:<7} {m.category:<18} {m.target_table:<13} {m.severity:<9} {m.schema_version:<22} {m.injected_fault_count:<8}")
+    print("-" * 120)
 
     # 3. Test Gate 1 on 17 New Expanded Mutations
     expanded_17 = [m for m in all_36 if not m.is_core]
@@ -141,7 +148,12 @@ def main():
             res_tag = "PASS (Zero FP)" if is_valid else "FAIL (False Positive)"
         else:
             is_valid = detected
-            res_tag = "PASS (Detected)" if is_valid else "FAIL (Undetected)"
+            if status == "BLOCKED":
+                res_tag = "PASS (Blocked)"
+            elif quarantined_total > 0:
+                res_tag = "PASS (Quarantined)"
+            else:
+                res_tag = "PASS (Detected)" if is_valid else "FAIL (Undetected)"
 
         m_type = "Benign" if is_benign else "Harmful"
         print(f"{m.name:<28} {m_type:<7} {status:<9} {detected!s:<6} {ddi:<5} {stage:<15} {quarantined_total:<7} {violations_total:<11} {res_tag}")
@@ -173,6 +185,30 @@ def main():
 
     assert harmful_detected == harmful_total, f"Not all harmful mutations detected: {harmful_detected}/{harmful_total}"
     assert benign_passed == benign_total, f"Some benign mutations triggered false positives: {benign_passed}/{benign_total}"
+
+    # Specific assertion checks requested by GVHD:
+    # 7 Blocked harmful: M1c, M1d, M2d, M2e, M3d, M3e, M5d
+    for blocked_name in ["M1c_AddCustomerPiiCol", "M1d_AddOrdersShadowCol", "M2d_DropCustomerNationKey",
+                         "M2e_RenameOrdersPriority", "M3d_CustomerAcctbalToVarchar",
+                         "M3e_OrdersCustkeyToVarchar", "M5d_LineitemTaxSpike"]:
+        r = next(item for item in test_results if item["name"] == blocked_name)
+        assert r["status"] == "BLOCKED" and r["detected"] is True, f"{blocked_name} should be BLOCKED at Gate 1"
+
+    # 3 Quarantined harmful: M4d (25 rows), M4e (10 rows), M5e (15 rows)
+    r_m4d = next(item for item in test_results if item["name"] == "M4d_LineitemNegativeQty")
+    assert r_m4d["quarantined_rows"] == 25 and r_m4d["status"] == "SUCCESS", f"M4d quarantined rows expected 25, got {r_m4d['quarantined_rows']}"
+
+    r_m4e = next(item for item in test_results if item["name"] == "M4e_CustomerDuplicateKeys")
+    assert r_m4e["quarantined_rows"] == 10 and r_m4e["status"] == "SUCCESS", f"M4e quarantined rows expected 10, got {r_m4e['quarantined_rows']}"
+
+    r_m5e = next(item for item in test_results if item["name"] == "M5e_ShipmodeInvalidCode")
+    assert r_m5e["quarantined_rows"] == 15 and r_m5e["status"] == "SUCCESS", f"M5e quarantined rows expected 15, got {r_m5e['quarantined_rows']}"
+
+    # 7 Benign: all detected == False
+    for b_item in test_results:
+        if b_item["is_benign"]:
+            assert b_item["detected"] is False and b_item["violations_count"] == 0, f"Benign {b_item['name']} triggered violation"
+
     print("  --> ALL 17 EXPANDED SCENARIOS PASSED VERIFICATION 100%!")
 
     # 5. Save Catalog and Verification Outputs
@@ -183,8 +219,8 @@ def main():
     with open(json_path, "w", encoding="utf-8") as f:
         json.dump({
             "total_scenarios": len(catalog),
-            "core_scenarios": n_core_f + n_core_b,
-            "expanded_scenarios": n_exp_f + n_exp_b,
+            "core_scenarios": len(core_mutations),
+            "expanded_scenarios": len(exp_mutations),
             "harmful_count": n_exp_f,
             "benign_count": n_exp_b,
             "catalog": catalog,

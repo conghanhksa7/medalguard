@@ -7,7 +7,7 @@ from mutations.base import BaseMutation
 
 
 class B1_AddColumn(BaseMutation):
-    """Add a legitimate comment column (additive, valid with strict_columns=false)."""
+    """Add a legitimate comment column (additive, valid with strict_columns=false or allowed_extra)."""
 
     @property
     def description(self):
@@ -134,7 +134,7 @@ class B3_InsertRows(BaseMutation):
     def apply(self, con):
         con.execute("CREATE TABLE IF NOT EXISTS source._orders_backup AS SELECT * FROM source.orders")
         max_key = con.execute("SELECT MAX(o_orderkey) FROM source.orders").fetchone()[0]
-        n = int(100 * self.sf)
+        n = 100
         con.execute(f"""
             INSERT INTO source.orders
             SELECT
@@ -161,7 +161,7 @@ class B3_InsertRows(BaseMutation):
 
 
 class B4_ReorderCols(BaseMutation):
-    """Reorder columns in source — should not affect output."""
+    """Reorder columns physically in orders table."""
 
     @property
     def description(self):
@@ -177,7 +177,7 @@ class B4_ReorderCols(BaseMutation):
 
     @property
     def schema_version(self) -> str:
-        return "v1.1-compatible"
+        return "v1.1-reorder"
 
     @property
     def target_table(self) -> str:
@@ -264,7 +264,7 @@ class B5_AddValidStatus(BaseMutation):
 
 
 class B6_IncreasePrecision(BaseMutation):
-    """Change DECIMAL precision (widening — should be compatible)."""
+    """Widen o_totalprice precision to DECIMAL(18,4) in orders."""
 
     @property
     def description(self):
@@ -280,7 +280,7 @@ class B6_IncreasePrecision(BaseMutation):
 
     @property
     def schema_version(self) -> str:
-        return "v1.1-compatible"
+        return "v1.1-widening"
 
     @property
     def target_table(self) -> str:
@@ -364,7 +364,7 @@ class B7_LargeBatchInsert(BaseMutation):
 
 
 class B8_WhitespaceValues(BaseMutation):
-    """Add trailing spaces to VARCHAR columns — edge case test."""
+    """Add trailing spaces to o_comment in 50 rows of orders."""
 
     @property
     def description(self):
@@ -380,7 +380,7 @@ class B8_WhitespaceValues(BaseMutation):
 
     @property
     def schema_version(self) -> str:
-        return "v1.1-compatible"
+        return "v1.0-benign-data"
 
     @property
     def target_table(self) -> str:
@@ -429,7 +429,7 @@ class B9_AddOrdersAuditCol(BaseMutation):
 
     @property
     def schema_version(self) -> str:
-        return "v1.1-compatible"
+        return "v1.1-allowlisted"
 
     @property
     def target_table(self) -> str:
@@ -473,7 +473,7 @@ class B10_AddCustomerAuditCol(BaseMutation):
 
     @property
     def schema_version(self) -> str:
-        return "v1.1-compatible"
+        return "v1.1-allowlisted"
 
     @property
     def target_table(self) -> str:
@@ -488,7 +488,7 @@ class B10_AddCustomerAuditCol(BaseMutation):
         return 0
 
     def apply(self, con):
-        con.execute("ALTER TABLE source.customer ADD COLUMN c_internal_note VARCHAR DEFAULT 'verified'")
+        con.execute("ALTER TABLE source.customer ADD COLUMN c_internal_note VARCHAR DEFAULT 'kyc-verified'")
         self.applied = True
 
     def revert(self, con):
@@ -500,12 +500,12 @@ class B10_AddCustomerAuditCol(BaseMutation):
             self.applied = False
 
 
-class B11_LineitemQuantityInRange(BaseMutation):
-    """Update l_quantity = 26 for 200 rows in lineitem (valid range [1, 50])."""
+class B11_QuantityInRange(BaseMutation):
+    """Adjust l_quantity = 26.0 on first 50 rows of lineitem (valid range [1, 50])."""
 
     @property
     def description(self):
-        return "Update l_quantity = 26 for 200 rows in lineitem (valid range [1, 50])"
+        return "Update l_quantity = 26.0 for 50 rows in lineitem (valid range [1, 50])"
 
     @property
     def category(self):
@@ -517,7 +517,7 @@ class B11_LineitemQuantityInRange(BaseMutation):
 
     @property
     def schema_version(self) -> str:
-        return "v1.1-compatible"
+        return "v1.0-benign-data"
 
     @property
     def target_table(self) -> str:
@@ -536,7 +536,7 @@ class B11_LineitemQuantityInRange(BaseMutation):
         con.execute("""
             CREATE OR REPLACE TEMP TABLE _b11_keys AS
             SELECT l_orderkey, l_linenumber FROM source.lineitem
-            ORDER BY l_orderkey, l_linenumber LIMIT 200
+            ORDER BY l_orderkey, l_linenumber LIMIT 50
         """)
         con.execute("""
             UPDATE source.lineitem
@@ -553,12 +553,12 @@ class B11_LineitemQuantityInRange(BaseMutation):
             self.applied = False
 
 
-class B12_CustomerAcctbalUpdate(BaseMutation):
-    """Update c_acctbal = c_acctbal + 10.0 for 50 rows in customer."""
+class B12_CustomerBalUpdate(BaseMutation):
+    """Update c_acctbal = 2500.00 for first 50 rows in customer (valid range [-1000, 10000])."""
 
     @property
     def description(self):
-        return "Update c_acctbal = c_acctbal + 10.0 for 50 rows in customer"
+        return "Update c_acctbal = 2500.00 for 50 rows in customer (valid range [-1000, 10000])"
 
     @property
     def category(self):
@@ -570,7 +570,7 @@ class B12_CustomerAcctbalUpdate(BaseMutation):
 
     @property
     def schema_version(self) -> str:
-        return "v1.1-compatible"
+        return "v1.0-benign-data"
 
     @property
     def target_table(self) -> str:
@@ -593,7 +593,7 @@ class B12_CustomerAcctbalUpdate(BaseMutation):
         """)
         con.execute("""
             UPDATE source.customer
-            SET c_acctbal = c_acctbal + 10.0
+            SET c_acctbal = 2500.00
             WHERE c_custkey IN (SELECT c_custkey FROM _b12_keys)
         """)
         con.execute("DROP TABLE IF EXISTS _b12_keys")
@@ -604,3 +604,8 @@ class B12_CustomerAcctbalUpdate(BaseMutation):
             con.execute("DROP TABLE IF EXISTS source.customer")
             con.execute("ALTER TABLE source._customer_backup RENAME TO customer")
             self.applied = False
+
+
+# Aliases for backward compatibility
+B11_LineitemQuantityInRange = B11_QuantityInRange
+B12_CustomerAcctbalUpdate = B12_CustomerBalUpdate

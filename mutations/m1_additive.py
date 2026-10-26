@@ -118,7 +118,7 @@ class M1c_AddCustomerPiiCol(BaseMutation):
 
     @property
     def description(self):
-        return "Add unregistered sensitive column c_tax_ssn VARCHAR to customer"
+        return "Add unregistered PII column c_tax_ssn VARCHAR(20) to customer"
 
     @property
     def category(self):
@@ -130,7 +130,7 @@ class M1c_AddCustomerPiiCol(BaseMutation):
 
     @property
     def schema_version(self) -> str:
-        return "v1.1-unregistered-pii"
+        return "v1.1-pii-leak"
 
     @property
     def target_table(self) -> str:
@@ -145,7 +145,7 @@ class M1c_AddCustomerPiiCol(BaseMutation):
         return 0
 
     def apply(self, con):
-        con.execute("ALTER TABLE source.customer ADD COLUMN c_tax_ssn VARCHAR DEFAULT 'SSN-REDACTED'")
+        con.execute("ALTER TABLE source.customer ADD COLUMN c_tax_ssn VARCHAR(20) DEFAULT 'XXX-XX-0000'")
         self.applied = True
 
     def revert(self, con):
@@ -158,11 +158,11 @@ class M1c_AddCustomerPiiCol(BaseMutation):
 
 
 class M1d_AddOrdersShadowCol(BaseMutation):
-    """Add unregistered debug column o_debug_payload to orders."""
+    """Add unregistered debug/shadow column o_debug_payload to orders."""
 
     @property
     def description(self):
-        return "Add unregistered column o_debug_payload VARCHAR to orders"
+        return "Add unregistered shadow column o_debug_payload VARCHAR to orders"
 
     @property
     def category(self):
@@ -189,7 +189,7 @@ class M1d_AddOrdersShadowCol(BaseMutation):
         return 0
 
     def apply(self, con):
-        con.execute("ALTER TABLE source.orders ADD COLUMN o_debug_payload VARCHAR DEFAULT 'DBG_01'")
+        con.execute("ALTER TABLE source.orders ADD COLUMN o_debug_payload VARCHAR DEFAULT '{\"debug\":true}'")
         self.applied = True
 
     def revert(self, con):

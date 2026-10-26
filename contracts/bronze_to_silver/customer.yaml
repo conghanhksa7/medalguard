@@ -22,6 +22,8 @@ columns:
     type: VARCHAR
   - name: c_acctbal
     type: DOUBLE
+    min_value: -1000.0
+    max_value: 10000.0
   - name: c_mktsegment
     type: VARCHAR
   - name: c_comment
@@ -30,3 +32,6 @@ columns:
 quality_rules:
   - rule: row_count
     min: 1
+  - rule: null_rate
+    column: c_nationkey
+    max: 0.0
