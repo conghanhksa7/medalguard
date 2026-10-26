@@ -18,6 +18,22 @@ class B1_AddColumn(BaseMutation):
         return "BENIGN"
 
     @property
+    def severity(self) -> str:
+        return "BENIGN"
+
+    @property
+    def schema_version(self) -> str:
+        return "v1.1-compatible"
+
+    @property
+    def target_table(self) -> str:
+        return "lineitem"
+
+    @property
+    def is_core(self) -> bool:
+        return True
+
+    @property
     def injected_fault_count(self):
         return 0
 
@@ -49,11 +65,27 @@ class B2_ValueInRange(BaseMutation):
         return "BENIGN"
 
     @property
+    def severity(self) -> str:
+        return "BENIGN"
+
+    @property
+    def schema_version(self) -> str:
+        return "v1.1-compatible"
+
+    @property
+    def target_table(self) -> str:
+        return "lineitem"
+
+    @property
+    def is_core(self) -> bool:
+        return True
+
+    @property
     def injected_fault_count(self):
         return 0
 
     def apply(self, con):
-        # Set some discounts to 0.08 (within [0.0, 0.10])
+        con.execute("CREATE TABLE IF NOT EXISTS source._lineitem_backup AS SELECT * FROM source.lineitem")
         con.execute("""
             UPDATE source.lineitem
             SET l_discount = 0.08
@@ -63,8 +95,8 @@ class B2_ValueInRange(BaseMutation):
 
     def revert(self, con):
         if self.applied:
-            con.execute("LOAD tpch;")
-            con.execute(f"CALL dbgen(sf={self.sf}, schema='source', overwrite=true)")
+            con.execute("DROP TABLE IF EXISTS source.lineitem")
+            con.execute("ALTER TABLE source._lineitem_backup RENAME TO lineitem")
             self.applied = False
 
 
@@ -80,10 +112,27 @@ class B3_InsertRows(BaseMutation):
         return "BENIGN"
 
     @property
+    def severity(self) -> str:
+        return "BENIGN"
+
+    @property
+    def schema_version(self) -> str:
+        return "v1.1-compatible"
+
+    @property
+    def target_table(self) -> str:
+        return "orders"
+
+    @property
+    def is_core(self) -> bool:
+        return True
+
+    @property
     def injected_fault_count(self):
         return 0
 
     def apply(self, con):
+        con.execute("CREATE TABLE IF NOT EXISTS source._orders_backup AS SELECT * FROM source.orders")
         max_key = con.execute("SELECT MAX(o_orderkey) FROM source.orders").fetchone()[0]
         n = int(100 * self.sf)
         con.execute(f"""
@@ -106,8 +155,8 @@ class B3_InsertRows(BaseMutation):
 
     def revert(self, con):
         if self.applied:
-            con.execute("LOAD tpch;")
-            con.execute(f"CALL dbgen(sf={self.sf}, schema='source', overwrite=true)")
+            con.execute("DROP TABLE IF EXISTS source.orders")
+            con.execute("ALTER TABLE source._orders_backup RENAME TO orders")
             self.applied = False
 
 
@@ -121,6 +170,22 @@ class B4_ReorderCols(BaseMutation):
     @property
     def category(self):
         return "BENIGN"
+
+    @property
+    def severity(self) -> str:
+        return "BENIGN"
+
+    @property
+    def schema_version(self) -> str:
+        return "v1.1-compatible"
+
+    @property
+    def target_table(self) -> str:
+        return "orders"
+
+    @property
+    def is_core(self) -> bool:
+        return False
 
     @property
     def injected_fault_count(self):
@@ -157,10 +222,27 @@ class B5_AddValidStatus(BaseMutation):
         return "BENIGN"
 
     @property
+    def severity(self) -> str:
+        return "BENIGN"
+
+    @property
+    def schema_version(self) -> str:
+        return "v1.1-compatible"
+
+    @property
+    def target_table(self) -> str:
+        return "orders"
+
+    @property
+    def is_core(self) -> bool:
+        return True
+
+    @property
     def injected_fault_count(self):
         return 0
 
     def apply(self, con):
+        con.execute("CREATE TABLE IF NOT EXISTS source._orders_backup AS SELECT * FROM source.orders")
         max_key = con.execute("SELECT MAX(o_orderkey) FROM source.orders").fetchone()[0]
         con.execute(f"""
             INSERT INTO source.orders
@@ -176,8 +258,8 @@ class B5_AddValidStatus(BaseMutation):
 
     def revert(self, con):
         if self.applied:
-            con.execute("LOAD tpch;")
-            con.execute(f"CALL dbgen(sf={self.sf}, schema='source', overwrite=true)")
+            con.execute("DROP TABLE IF EXISTS source.orders")
+            con.execute("ALTER TABLE source._orders_backup RENAME TO orders")
             self.applied = False
 
 
@@ -193,11 +275,26 @@ class B6_IncreasePrecision(BaseMutation):
         return "BENIGN"
 
     @property
+    def severity(self) -> str:
+        return "BENIGN"
+
+    @property
+    def schema_version(self) -> str:
+        return "v1.1-compatible"
+
+    @property
+    def target_table(self) -> str:
+        return "orders"
+
+    @property
+    def is_core(self) -> bool:
+        return False
+
+    @property
     def injected_fault_count(self):
         return 0
 
     def apply(self, con):
-        # DuckDB handles precision widening gracefully
         con.execute("CREATE TABLE IF NOT EXISTS source._orders_backup AS SELECT * FROM source.orders")
         con.execute("""
             CREATE OR REPLACE TABLE source.orders AS
@@ -227,10 +324,27 @@ class B7_LargeBatchInsert(BaseMutation):
         return "BENIGN"
 
     @property
+    def severity(self) -> str:
+        return "BENIGN"
+
+    @property
+    def schema_version(self) -> str:
+        return "v1.1-compatible"
+
+    @property
+    def target_table(self) -> str:
+        return "orders"
+
+    @property
+    def is_core(self) -> bool:
+        return True
+
+    @property
     def injected_fault_count(self):
         return 0
 
     def apply(self, con):
+        con.execute("CREATE TABLE IF NOT EXISTS source._orders_backup AS SELECT * FROM source.orders")
         max_key = con.execute("SELECT MAX(o_orderkey) FROM source.orders").fetchone()[0]
         con.execute(f"""
             INSERT INTO source.orders
@@ -244,8 +358,8 @@ class B7_LargeBatchInsert(BaseMutation):
 
     def revert(self, con):
         if self.applied:
-            con.execute("LOAD tpch;")
-            con.execute(f"CALL dbgen(sf={self.sf}, schema='source', overwrite=true)")
+            con.execute("DROP TABLE IF EXISTS source.orders")
+            con.execute("ALTER TABLE source._orders_backup RENAME TO orders")
             self.applied = False
 
 
@@ -254,19 +368,34 @@ class B8_WhitespaceValues(BaseMutation):
 
     @property
     def description(self):
-        return "Add trailing spaces to o_orderstatus (still valid values)"
+        return "Add trailing spaces to o_comment (still valid values)"
 
     @property
     def category(self):
         return "BENIGN"
 
     @property
+    def severity(self) -> str:
+        return "BENIGN"
+
+    @property
+    def schema_version(self) -> str:
+        return "v1.1-compatible"
+
+    @property
+    def target_table(self) -> str:
+        return "orders"
+
+    @property
+    def is_core(self) -> bool:
+        return False
+
+    @property
     def injected_fault_count(self):
         return 0
 
     def apply(self, con):
-        # Note: This MAY trigger allowed_values check if trimming is not done
-        # That would be a legitimate false positive to report
+        con.execute("CREATE TABLE IF NOT EXISTS source._orders_backup AS SELECT * FROM source.orders")
         con.execute("""
             UPDATE source.orders
             SET o_comment = o_comment || '   '
@@ -278,6 +407,200 @@ class B8_WhitespaceValues(BaseMutation):
 
     def revert(self, con):
         if self.applied:
-            con.execute("LOAD tpch;")
-            con.execute(f"CALL dbgen(sf={self.sf}, schema='source', overwrite=true)")
+            con.execute("DROP TABLE IF EXISTS source.orders")
+            con.execute("ALTER TABLE source._orders_backup RENAME TO orders")
+            self.applied = False
+
+
+class B9_AddOrdersAuditCol(BaseMutation):
+    """Add allowed extra column o_internal_note to orders."""
+
+    @property
+    def description(self):
+        return "Add allowed extra column o_internal_note VARCHAR to orders"
+
+    @property
+    def category(self):
+        return "BENIGN"
+
+    @property
+    def severity(self) -> str:
+        return "BENIGN"
+
+    @property
+    def schema_version(self) -> str:
+        return "v1.1-compatible"
+
+    @property
+    def target_table(self) -> str:
+        return "orders"
+
+    @property
+    def is_core(self) -> bool:
+        return False
+
+    @property
+    def injected_fault_count(self):
+        return 0
+
+    def apply(self, con):
+        con.execute("ALTER TABLE source.orders ADD COLUMN o_internal_note VARCHAR DEFAULT 'audit-ok'")
+        self.applied = True
+
+    def revert(self, con):
+        if self.applied:
+            try:
+                con.execute("ALTER TABLE source.orders DROP COLUMN o_internal_note")
+            except Exception:
+                pass
+            self.applied = False
+
+
+class B10_AddCustomerAuditCol(BaseMutation):
+    """Add allowed extra column c_internal_note to customer."""
+
+    @property
+    def description(self):
+        return "Add allowed extra column c_internal_note VARCHAR to customer"
+
+    @property
+    def category(self):
+        return "BENIGN"
+
+    @property
+    def severity(self) -> str:
+        return "BENIGN"
+
+    @property
+    def schema_version(self) -> str:
+        return "v1.1-compatible"
+
+    @property
+    def target_table(self) -> str:
+        return "customer"
+
+    @property
+    def is_core(self) -> bool:
+        return False
+
+    @property
+    def injected_fault_count(self):
+        return 0
+
+    def apply(self, con):
+        con.execute("ALTER TABLE source.customer ADD COLUMN c_internal_note VARCHAR DEFAULT 'verified'")
+        self.applied = True
+
+    def revert(self, con):
+        if self.applied:
+            try:
+                con.execute("ALTER TABLE source.customer DROP COLUMN c_internal_note")
+            except Exception:
+                pass
+            self.applied = False
+
+
+class B11_LineitemQuantityInRange(BaseMutation):
+    """Update l_quantity = 26 for 200 rows in lineitem (valid range [1, 50])."""
+
+    @property
+    def description(self):
+        return "Update l_quantity = 26 for 200 rows in lineitem (valid range [1, 50])"
+
+    @property
+    def category(self):
+        return "BENIGN"
+
+    @property
+    def severity(self) -> str:
+        return "BENIGN"
+
+    @property
+    def schema_version(self) -> str:
+        return "v1.1-compatible"
+
+    @property
+    def target_table(self) -> str:
+        return "lineitem"
+
+    @property
+    def is_core(self) -> bool:
+        return False
+
+    @property
+    def injected_fault_count(self):
+        return 0
+
+    def apply(self, con):
+        con.execute("CREATE TABLE IF NOT EXISTS source._lineitem_backup AS SELECT * FROM source.lineitem")
+        con.execute("""
+            CREATE OR REPLACE TEMP TABLE _b11_keys AS
+            SELECT l_orderkey, l_linenumber FROM source.lineitem
+            ORDER BY l_orderkey, l_linenumber LIMIT 200
+        """)
+        con.execute("""
+            UPDATE source.lineitem
+            SET l_quantity = 26.0
+            WHERE (l_orderkey, l_linenumber) IN (SELECT l_orderkey, l_linenumber FROM _b11_keys)
+        """)
+        con.execute("DROP TABLE IF EXISTS _b11_keys")
+        self.applied = True
+
+    def revert(self, con):
+        if self.applied:
+            con.execute("DROP TABLE IF EXISTS source.lineitem")
+            con.execute("ALTER TABLE source._lineitem_backup RENAME TO lineitem")
+            self.applied = False
+
+
+class B12_CustomerAcctbalUpdate(BaseMutation):
+    """Update c_acctbal = c_acctbal + 10.0 for 50 rows in customer."""
+
+    @property
+    def description(self):
+        return "Update c_acctbal = c_acctbal + 10.0 for 50 rows in customer"
+
+    @property
+    def category(self):
+        return "BENIGN"
+
+    @property
+    def severity(self) -> str:
+        return "BENIGN"
+
+    @property
+    def schema_version(self) -> str:
+        return "v1.1-compatible"
+
+    @property
+    def target_table(self) -> str:
+        return "customer"
+
+    @property
+    def is_core(self) -> bool:
+        return False
+
+    @property
+    def injected_fault_count(self):
+        return 0
+
+    def apply(self, con):
+        con.execute("CREATE TABLE IF NOT EXISTS source._customer_backup AS SELECT * FROM source.customer")
+        con.execute("""
+            CREATE OR REPLACE TEMP TABLE _b12_keys AS
+            SELECT c_custkey FROM source.customer
+            ORDER BY c_custkey LIMIT 50
+        """)
+        con.execute("""
+            UPDATE source.customer
+            SET c_acctbal = c_acctbal + 10.0
+            WHERE c_custkey IN (SELECT c_custkey FROM _b12_keys)
+        """)
+        con.execute("DROP TABLE IF EXISTS _b12_keys")
+        self.applied = True
+
+    def revert(self, con):
+        if self.applied:
+            con.execute("DROP TABLE IF EXISTS source.customer")
+            con.execute("ALTER TABLE source._customer_backup RENAME TO customer")
             self.applied = False

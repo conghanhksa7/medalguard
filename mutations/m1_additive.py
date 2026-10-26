@@ -17,6 +17,22 @@ class M1a_AddSingleCol(BaseMutation):
     def injected_fault_count(self):
         return 0  # Additive is not inherently faulty
 
+    @property
+    def severity(self) -> str:
+        return "MEDIUM"
+
+    @property
+    def schema_version(self) -> str:
+        return "v1.1-unregistered"
+
+    @property
+    def target_table(self) -> str:
+        return "lineitem"
+
+    @property
+    def is_core(self) -> bool:
+        return True
+
     def apply(self, con):
         con.execute("""
             ALTER TABLE source.lineitem
@@ -56,6 +72,22 @@ class M1b_AddMultiCol(BaseMutation):
     def injected_fault_count(self):
         return 0
 
+    @property
+    def severity(self) -> str:
+        return "MEDIUM"
+
+    @property
+    def schema_version(self) -> str:
+        return "v1.2-unregistered"
+
+    @property
+    def target_table(self) -> str:
+        return "lineitem"
+
+    @property
+    def is_core(self) -> bool:
+        return True
+
     def apply(self, con):
         con.execute("""
             ALTER TABLE source.lineitem
@@ -78,4 +110,92 @@ class M1b_AddMultiCol(BaseMutation):
                     con.execute(f"ALTER TABLE source.lineitem DROP COLUMN {col}")
                 except Exception:
                     pass
+            self.applied = False
+
+
+class M1c_AddCustomerPiiCol(BaseMutation):
+    """Add unregistered sensitive PII column c_tax_ssn to customer."""
+
+    @property
+    def description(self):
+        return "Add unregistered sensitive column c_tax_ssn VARCHAR to customer"
+
+    @property
+    def category(self):
+        return "ADDITIVE"
+
+    @property
+    def severity(self) -> str:
+        return "HIGH"
+
+    @property
+    def schema_version(self) -> str:
+        return "v1.1-unregistered-pii"
+
+    @property
+    def target_table(self) -> str:
+        return "customer"
+
+    @property
+    def is_core(self) -> bool:
+        return False
+
+    @property
+    def injected_fault_count(self):
+        return 0
+
+    def apply(self, con):
+        con.execute("ALTER TABLE source.customer ADD COLUMN c_tax_ssn VARCHAR DEFAULT 'SSN-REDACTED'")
+        self.applied = True
+
+    def revert(self, con):
+        if self.applied:
+            try:
+                con.execute("ALTER TABLE source.customer DROP COLUMN c_tax_ssn")
+            except Exception:
+                pass
+            self.applied = False
+
+
+class M1d_AddOrdersShadowCol(BaseMutation):
+    """Add unregistered debug column o_debug_payload to orders."""
+
+    @property
+    def description(self):
+        return "Add unregistered column o_debug_payload VARCHAR to orders"
+
+    @property
+    def category(self):
+        return "ADDITIVE"
+
+    @property
+    def severity(self) -> str:
+        return "MEDIUM"
+
+    @property
+    def schema_version(self) -> str:
+        return "v1.1-unregistered"
+
+    @property
+    def target_table(self) -> str:
+        return "orders"
+
+    @property
+    def is_core(self) -> bool:
+        return False
+
+    @property
+    def injected_fault_count(self):
+        return 0
+
+    def apply(self, con):
+        con.execute("ALTER TABLE source.orders ADD COLUMN o_debug_payload VARCHAR DEFAULT 'DBG_01'")
+        self.applied = True
+
+    def revert(self, con):
+        if self.applied:
+            try:
+                con.execute("ALTER TABLE source.orders DROP COLUMN o_debug_payload")
+            except Exception:
+                pass
             self.applied = False

@@ -609,3 +609,530 @@ ground_truth:
       detection_stage: NOT_DETECTED
       pipeline_status: SUCCESS
       measurement_type: MEASURED
+  M1c_AddCustomerPiiCol:
+    C0:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C1:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C2:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C3:
+      detected: true
+      blast_radius: 0.0
+      detection_stage: BRONZE
+      pipeline_status: BLOCKED
+      measurement_type: ASSIGNED_BLOCK
+    C3_standalone:
+      detected: true
+      blast_radius: 0.0
+      detection_stage: BRONZE
+      pipeline_status: BLOCKED
+      measurement_type: ASSIGNED_BLOCK
+  M1d_AddOrdersShadowCol:
+    C0:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C1:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C2:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C3:
+      detected: true
+      blast_radius: 0.0
+      detection_stage: BRONZE
+      pipeline_status: BLOCKED
+      measurement_type: ASSIGNED_BLOCK
+    C3_standalone:
+      detected: true
+      blast_radius: 0.0
+      detection_stage: BRONZE
+      pipeline_status: BLOCKED
+      measurement_type: ASSIGNED_BLOCK
+  M2d_DropCustomerNationKey:
+    C0:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: CRASH
+      measurement_type: ASSIGNED_CRASH
+    C1:
+      detected: true
+      blast_radius: 0.0
+      detection_stage: SILVER
+      pipeline_status: BLOCKED
+      measurement_type: ASSIGNED_BLOCK
+    C2:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: CRASH
+      measurement_type: ASSIGNED_CRASH
+    C3:
+      detected: true
+      blast_radius: 0.0
+      detection_stage: BRONZE
+      pipeline_status: BLOCKED
+      measurement_type: ASSIGNED_BLOCK
+    C3_standalone:
+      detected: true
+      blast_radius: 0.0
+      detection_stage: BRONZE
+      pipeline_status: BLOCKED
+      measurement_type: ASSIGNED_BLOCK
+  M2e_RenameOrdersPriority:
+    C0:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: CRASH
+      measurement_type: ASSIGNED_CRASH
+    C1:
+      detected: true
+      blast_radius: 0.0
+      detection_stage: SILVER
+      pipeline_status: BLOCKED
+      measurement_type: ASSIGNED_BLOCK
+    C2:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: CRASH
+      measurement_type: ASSIGNED_CRASH
+    C3:
+      detected: true
+      blast_radius: 0.0
+      detection_stage: BRONZE
+      pipeline_status: BLOCKED
+      measurement_type: ASSIGNED_BLOCK
+    C3_standalone:
+      detected: true
+      blast_radius: 0.0
+      detection_stage: BRONZE
+      pipeline_status: BLOCKED
+      measurement_type: ASSIGNED_BLOCK
+  M3d_CustomerAcctbalToVarchar:
+    C0:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C1:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C2:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C3:
+      detected: true
+      blast_radius: 0.0
+      detection_stage: BRONZE
+      pipeline_status: BLOCKED
+      measurement_type: ASSIGNED_BLOCK
+    C3_standalone:
+      detected: true
+      blast_radius: 0.0
+      detection_stage: BRONZE
+      pipeline_status: BLOCKED
+      measurement_type: ASSIGNED_BLOCK
+  M3e_OrdersCustkeyToVarchar:
+    C0:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C1:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C2:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C3:
+      detected: true
+      blast_radius: 0.0
+      detection_stage: BRONZE
+      pipeline_status: BLOCKED
+      measurement_type: ASSIGNED_BLOCK
+    C3_standalone:
+      detected: true
+      blast_radius: 0.0
+      detection_stage: BRONZE
+      pipeline_status: BLOCKED
+      measurement_type: ASSIGNED_BLOCK
+  M4d_LineitemNegativeQty:
+    C0:
+      detected: false
+      blast_radius: 0.9211
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C1:
+      detected: false
+      blast_radius: 0.9211
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C2:
+      detected: true
+      blast_radius: 0.0
+      detection_stage: POST_TRANSFORM
+      pipeline_status: BLOCKED
+      measurement_type: ASSIGNED_BLOCK
+    C3:
+      detected: true
+      blast_radius: 0.0
+      detection_stage: BRONZE
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C3_standalone:
+      detected: true
+      blast_radius: 0.0
+      detection_stage: BRONZE
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+  M4e_CustomerDuplicateKeys:
+    C0:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C1:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C2:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C3:
+      detected: true
+      blast_radius: 0.0
+      detection_stage: BRONZE
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C3_standalone:
+      detected: true
+      blast_radius: 0.0
+      detection_stage: BRONZE
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+  M5d_LineitemTaxSpike:
+    C0:
+      detected: false
+      blast_radius: 0.9211
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C1:
+      detected: false
+      blast_radius: 0.9211
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C2:
+      detected: true
+      blast_radius: 0.0
+      detection_stage: POST_TRANSFORM
+      pipeline_status: BLOCKED
+      measurement_type: ASSIGNED_BLOCK
+    C3:
+      detected: true
+      blast_radius: 0.0
+      detection_stage: BRONZE
+      pipeline_status: BLOCKED
+      measurement_type: ASSIGNED_BLOCK
+    C3_standalone:
+      detected: true
+      blast_radius: 0.0
+      detection_stage: BRONZE
+      pipeline_status: BLOCKED
+      measurement_type: ASSIGNED_BLOCK
+  M5e_ShipmodeInvalidCode:
+    C0:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C1:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C2:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C3:
+      detected: true
+      blast_radius: 0.0
+      detection_stage: BRONZE
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C3_standalone:
+      detected: true
+      blast_radius: 0.0
+      detection_stage: BRONZE
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+  B4_ReorderCols:
+    C0:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C1:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C2:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C3:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C3_standalone:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+  B6_IncreasePrecision:
+    C0:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C1:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C2:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C3:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C3_standalone:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+  B8_WhitespaceValues:
+    C0:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C1:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C2:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C3:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C3_standalone:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+  B9_AddOrdersAuditCol:
+    C0:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C1:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C2:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C3:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C3_standalone:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+  B10_AddCustomerAuditCol:
+    C0:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C1:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C2:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C3:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C3_standalone:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+  B11_LineitemQuantityInRange:
+    C0:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C1:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C2:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C3:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C3_standalone:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+  B12_CustomerAcctbalUpdate:
+    C0:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C1:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C2:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C3:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED
+    C3_standalone:
+      detected: false
+      blast_radius: 0.0
+      detection_stage: NOT_DETECTED
+      pipeline_status: SUCCESS
+      measurement_type: MEASURED

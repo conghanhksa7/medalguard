@@ -14,9 +14,24 @@ class M2a_DropNonKey(BaseMutation):
         return "DESTRUCTIVE"
 
     @property
+    def severity(self) -> str:
+        return "CRITICAL"
+
+    @property
+    def schema_version(self) -> str:
+        return "v2.0-breaking"
+
+    @property
+    def target_table(self) -> str:
+        return "lineitem"
+
+    @property
+    def is_core(self) -> bool:
+        return True
+
+    @property
     def injected_fault_count(self):
-        # All rows affected when column is dropped
-        return int(6_000_000 * self.sf)  # ~6M rows at SF=1
+        return int(6_000_000 * self.sf)
 
     def apply(self, con):
         con.execute("CREATE TABLE IF NOT EXISTS source._lineitem_backup AS SELECT * FROM source.lineitem")
@@ -40,6 +55,22 @@ class M2b_DropKeyCol(BaseMutation):
     @property
     def category(self):
         return "DESTRUCTIVE"
+
+    @property
+    def severity(self) -> str:
+        return "CRITICAL"
+
+    @property
+    def schema_version(self) -> str:
+        return "v2.0-breaking"
+
+    @property
+    def target_table(self) -> str:
+        return "lineitem"
+
+    @property
+    def is_core(self) -> bool:
+        return True
 
     @property
     def injected_fault_count(self):
@@ -69,6 +100,22 @@ class M2c_RenameCol(BaseMutation):
         return "DESTRUCTIVE"
 
     @property
+    def severity(self) -> str:
+        return "CRITICAL"
+
+    @property
+    def schema_version(self) -> str:
+        return "v2.0-breaking"
+
+    @property
+    def target_table(self) -> str:
+        return "lineitem"
+
+    @property
+    def is_core(self) -> bool:
+        return True
+
+    @property
     def injected_fault_count(self):
         return int(6_000_000 * self.sf)
 
@@ -84,4 +131,93 @@ class M2c_RenameCol(BaseMutation):
             except Exception:
                 con.execute("DROP TABLE IF EXISTS source.lineitem")
                 con.execute("ALTER TABLE source._lineitem_backup RENAME TO lineitem")
+            self.applied = False
+
+
+class M2d_DropCustomerNationKey(BaseMutation):
+    """Drop foreign key column c_nationkey from customer (breaking join)."""
+
+    @property
+    def description(self):
+        return "Drop foreign key column c_nationkey from customer (breaking join)"
+
+    @property
+    def category(self):
+        return "DESTRUCTIVE"
+
+    @property
+    def severity(self) -> str:
+        return "CRITICAL"
+
+    @property
+    def schema_version(self) -> str:
+        return "v2.0-breaking"
+
+    @property
+    def target_table(self) -> str:
+        return "customer"
+
+    @property
+    def is_core(self) -> bool:
+        return False
+
+    @property
+    def injected_fault_count(self):
+        return int(150_000 * self.sf)
+
+    def apply(self, con):
+        con.execute("CREATE TABLE IF NOT EXISTS source._customer_backup AS SELECT * FROM source.customer")
+        con.execute("ALTER TABLE source.customer DROP COLUMN c_nationkey")
+        self.applied = True
+
+    def revert(self, con):
+        if self.applied:
+            con.execute("DROP TABLE IF EXISTS source.customer")
+            con.execute("ALTER TABLE source._customer_backup RENAME TO customer")
+            self.applied = False
+
+
+class M2e_RenameOrdersPriority(BaseMutation):
+    """Rename o_orderpriority -> o_priority_tier in orders."""
+
+    @property
+    def description(self):
+        return "Rename o_orderpriority -> o_priority_tier in orders"
+
+    @property
+    def category(self):
+        return "DESTRUCTIVE"
+
+    @property
+    def severity(self) -> str:
+        return "CRITICAL"
+
+    @property
+    def schema_version(self) -> str:
+        return "v2.0-breaking"
+
+    @property
+    def target_table(self) -> str:
+        return "orders"
+
+    @property
+    def is_core(self) -> bool:
+        return False
+
+    @property
+    def injected_fault_count(self):
+        return int(1_500_000 * self.sf)
+
+    def apply(self, con):
+        con.execute("CREATE TABLE IF NOT EXISTS source._orders_backup AS SELECT * FROM source.orders")
+        con.execute("ALTER TABLE source.orders RENAME COLUMN o_orderpriority TO o_priority_tier")
+        self.applied = True
+
+    def revert(self, con):
+        if self.applied:
+            try:
+                con.execute("ALTER TABLE source.orders RENAME COLUMN o_priority_tier TO o_orderpriority")
+            except Exception:
+                con.execute("DROP TABLE IF EXISTS source.orders")
+                con.execute("ALTER TABLE source._orders_backup RENAME TO orders")
             self.applied = False

@@ -15,6 +15,22 @@ class M4a_NullAndNegative(BaseMutation):
         return "CONSTRAINT_BREACH"
 
     @property
+    def severity(self) -> str:
+        return "HIGH"
+
+    @property
+    def schema_version(self) -> str:
+        return "v1.0-constraint"
+
+    @property
+    def target_table(self) -> str:
+        return "orders"
+
+    @property
+    def is_core(self) -> bool:
+        return True
+
+    @property
     def injected_fault_count(self):
         return int(300 * self.sf)
 
@@ -64,6 +80,22 @@ class M4b_NullSmall(BaseMutation):
         return "CONSTRAINT_BREACH"
 
     @property
+    def severity(self) -> str:
+        return "MEDIUM"
+
+    @property
+    def schema_version(self) -> str:
+        return "v1.0-constraint"
+
+    @property
+    def target_table(self) -> str:
+        return "orders"
+
+    @property
+    def is_core(self) -> bool:
+        return True
+
+    @property
     def injected_fault_count(self):
         return 5  # Fixed small count regardless of SF
 
@@ -99,6 +131,22 @@ class M4c_DuplicateKeys(BaseMutation):
         return "CONSTRAINT_BREACH"
 
     @property
+    def severity(self) -> str:
+        return "HIGH"
+
+    @property
+    def schema_version(self) -> str:
+        return "v1.0-constraint"
+
+    @property
+    def target_table(self) -> str:
+        return "orders"
+
+    @property
+    def is_core(self) -> bool:
+        return True
+
+    @property
     def injected_fault_count(self):
         return int(50 * self.sf)
 
@@ -117,4 +165,111 @@ class M4c_DuplicateKeys(BaseMutation):
         if self.applied:
             con.execute("LOAD tpch;")
             con.execute(f"CALL dbgen(sf={self.sf}, schema='source', overwrite=true)")
+            self.applied = False
+
+
+class M4d_LineitemNegativeQty(BaseMutation):
+    """Inject negative l_quantity rows (-5) in lineitem."""
+
+    @property
+    def description(self):
+        return f"Inject {max(5, int(250 * self.sf))} negative l_quantity rows (-5) in lineitem"
+
+    @property
+    def category(self):
+        return "CONSTRAINT_BREACH"
+
+    @property
+    def severity(self) -> str:
+        return "HIGH"
+
+    @property
+    def schema_version(self) -> str:
+        return "v1.0-constraint"
+
+    @property
+    def target_table(self) -> str:
+        return "lineitem"
+
+    @property
+    def is_core(self) -> bool:
+        return False
+
+    @property
+    def injected_fault_count(self):
+        return max(5, int(250 * self.sf))
+
+    def apply(self, con):
+        n = self.injected_fault_count
+        con.execute("CREATE TABLE IF NOT EXISTS source._lineitem_backup AS SELECT * FROM source.lineitem")
+        con.execute(f"""
+            CREATE OR REPLACE TEMP TABLE _bad_keys AS
+            SELECT l_orderkey, l_linenumber
+            FROM source.lineitem
+            ORDER BY l_orderkey, l_linenumber
+            LIMIT {n}
+        """)
+        con.execute("""
+            UPDATE source.lineitem
+            SET l_quantity = -5
+            WHERE (l_orderkey, l_linenumber) IN (
+                SELECT l_orderkey, l_linenumber FROM _bad_keys
+            )
+        """)
+        con.execute("DROP TABLE IF EXISTS _bad_keys")
+        self.applied = True
+
+    def revert(self, con):
+        if self.applied:
+            con.execute("DROP TABLE IF EXISTS source.lineitem")
+            con.execute("ALTER TABLE source._lineitem_backup RENAME TO lineitem")
+            self.applied = False
+
+
+class M4e_CustomerDuplicateKeys(BaseMutation):
+    """Insert rows with duplicate c_custkey in customer."""
+
+    @property
+    def description(self):
+        return f"Insert {max(5, int(100 * self.sf))} duplicate c_custkey rows in customer"
+
+    @property
+    def category(self):
+        return "CONSTRAINT_BREACH"
+
+    @property
+    def severity(self) -> str:
+        return "HIGH"
+
+    @property
+    def schema_version(self) -> str:
+        return "v1.0-constraint"
+
+    @property
+    def target_table(self) -> str:
+        return "customer"
+
+    @property
+    def is_core(self) -> bool:
+        return False
+
+    @property
+    def injected_fault_count(self):
+        return max(5, int(100 * self.sf))
+
+    def apply(self, con):
+        n = self.injected_fault_count
+        con.execute("CREATE TABLE IF NOT EXISTS source._customer_backup AS SELECT * FROM source.customer")
+        con.execute(f"""
+            INSERT INTO source.customer
+            SELECT * FROM source.customer
+            ORDER BY c_custkey
+            LIMIT {n}
+        """)
+        self.applied = True
+
+    def revert(self, con):
+        if self.applied:
+            con.execute("DROP TABLE IF EXISTS source.customer")
+            con.execute("ALTER TABLE source._customer_backup RENAME TO customer")
             self.applied = False

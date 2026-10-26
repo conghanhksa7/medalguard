@@ -102,6 +102,10 @@ class ExperimentResult:
     gold_residual_diff_ratio: float = 0.0
 
     # Metadata
+    severity: str = "HIGH"
+    schema_version: str = "v1.0"
+    target_table: str = "orders"
+    is_core: bool = True
     timestamp: str = ""
     error_message: str = ""
 
@@ -301,6 +305,10 @@ def run_single_experiment(
         config_name=config_name,
         scale_factor=scale_factor,
         run_index=run_index,
+        severity=getattr(mutation, "severity", "HIGH"),
+        schema_version=getattr(mutation, "schema_version", "v1.0"),
+        target_table=getattr(mutation, "target_table", "orders"),
+        is_core=getattr(mutation, "is_core", True),
         timestamp=datetime.now().isoformat(),
     )
 
@@ -574,6 +582,8 @@ def main():
     parser.add_argument("--mutation", type=str, help="Specific mutation name")
     parser.add_argument("--config", type=str, help="Specific config name")
     parser.add_argument("--save", action="store_true", help="Save experiment result to JSON in results/raw")
+    parser.add_argument("--suite", choices=["core", "expanded"], default="core",
+                        help="Mutation suite to run (core=19 mutations, expanded=36 mutations)")
     parser.add_argument("--runs", type=int, default=7, help="Number of repetitions for overhead mode (default 7)")
 
     args = parser.parse_args()
@@ -582,23 +592,12 @@ def main():
     configs = full_cfg.get("configs", {})
 
     # Import mutations
-    from mutations.m1_additive import M1a_AddSingleCol, M1b_AddMultiCol
-    from mutations.m2_destructive import M2a_DropNonKey, M2b_DropKeyCol, M2c_RenameCol
-    from mutations.m3_type_change import M3a_DoubleToVarchar, M3b_IntegerToDouble, M3c_DateToVarchar
-    from mutations.m4_constraint_breach import M4a_NullAndNegative, M4b_NullSmall, M4c_DuplicateKeys
-    from mutations.m5_semantic_drift import M5a_MULTIPLY_100, M5b_MULTIPLY_1_5, M5c_CATEGORICAL_SHIFT
-    from mutations.benign_mutations import B1_AddColumn, B2_ValueInRange, B3_InsertRows, B5_AddValidStatus, B7_LargeBatchInsert
-
-    all_mutations_list = [
-        M1a_AddSingleCol(args.sf), M1b_AddMultiCol(args.sf),
-        M2a_DropNonKey(args.sf), M2b_DropKeyCol(args.sf), M2c_RenameCol(args.sf),
-        M3a_DoubleToVarchar(args.sf), M3b_IntegerToDouble(args.sf), M3c_DateToVarchar(args.sf),
-        M4a_NullAndNegative(args.sf), M4b_NullSmall(args.sf), M4c_DuplicateKeys(args.sf),
-        M5a_MULTIPLY_100(args.sf), M5b_MULTIPLY_1_5(args.sf), M5c_CATEGORICAL_SHIFT(args.sf),
-        B1_AddColumn(args.sf), B2_ValueInRange(args.sf), B3_InsertRows(args.sf),
-        B5_AddValidStatus(args.sf), B7_LargeBatchInsert(args.sf),
-    ]
-    mutation_map = {m.name: m for m in all_mutations_list}
+    from mutations import get_mutation_suite
+    core_f, core_b = get_mutation_suite(sf=args.sf, suite="core")
+    exp_f, exp_b = get_mutation_suite(sf=args.sf, suite="expanded")
+    all_available_map = {m.name: m for m in (exp_f + exp_b)}
+    active_mutations_list = exp_f + exp_b if args.suite == "expanded" else core_f + core_b
+    mutation_map = {m.name: m for m in active_mutations_list}
     all_configs_map = {**configs, **full_cfg.get("ablation", {})}
 
     print("Building/loading clean Gold reference...")
@@ -664,21 +663,21 @@ def main():
     elif args.mode == "single":
         if not args.mutation:
             print("Error: --mutation is required for single mode. Available choices:")
-            print(", ".join(mutation_map.keys()))
+            print(", ".join(all_available_map.keys()))
             sys.exit(1)
         if not args.config:
             print("Error: --config is required for single mode. Available choices:")
             print(", ".join(all_configs_map.keys()))
             sys.exit(1)
 
-        if args.mutation not in mutation_map:
-            print(f"Error: Unknown mutation '{args.mutation}'. Available choices: {list(mutation_map.keys())}")
+        if args.mutation not in all_available_map:
+            print(f"Error: Unknown mutation '{args.mutation}'. Available choices: {list(all_available_map.keys())}")
             sys.exit(1)
         if args.config not in all_configs_map:
             print(f"Error: Unknown config '{args.config}'. Available choices: {list(all_configs_map.keys())}")
             sys.exit(1)
 
-        target_mut = mutation_map[args.mutation]
+        target_mut = all_available_map[args.mutation]
         target_cfg = all_configs_map[args.config]
 
         print(f"\nRunning Single Experiment: {target_mut.name} on {args.config} (SF={args.sf})...")
@@ -700,6 +699,10 @@ def main():
         print(f"Experiment ID:    {res.experiment_id}")
         print(f"Mutation:         {res.mutation_name} ({res.category})")
         print(f"Configuration:    {res.config_name}")
+        print(f"Severity:         {res.severity}")
+        print(f"Schema Version:   {res.schema_version}")
+        print(f"Target Table:     {res.target_table}")
+        print(f"Is Core:          {res.is_core}")
         print(f"Pipeline Status:  {res.pipeline_status}")
         print(f"Detected:         {res.detected} (Stage: {res.detection_stage}, DDI: {res.detection_depth_index})")
         print(f"Quarantined Rows: {res.quarantined_rows}")
@@ -715,13 +718,13 @@ def main():
 
     elif args.mode == "matrix":
         print("\n" + "=" * 90)
-        print(f"  MEDALGUARD FULL MATRIX: {len(all_mutations_list)} mutations × {len(configs)} configs (SF={args.sf})")
+        print(f"  MEDALGUARD FULL MATRIX ({args.suite.upper()} SUITE): {len(active_mutations_list)} mutations × {len(configs)} configs (SF={args.sf})")
         print("=" * 90)
 
         results = []
         for cfg_name, cfg in configs.items():
             print(f"\n--- Running Config: {cfg_name} ({cfg.get('description', '')}) ---")
-            for mut in all_mutations_list:
+            for mut in active_mutations_list:
                 print(f"  Testing {mut.name}...")
                 res = run_single_experiment(
                     mutation=mut,
