@@ -608,7 +608,7 @@ def generate_e2_markdown(dict_e2a: list[dict], dict_e2b: list[dict]) -> str:
         detected = [r for r in runs if r["detected"]]
         dr = (len(detected) / total) * 100.0 if total else 0.0
         mean_br = statistics.mean([r["blast_radius"] * 100.0 for r in runs]) if runs else 0.0
-        ddi_vals = [r["detection_depth_index"] for r in runs if r["detection_depth_index"] is not None]
+        ddi_vals = [r["detection_depth_index"] for r in runs if r.get("detected") and r["detection_depth_index"] is not None and r["detection_depth_index"] >= 0]
         mean_ddi = statistics.mean(ddi_vals) if ddi_vals else 0.0
         leakage = statistics.mean([r["gold_residual_diff_ratio"] * 100.0 for r in runs]) if runs else 0.0
         mean_wall = statistics.mean([r["pipeline_wall_ms"] for r in runs]) if runs else 0.0

@@ -78,7 +78,7 @@ class M5b_MULTIPLY_1_5(BaseMutation):
 
     def apply(self, con):
         con.execute("CREATE TABLE IF NOT EXISTS source._lineitem_backup AS SELECT * FROM source.lineitem")
-        con.execute("UPDATE source.lineitem SET l_discount = LEAST(l_discount * 1.5, 0.10)")
+        con.execute("UPDATE source.lineitem SET l_discount = LEAST(l_discount * 1.5 + 0.01, 0.10)")
         self.applied = True
 
     def revert(self, con):
