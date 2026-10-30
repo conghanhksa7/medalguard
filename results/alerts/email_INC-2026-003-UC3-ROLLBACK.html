@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>MedalGuard Alert: INC-2026-003-UC3-ROLLBACK</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 20px; background: #f4f6f8; color: #222; }
+    .card { background: #fff; max-width: 720px; margin: 0 auto; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); overflow: hidden; }
+    .header { background: #1a202c; color: #fff; padding: 20px 24px; border-bottom: 4px solid #d9534f; }
+    .header h2 { margin: 0; font-size: 20px; font-weight: 600; display: flex; align-items: center; justify-content: space-between; }
+    .badge { display: inline-block; padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; background: #d9534f; color: #fff; }
+    .content { padding: 24px; }
+    table.meta { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    table.meta td { padding: 8px 12px; border: 1px solid #e2e8f0; font-size: 13px; }
+    table.meta td.label { background: #f8fafc; font-weight: 600; width: 32%; }
+    .section-title { font-size: 14px; font-weight: 700; text-transform: uppercase; color: #4a5568; margin-top: 20px; margin-bottom: 10px; border-bottom: 1px solid #edf2f7; padding-bottom: 4px; }
+    .remediation-box { background: #f0fff4; border: 1px solid #c6f6d5; border-radius: 6px; padding: 14px; margin-top: 15px; }
+    .footer { background: #f8fafc; padding: 12px 24px; font-size: 11px; color: #718096; text-align: center; border-top: 1px solid #e2e8f0; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <h2>
+        <span>MedalGuard Incident Alert</span>
+        <span class="badge">CRITICAL</span>
+      </h2>
+    </div>
+    <div class="content">
+      <table class="meta">
+        <tr><td class="label">Incident ID</td><td><code>INC-2026-003-UC3-ROLLBACK</code></td></tr>
+        <tr><td class="label">Timestamp</td><td>2026-10-30T17:24:14.526185</td></tr>
+        <tr><td class="label">Boundary Gate</td><td><b>B->S:lineitem</b></td></tr>
+        <tr><td class="label">Fault / Mutation</td><td><code>M5a_MULTIPLY_100</code></td></tr>
+        <tr><td class="label">Mean Time to Detect (MTTD)</td><td><b>115.8 ms</b></td></tr>
+        <tr><td class="label">Root Cause Category</td><td><b>GLOBAL_DISTRIBUTION_DRIFT</b></td></tr>
+        <tr><td class="label">Recommended Action</td><td><code>CIRCUIT_BREAKER_BLOCK_AND_ROLLBACK_GOLD</code></td></tr>
+      </table>
+
+      <div class="section-title">Downstream Lineage & KPI Exposure</div>
+      <p style="font-size: 13px; color: #4a5568;">
+        The fault was intercepted at <b>B->S:lineitem</b> before corrupting:
+      </p>
+      <ul style="font-size: 13px; color: #2d3748; line-height: 1.6;">
+        <li><b>total_revenue</b> (gold.gold_revenue_by_nation) &rarr; <code>SUM(l_extendedprice * (1 - l_discount))</code></li><li><b>avg_discount</b> (gold.gold_revenue_by_nation) &rarr; <code>AVG(l_discount)</code></li>
+      </ul>
+
+      <div class="remediation-box">
+        <h4 style="margin: 0 0 6px 0; color: #22543d; font-size: 13px;">Automated Remediation Engine</h4>
+        <div style="font-size: 12px; color: #276749;">
+          Status: <b style="color: #dc3545;">EXECUTED</b> |
+          Availability: <b>100.0%</b> |
+          Post-Remediation Blast Radius: <b>0.0%</b>
+        </div>
+      </div>
+    </div>
+    <div class="footer">
+      Generated automatically by MedalGuard Observability Platform &bull; Medallion Lakehouse Early Failure Guard
+    </div>
+  </div>
+</body>
+</html>

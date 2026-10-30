@@ -3,11 +3,11 @@ from mutations.base import BaseMutation
 
 
 class M3a_DoubleToVarchar(BaseMutation):
-    """Change l_extendedprice from DOUBLE to VARCHAR."""
+    """Change l_quantity from DOUBLE to VARCHAR (incompatible)."""
 
     @property
     def description(self):
-        return "Cast l_extendedprice DOUBLE -> VARCHAR in lineitem"
+        return "Cast l_quantity DOUBLE -> VARCHAR in lineitem"
 
     @property
     def category(self):
@@ -38,8 +38,8 @@ class M3a_DoubleToVarchar(BaseMutation):
         con.execute("""
             CREATE OR REPLACE TABLE source.lineitem AS
             SELECT
-                * EXCLUDE (l_extendedprice),
-                CAST(l_extendedprice AS VARCHAR) AS l_extendedprice
+                * EXCLUDE (l_quantity),
+                CAST(l_quantity AS VARCHAR) AS l_quantity
             FROM source._lineitem_backup
         """)
         self.applied = True
@@ -52,11 +52,11 @@ class M3a_DoubleToVarchar(BaseMutation):
 
 
 class M3b_IntegerToDouble(BaseMutation):
-    """Change l_suppkey from INTEGER/BIGINT to DOUBLE (widening, subtle)."""
+    """Cast l_linenumber BIGINT -> DOUBLE in lineitem (widening, possibly benign)."""
 
     @property
     def description(self):
-        return "Cast l_suppkey BIGINT -> DOUBLE in lineitem (subtle widening)"
+        return "Cast l_linenumber BIGINT -> DOUBLE in lineitem (widening, possibly benign)"
 
     @property
     def category(self):
@@ -87,8 +87,8 @@ class M3b_IntegerToDouble(BaseMutation):
         con.execute("""
             CREATE OR REPLACE TABLE source.lineitem AS
             SELECT
-                * EXCLUDE (l_suppkey),
-                CAST(l_suppkey AS DOUBLE) AS l_suppkey
+                * EXCLUDE (l_linenumber),
+                CAST(l_linenumber AS DOUBLE) AS l_linenumber
             FROM source._lineitem_backup
         """)
         self.applied = True

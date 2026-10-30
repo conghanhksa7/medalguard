@@ -3,11 +3,11 @@ from mutations.base import BaseMutation
 
 
 class M2a_DropNonKey(BaseMutation):
-    """Drop l_discount (used in revenue calculations)."""
+    """Drop l_tax column from lineitem (breaking change)."""
 
     @property
     def description(self):
-        return "Drop l_discount from lineitem (used in revenue)"
+        return "Drop l_tax column from lineitem (breaking change)"
 
     @property
     def category(self):
@@ -35,7 +35,7 @@ class M2a_DropNonKey(BaseMutation):
 
     def apply(self, con):
         con.execute("CREATE TABLE IF NOT EXISTS source._lineitem_backup AS SELECT * FROM source.lineitem")
-        con.execute("ALTER TABLE source.lineitem DROP COLUMN l_discount")
+        con.execute("ALTER TABLE source.lineitem DROP COLUMN l_tax")
         self.applied = True
 
     def revert(self, con):

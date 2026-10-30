@@ -606,10 +606,10 @@ def main():
 
     if args.mode == "smoke":
         smoke_mutations = [
-            M2a_DropNonKey(args.sf),
-            M4a_NullAndNegative(args.sf),
-            M5a_MULTIPLY_100(args.sf),
-            B1_AddColumn(args.sf),
+            all_available_map["M2a_DropNonKey"],
+            all_available_map["M4a_NullAndNegative"],
+            all_available_map["M5a_MULTIPLY_100"],
+            all_available_map["B1_AddColumn"],
         ]
         smoke_config_names = ["C1", "C2", "C3_standalone", "C3"]
 

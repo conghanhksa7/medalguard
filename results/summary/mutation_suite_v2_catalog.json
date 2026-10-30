@@ -63,7 +63,7 @@
       "severity": "CRITICAL",
       "schema_version": "v2.0-breaking",
       "injected_fault_count": 600000,
-      "description": "Drop l_discount from lineitem (used in revenue)"
+      "description": "Drop l_tax column from lineitem (breaking change)"
     },
     {
       "index": 6,
@@ -123,7 +123,7 @@
       "severity": "HIGH",
       "schema_version": "v2.0-type-drift",
       "injected_fault_count": 600000,
-      "description": "Cast l_extendedprice DOUBLE -> VARCHAR in lineitem"
+      "description": "Cast l_quantity DOUBLE -> VARCHAR in lineitem"
     },
     {
       "index": 11,
@@ -135,7 +135,7 @@
       "severity": "MEDIUM",
       "schema_version": "v2.0-type-drift",
       "injected_fault_count": 600000,
-      "description": "Cast l_suppkey BIGINT -> DOUBLE in lineitem (subtle widening)"
+      "description": "Cast l_linenumber BIGINT -> DOUBLE in lineitem (widening, possibly benign)"
     },
     {
       "index": 12,
@@ -207,7 +207,7 @@
       "severity": "HIGH",
       "schema_version": "v1.0-row-fault",
       "injected_fault_count": 5,
-      "description": "Inject 5 duplicate o_orderkey rows"
+      "description": "Insert 5 rows with duplicate o_orderkey (PK violation)"
     },
     {
       "index": 18,
@@ -243,7 +243,7 @@
       "severity": "CRITICAL",
       "schema_version": "v1.0-semantic",
       "injected_fault_count": 600000,
-      "description": "Multiply l_extendedprice by 100 (extreme semantic drift)"
+      "description": "Multiply l_discount * 100 (0.05 -> 5.0)"
     },
     {
       "index": 21,
@@ -255,7 +255,7 @@
       "severity": "HIGH",
       "schema_version": "v1.0-semantic",
       "injected_fault_count": 600000,
-      "description": "Multiply l_extendedprice by 1.5 (moderate semantic drift)"
+      "description": "Multiply l_discount * 1.5 (subtle, mean 0.05 -> 0.075)"
     },
     {
       "index": 22,
@@ -267,7 +267,7 @@
       "severity": "HIGH",
       "schema_version": "v1.0-semantic",
       "injected_fault_count": 10,
-      "description": "Insert 10 rows with invalid orderstatus 'X'"
+      "description": "Change 10 orders o_orderstatus to 'X' (not in allowed set)"
     },
     {
       "index": 23,

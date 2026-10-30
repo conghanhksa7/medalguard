@@ -1,0 +1,73 @@
+{
+  "incident_id": "INC-2026-001-UC1-ALLOWLIST",
+  "timestamp": "2026-10-30T17:23:10.736666",
+  "severity": "MEDIUM",
+  "status": "RESOLVED",
+  "gate_name": "B->S:lineitem",
+  "mutation_name": "M1a_AddSingleCol",
+  "pipeline_status": "RESOLVED",
+  "mttd_ms": 101.08,
+  "channel": "#lakehouse-data-observability",
+  "pagerduty": {
+    "service": "Medalhouse-Bronze-Gate",
+    "urgency": "medium",
+    "client": "MedalGuard-Core-Engine"
+  },
+  "root_cause_diff": {
+    "table_name": "bronze.bronze_lineitem",
+    "total_rows": 600572,
+    "schema_diff": {
+      "missing_columns": [],
+      "unexpected_columns": [
+        "l_promo_code"
+      ],
+      "type_mismatches": [],
+      "expected_count": 16,
+      "actual_count": 17
+    },
+    "statistical_diff": [
+      {
+        "column": "l_promo_code",
+        "row_count": 600572,
+        "null_count": 0,
+        "null_rate": 0.0,
+        "actual_min": "NONE",
+        "actual_max": "SALE5",
+        "actual_mean": null,
+        "contract_min": null,
+        "contract_max": null,
+        "contract_not_null": false,
+        "contract_allowed_values": null
+      }
+    ],
+    "violations_count": 1,
+    "violation_types": [
+      "UNEXPECTED_COLUMN"
+    ],
+    "root_cause_category": "UNREGISTERED_SCHEMA_EXTENSION",
+    "recommended_action": "PROMOTE_TO_ALLOWLIST_AND_RESUME"
+  },
+  "downstream_lineage": {
+    "affected_silver": [
+      "silver.silver_lineitem"
+    ],
+    "affected_gold": [
+      "gold.gold_revenue_by_nation"
+    ],
+    "affected_kpis": [],
+    "blast_scope_severity": "MEDIUM_SILVER_MART"
+  },
+  "auto_remediation": {
+    "status": "APPROVED_AND_RESUMED",
+    "column_promoted": "l_promo_code",
+    "old_version": 1,
+    "new_version": 2,
+    "dbt_status": "SUCCESS",
+    "dbt_elapsed_ms": 7767.3,
+    "mttr_ms": 7777.6,
+    "blast_radius": 0.0,
+    "data_loss_rate_pct": 0.0,
+    "availability_pct": 100.0,
+    "error": ""
+  }
+}

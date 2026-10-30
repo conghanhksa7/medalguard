@@ -1,0 +1,107 @@
+{
+  "incident_id": "INC-2026-002-UC2-QUARANTINE",
+  "timestamp": "2026-10-30T17:23:52.627208",
+  "severity": "HIGH",
+  "status": "RESOLVED",
+  "gate_name": "B->S:orders",
+  "mutation_name": "M4a_NullAndNegative + M4c_DuplicateKeys",
+  "pipeline_status": "RESOLVED",
+  "mttd_ms": 540.06,
+  "channel": "#lakehouse-data-observability",
+  "pagerduty": {
+    "service": "Medalhouse-Bronze-Gate",
+    "urgency": "high",
+    "client": "MedalGuard-Core-Engine"
+  },
+  "root_cause_diff": {
+    "table_name": "bronze.bronze_orders",
+    "total_rows": 149970,
+    "schema_diff": {
+      "missing_columns": [],
+      "unexpected_columns": [],
+      "type_mismatches": [],
+      "expected_count": 9,
+      "actual_count": 9
+    },
+    "statistical_diff": [
+      {
+        "column": "o_orderkey",
+        "row_count": 149970,
+        "null_count": 0,
+        "null_rate": 0.0,
+        "actual_min": 103,
+        "actual_max": 600000,
+        "actual_mean": 300051.5,
+        "contract_min": null,
+        "contract_max": null,
+        "contract_not_null": true,
+        "contract_allowed_values": null
+      },
+      {
+        "column": "o_totalprice",
+        "row_count": 149970,
+        "null_count": 0,
+        "null_rate": 0.0,
+        "actual_min": "833.40",
+        "actual_max": "479129.21",
+        "actual_mean": 142376.5965,
+        "contract_min": 0,
+        "contract_max": null,
+        "contract_not_null": true,
+        "contract_allowed_values": null
+      },
+      {
+        "column": "o_custkey",
+        "row_count": 149970,
+        "null_count": 0,
+        "null_rate": 0.0,
+        "actual_min": 1,
+        "actual_max": 14999,
+        "actual_mean": 7495.4747,
+        "contract_min": null,
+        "contract_max": null,
+        "contract_not_null": true,
+        "contract_allowed_values": null
+      }
+    ],
+    "violations_count": 3,
+    "violation_types": [
+      "NULL_VIOLATION",
+      "RANGE_VIOLATION",
+      "UNIQUE_VIOLATION"
+    ],
+    "root_cause_category": "ROW_LEVEL_DATA_CORRUPTION",
+    "recommended_action": "QUARANTINE_AND_REPAIR_ROWS"
+  },
+  "downstream_lineage": {
+    "affected_silver": [
+      "silver.silver_orders"
+    ],
+    "affected_gold": [
+      "gold.gold_order_priority_summary",
+      "gold.gold_revenue_by_nation"
+    ],
+    "affected_kpis": [
+      "nation_attribution",
+      "total_value",
+      "avg_order_value",
+      "total_orders",
+      "order_count"
+    ],
+    "blast_scope_severity": "CRITICAL_GOLD_JOIN"
+  },
+  "auto_remediation": {
+    "status": "REPAIRED_AND_REPLAYED",
+    "quarantined_input_rows": 35,
+    "deduplicated_rows": 5,
+    "repaired_and_backfilled_rows": 30,
+    "unrecoverable_rows": 0,
+    "data_loss_rate_pct": 0.0,
+    "mttr_ms": 8345.5,
+    "post_replay_blast_radius": 0.0,
+    "gold_tables_recalculated": 2,
+    "clean_rows_preserved_pct": 100.0,
+    "dbt_replay_status": "SUCCESS",
+    "dbt_elapsed_ms": 8279.1
+  }
+}

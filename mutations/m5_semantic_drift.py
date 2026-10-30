@@ -3,11 +3,11 @@ from mutations.base import BaseMutation
 
 
 class M5a_MULTIPLY_100(BaseMutation):
-    """Multiply l_extendedprice by 100 — extreme drift."""
+    """Multiply l_discount by 100: 0.05 -> 5.0 (obvious drift)."""
 
     @property
     def description(self):
-        return "Multiply l_extendedprice by 100 (extreme semantic drift)"
+        return "Multiply l_discount * 100 (0.05 -> 5.0)"
 
     @property
     def category(self):
@@ -35,7 +35,7 @@ class M5a_MULTIPLY_100(BaseMutation):
 
     def apply(self, con):
         con.execute("CREATE TABLE IF NOT EXISTS source._lineitem_backup AS SELECT * FROM source.lineitem")
-        con.execute("UPDATE source.lineitem SET l_extendedprice = l_extendedprice * 100")
+        con.execute("UPDATE source.lineitem SET l_discount = l_discount * 100")
         self.applied = True
 
     def revert(self, con):
@@ -46,11 +46,11 @@ class M5a_MULTIPLY_100(BaseMutation):
 
 
 class M5b_MULTIPLY_1_5(BaseMutation):
-    """Multiply l_extendedprice by 1.5 — moderate drift."""
+    """Multiply l_discount by 1.5: subtle drift, mean ~0.05 -> ~0.075."""
 
     @property
     def description(self):
-        return "Multiply l_extendedprice by 1.5 (moderate semantic drift)"
+        return "Multiply l_discount * 1.5 (subtle, mean 0.05 -> 0.075)"
 
     @property
     def category(self):
@@ -78,7 +78,7 @@ class M5b_MULTIPLY_1_5(BaseMutation):
 
     def apply(self, con):
         con.execute("CREATE TABLE IF NOT EXISTS source._lineitem_backup AS SELECT * FROM source.lineitem")
-        con.execute("UPDATE source.lineitem SET l_extendedprice = l_extendedprice * 1.5")
+        con.execute("UPDATE source.lineitem SET l_discount = LEAST(l_discount * 1.5, 0.10)")
         self.applied = True
 
     def revert(self, con):
@@ -89,11 +89,11 @@ class M5b_MULTIPLY_1_5(BaseMutation):
 
 
 class M5c_CATEGORICAL_SHIFT(BaseMutation):
-    """Insert 10 rows with unlisted status 'X'."""
+    """Change orderstatus to 'X' not in allowed set [O, F, P]."""
 
     @property
     def description(self):
-        return "Insert 10 rows with invalid orderstatus 'X'"
+        return f"Change {int(100 * self.sf)} orders o_orderstatus to 'X' (not in allowed set)"
 
     @property
     def category(self):
@@ -117,19 +117,17 @@ class M5c_CATEGORICAL_SHIFT(BaseMutation):
 
     @property
     def injected_fault_count(self):
-        return 10
+        return int(100 * self.sf)
 
     def apply(self, con):
         con.execute("CREATE TABLE IF NOT EXISTS source._orders_backup AS SELECT * FROM source.orders")
-        max_key = con.execute("SELECT MAX(o_orderkey) FROM source.orders").fetchone()[0]
+        n = int(100 * self.sf)
         con.execute(f"""
-            INSERT INTO source.orders
-            SELECT
-                o_orderkey + {max_key + 1},
-                o_custkey, 'X', o_totalprice, o_orderdate,
-                o_orderpriority, o_clerk, o_shippriority, o_comment
-            FROM source.orders
-            LIMIT 10
+            UPDATE source.orders
+            SET o_orderstatus = 'X'
+            WHERE o_orderkey IN (
+                SELECT o_orderkey FROM source.orders ORDER BY o_orderkey LIMIT {n}
+            )
         """)
         self.applied = True
 

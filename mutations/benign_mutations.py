@@ -134,7 +134,7 @@ class B3_InsertRows(BaseMutation):
     def apply(self, con):
         con.execute("CREATE TABLE IF NOT EXISTS source._orders_backup AS SELECT * FROM source.orders")
         max_key = con.execute("SELECT MAX(o_orderkey) FROM source.orders").fetchone()[0]
-        n = 100
+        n = int(100 * self.sf)
         con.execute(f"""
             INSERT INTO source.orders
             SELECT

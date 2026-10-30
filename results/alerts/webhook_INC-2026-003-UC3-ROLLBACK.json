@@ -1,0 +1,69 @@
+{
+  "incident_id": "INC-2026-003-UC3-ROLLBACK",
+  "timestamp": "2026-10-30T17:24:14.526185",
+  "severity": "CRITICAL",
+  "status": "TRIGGERED",
+  "gate_name": "B->S:lineitem",
+  "mutation_name": "M5a_MULTIPLY_100",
+  "pipeline_status": "BLOCKED",
+  "mttd_ms": 115.76,
+  "channel": "#lakehouse-data-observability",
+  "pagerduty": {
+    "service": "Medalhouse-Bronze-Gate",
+    "urgency": "high",
+    "client": "MedalGuard-Core-Engine"
+  },
+  "root_cause_diff": {
+    "table_name": "bronze.bronze_lineitem",
+    "total_rows": 600572,
+    "schema_diff": {
+      "missing_columns": [],
+      "unexpected_columns": [],
+      "type_mismatches": [],
+      "expected_count": 16,
+      "actual_count": 16
+    },
+    "statistical_diff": [
+      {
+        "column": "l_discount",
+        "row_count": 600572,
+        "null_count": 0,
+        "null_rate": 0.0,
+        "actual_min": "0.00",
+        "actual_max": "10.00",
+        "actual_mean": 5.0074,
+        "contract_min": 0.0,
+        "contract_max": 0.1,
+        "contract_not_null": true,
+        "contract_allowed_values": null
+      }
+    ],
+    "violations_count": 2,
+    "violation_types": [
+      "RANGE_VIOLATION",
+      "SEMANTIC_DRIFT"
+    ],
+    "root_cause_category": "GLOBAL_DISTRIBUTION_DRIFT",
+    "recommended_action": "CIRCUIT_BREAKER_BLOCK_AND_ROLLBACK_GOLD"
+  },
+  "downstream_lineage": {
+    "affected_silver": [
+      "silver.silver_lineitem"
+    ],
+    "affected_gold": [
+      "gold.gold_revenue_by_nation"
+    ],
+    "affected_kpis": [
+      "total_revenue",
+      "avg_discount"
+    ],
+    "blast_scope_severity": "HIGH_GOLD_KPI"
+  },
+  "auto_remediation": {
+    "rolled_back": true,
+    "gold_tables_restored": 2,
+    "availability_pct": 100.0,
+    "recovery_time_ms": 51.9,
+    "details": "Restored 2 Gold tables from LKG snapshot in 51.9 ms."
+  }
+}

@@ -118,11 +118,11 @@ class M4b_NullSmall(BaseMutation):
 
 
 class M4c_DuplicateKeys(BaseMutation):
-    """Insert 5 duplicate o_orderkey rows into source.orders."""
+    """Insert rows with duplicate o_orderkey values."""
 
     @property
     def description(self):
-        return "Inject 5 duplicate o_orderkey rows"
+        return f"Insert {int(50 * self.sf)} rows with duplicate o_orderkey (PK violation)"
 
     @property
     def category(self):
@@ -146,19 +146,19 @@ class M4c_DuplicateKeys(BaseMutation):
 
     @property
     def injected_fault_count(self):
-        return 5
+        return int(50 * self.sf)
 
     def apply(self, con):
         con.execute("""
             CREATE TABLE IF NOT EXISTS source._orders_backup AS
             SELECT * FROM source.orders
         """)
-        # Duplicate the first 5 rows
-        con.execute("""
+        n_dupes = int(50 * self.sf)
+        con.execute(f"""
             INSERT INTO source.orders
             SELECT * FROM source.orders
             ORDER BY o_orderkey
-            LIMIT 5
+            LIMIT {n_dupes}
         """)
         self.applied = True
 
