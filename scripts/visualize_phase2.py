@@ -67,7 +67,7 @@ def plot_fig1():
     with open(stat_path, "r", encoding="utf-8") as f:
         data = json.load(f)
 
-    fig, axes = plt.subplots(1, 2, figsize=(14, 5.5), sharey=True)
+    fig, axes = plt.subplots(1, 2, figsize=(15, 5.8), sharey=True)
 
     configs = ["C0", "C1", "C2", "C3_standalone", "C3"]
     cfg_labels = ["C0\n(Baseline)", "C1\n(dbt Contracts)", "C2\n(Great Exp.)", "C3_standalone\n(MedalGuard)", "C3\n(In-line Gate)"]
@@ -85,7 +85,7 @@ def plot_fig1():
         suite_cfgs = data[suite_key]["configs"]
 
         x = np.arange(len(configs))
-        width = 0.20
+        width = 0.21
 
         for m_idx, (m_key, ci_key, m_label, color) in enumerate(metrics):
             vals = [suite_cfgs[c][m_key] for c in configs]
@@ -106,13 +106,14 @@ def plot_fig1():
             bars = ax.bar(pos, vals, width, yerr=yerr, capsize=3, label=m_label if ax_idx == 0 else "",
                           color=color, alpha=0.88, edgecolor="black", linewidth=0.7)
 
-            # Direct data labels
+            # Direct data labels with alternating vertical offsets to prevent label collision
             for bar, val in zip(bars, vals):
                 if val > 0:
+                    y_off = 3 + (m_idx % 2) * 6
                     ax.annotate(f"{val:.0f}%",
                                 xy=(bar.get_x() + bar.get_width() / 2, bar.get_height()),
-                                xytext=(0, 4), textcoords="offset points",
-                                ha="center", va="bottom", fontsize=7.5, weight="bold", rotation=0)
+                                xytext=(0, y_off), textcoords="offset points",
+                                ha="center", va="bottom", fontsize=7.0, weight="bold", rotation=0)
 
         ax.set_title(title, pad=12)
         ax.set_xticks(x)
@@ -275,9 +276,9 @@ def plot_fig3():
     ax2.set_title("Panel B: Architectural Boundary Ablation (E2b)", pad=12)
     ax2.set_xticks(x2)
     ax2.set_xticklabels(b_labels)
-    ax2.set_ylim(0, 115)
+    ax2.set_ylim(0, 128)
     ax2.yaxis.set_major_formatter(mtick.PercentFormatter(100))
-    ax2.legend(loc="upper right", frameon=True, fontsize=8.5)
+    ax2.legend(loc="upper center", ncol=1, frameon=True, fontsize=8.5)
     ax2.grid(axis="y", linestyle="--", alpha=0.6)
 
     out_path = CHARTS_DIR / "fig3_detection_depth_and_boundary_ablation.png"
@@ -305,10 +306,10 @@ def plot_fig4():
         ("M5", "M5: Semantic (5)"),
     ]
 
-    fig, ax = plt.subplots(figsize=(13, 6))
+    fig, ax = plt.subplots(figsize=(14, 6.2))
 
     x = np.arange(len(cfg_names))
-    width = 0.15
+    width = 0.16
     colors = ["#3498db", "#e74c3c", "#9b59b6", "#2ecc71", "#f39c12"]
 
     for g_idx, (prefix, g_label) in enumerate(groups):
@@ -324,8 +325,9 @@ def plot_fig4():
 
         for bar, r in zip(bars, rates):
             if r > 0:
+                y_off = 3 + (g_idx % 2) * 5
                 ax.annotate(f"{r:.0f}%", xy=(bar.get_x() + bar.get_width() / 2, bar.get_height()),
-                            xytext=(0, 3), textcoords="offset points", ha="center", va="bottom", fontsize=7, weight="bold")
+                            xytext=(0, y_off), textcoords="offset points", ha="center", va="bottom", fontsize=7.5, weight="bold")
 
     ax.set_title("Validator Module Ablation Across Failure Taxonomies (E2a - 24 Harmful Scenarios)", pad=16)
     ax.set_xticks(x)
@@ -427,9 +429,9 @@ def plot_fig6():
     ucs = ["UC1", "UC2", "UC3"]
     uc_map = {uc["use_case_id"].split("_")[0]: uc for uc in pilot_data.get("use_cases", [])}
     uc_labels = [
-        "UC1: Schema Break\n(M2a Drop l_tax)",
-        "UC2: Constraint Drift\n(M4a Null & Negative)",
-        "UC3: Transform Drift\n(M5a Revenue ×100)"
+        "UC1: Schema Evolution\n(M1a Allowlist l_promo_code)",
+        "UC2: Row Corruption\n(M4a+M4c Quarantine & Replay)",
+        "UC3: Catastrophic Drift\n(M5a Discount ×100 Rollback)"
     ]
 
     mttd = [uc_map[uc]["mttd_ms"] for uc in ucs]
@@ -454,6 +456,7 @@ def plot_fig6():
     ax1.set_xticklabels(uc_labels)
     ax1.set_ylabel("Latency (ms)")
     ax1.set_yscale("log")
+    ax1.set_ylim(10, 45000)
     ax1.legend(loc="upper left", frameon=True, fontsize=9)
     ax1.grid(axis="y", linestyle="--", alpha=0.6)
 

@@ -71,7 +71,7 @@ Toàn bộ cấu trúc mã nguồn, tài liệu và kết quả thực nghiệm 
 | **Chương 2** | **Cơ Sở Lý Thuyết & Công Trình Liên Quan:** Khảo cứu Medallion Architecture, Data Contracts movement, dbt model contracts, Great Expectations, Soda Core; phân tích khoảng trống nghiên cứu (Research Gap). | `docs/academic_baseline_spec.md`; `docs/gap_analysis.md`. |
 | **Chương 3** | **Dữ Liệu Thực Nghiệm & Đo Đạc Baseline C0:** Tiêu chuẩn TPC-H Benchmark, thiết kế pipeline Medallion chuẩn; kết quả đo đạc Baseline C0 trên 14 kịch bản lỗi gốc (DR = 0%, Blast Radius = 14.8%). | `data/`; `results/baseline/`; `scripts/run_baseline.py`; `scripts/fill_baseline_form.py`. |
 | **Chương 4** | **Phương Pháp Đề Xuất (Framework MedalGuard):**<br>• 4.1 Kiến trúc tổng thể Dual-Boundary Gate.<br>• 4.2 **CT1 (DE-A/D):** Ngôn ngữ hợp đồng YAML đa tầng & Mutation Engine v2 (36 kịch bản, metadata severity, schema versioning).<br>• 4.3 **CT2 (DE-A/B):** In-line Gate Engine, DuckDB vector pushdown & Cơ chế Staged In-place Quarantine.<br>• 4.4 **CT3 (DE-B/C):** Đồ thị Lineage đa tầng, Root-Cause Diff, Tự phục hồi LKG Rollback & Replay Engine. | • `contracts/bronze_to_silver/`, `contracts/silver_to_gold/`<br>• `mutations/` (36 mutations v2)<br>• `medalguard/gate.py`, `medalguard/validators/`<br>• `medalguard/lineage.py`, `medalguard/replay.py`, `medalguard/alerting.py` |
-| **Chương 5** | **Thực Nghiệm Đánh Giá & Phân Tích Kết Quả:**<br>• 5.1 Ma trận so sánh E1 (Core 19 vs Expanded 36, paired CI 95%, McNemar test, DE SLA metrics).<br>• 5.2 Nghiên cứu triệt tiêu 2 trục E2 (Ablation Validator A1..A6 & Boundary Placement B1, B2, C3_DUAL).<br>• 5.3 Benchmark Chi phí & Năng lực co giãn E3 (SF=0.1 vs SF=1.0, Stress test 1.5M records, Scaling model curve).<br>• 5.4 Phân tích lỗi E4 (3 failure taxonomies, Quality-Latency-Cost trade-offs, Threats to validity).<br>• 5.5 Hồ sơ tái lập thực nghiệm E5. | • `scripts/run_phase2_experiments.py`<br>• `results/summary/e1_*.json`, `results/summary/e1_*.csv`<br>• `results/summary/e2_*.json`, `results/summary/e2_*.csv`<br>• `results/summary/e3_*.json`, `results/summary/e3_*.csv`<br>• `results/summary/e4_error_analysis_and_tradeoffs.md`<br>• `scripts/visualize_phase2.py` (6 charts 300 DPI) |
+| **Chương 5** | **Thực Nghiệm Đánh Giá & Phân Tích Kết Quả:**<br>• 5.1 Ma trận so sánh E1 (Core 19 vs Expanded 36, paired CI 95%, McNemar test, DE SLA metrics).<br>• 5.2 Nghiên cứu triệt tiêu 2 trục E2 (Ablation Validator A1..A6 & Boundary Placement B1, B2, C3_DUAL).<br>• 5.3 Benchmark Chi phí & Năng lực co giãn E3 (SF=0.1 vs SF=1.0, Stress test ~7.65M records, Scaling model curve).<br>• 5.4 Phân tích lỗi E4 (3 failure taxonomies, Quality-Latency-Cost trade-offs, Threats to validity).<br>• 5.5 Hồ sơ tái lập thực nghiệm E5. | • `scripts/run_phase2_experiments.py`<br>• `results/summary/e1_*.json`, `results/summary/e1_*.csv`<br>• `results/summary/e2_*.json`, `results/summary/e2_*.csv`<br>• `results/summary/e3_*.json`, `results/summary/e3_*.csv`<br>• `results/summary/e4_error_analysis_and_tradeoffs.md`<br>• `scripts/visualize_phase2.py` (6 charts 300 DPI) |
 | **Chương 6** | **Hệ Thống Thử Nghiệm & Ứng Dụng Thực Tế:**<br>• 6.1 Giao diện Quarantine & Replay Web Console.<br>• 6.2 Đánh giá Pilot 3 tình huống thực tế (UC1 Schema Evolution Allowlist, UC2 Row-level Quarantine & Repair, UC3 Catastrophic Drift & Rollback). | • `medalguard/console.py`<br>• `results/console/quarantine_replay_console.html`<br>• `results/summary/ct3_pilot_use_cases.json`, `.md`<br>• `results/alerts/` (Email HTMLs & Webhook JSONs) |
 | **Chương 7** | **Kết Luận & Hướng Phát Triển:** Tóm tắt đóng góp kỹ thuật, bài học kinh nghiệm, hạn chế và lộ trình mở rộng sang cụm phân tán Spark/Trino. | `PROJECT_OVERVIEW.md` (Mục 7); `README.md` (Mục 5). |
 
@@ -102,7 +102,7 @@ Luận văn tuân thủ nghiêm ngặt chuỗi lập luận khoa học theo tiê
 
 ## 5. KẾT QUẢ THỰC NGHIỆM TOÀN DIỆN (E1, E2, E3, E4, E5)
 
-### 5.1 E1: Ma Trận So Sánh Đa Cấu Hình (SF=0.1)
+### 5.1 E1: Ma Trận So Sánh Đa Cấu Hình (SF=0.1, ~765,572 dòng qua 3 bảng chính: 600,572 dòng lineitem, 150,000 dòng orders, 15,000 dòng customer)
 
 #### Bảng 1: Kết quả Thực nghiệm Tập Core 19 Gốc (14 Harmful + 5 Benign = 95 Runs)
 *Trích xuất từ [`e1_main_matrix_core19.csv`](results/summary/e1_main_matrix_core19.csv) và [`e1_paired_statistical_ci.json`](results/summary/e1_paired_statistical_ci.json).*
@@ -166,7 +166,7 @@ Luận văn tuân thủ nghiêm ngặt chuỗi lập luận khoa học theo tiê
 | **C2 (Great Exp.)** | 14,963.3 ms | +0.5% | 19,306.3 ms | +2.5% | 134.0 ms | 7,769 |
 | **C3 (MedalGuard)** | 15,269.4 ms | **+2.6%** | 20,434.0 ms | **+8.5%** | **506.1 ms** *(9.4% dbt time)* | 7,341 |
 
-#### Bảng 6: Kiểm Thử Áp Lực 6 Kịch Bản Đại Diện trên C3 tại SF=1.0 (1.5 Triệu Bản Ghi)
+#### Bảng 6: Kiểm Thử Áp Lực 6 Kịch Bản Đại Diện trên C3 tại SF=1.0 (~7.65 triệu dòng qua 3 bảng chính: 6.0M dòng lineitem, 1.5M dòng orders, 150K dòng customer)
 *Trích xuất từ [`e3_overhead_and_scaling.json`](results/summary/e3_overhead_and_scaling.json).*
 
 | Kịch bản Đột biến | Phân loại | Severity | Trạng thái Pipeline | Phát hiện? | DDI | Số dòng Cách ly | Hiệu quả Cách ly (QE) | Blast Radius % | Wall Time (ms) |
@@ -222,7 +222,7 @@ medalguard-seminar/
 │   ├── m3_type_change.py                     # M3a-M3e: Đột biến trôi dạt kiểu dữ liệu
 │   ├── m4_constraint_breach.py               # M4a-M4e: Đột biến vi phạm ràng buộc cấp dòng
 │   ├── m5_semantic_drift.py                  # M5a-M5e: Đột biến trôi dạt ngữ nghĩa phân phối
-│   └── benign.py                             # B1-B12: 12 kịch bản tiến hóa lành tính
+│   └── benign_mutations.py                   # B1-B12: 12 kịch bản tiến hóa lành tính
 ├── experiments/                              # Bộ điều khiển thực nghiệm
 │   ├── config.yaml                           # Cấu hình C0..C3, Ablation A1..A6, Boundary B1..B2
 │   ├── ground_truth.yaml                     # Ground truth phân loại lỗi & hành vi kỳ vọng

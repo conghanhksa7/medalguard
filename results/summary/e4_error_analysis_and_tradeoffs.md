@@ -94,7 +94,7 @@ flowchart TD
 
 | Trục Đánh Đổi | dbt Contracts (`C1`) | Great Expectations Post-run (`C2`) | MedalGuard Dual-Gate (`C3`) |
 | :--- | :--- | :--- | :--- |
-| **Chất lượng (Quality)** | **Nửa vời:** Độ hợp lệ cao (94.71%) nhưng Độ hoàn thiện thấp (72.22%) do cơ chế All-or-Nothing làm mất dữ liệu sạch. | **Kém:** Để lọt toàn bộ lỗi Ingestion vào Silver; chỉ chặn muộn tại Gold khi Silver đã ô nhiễm nặng nề. | **Tối ưu tuyệt đối:** Hợp lệ **97.44%**, Hoàn thiện **99.98%**, Triệt tiêu Blast Radius về **0.0%**, Ingest Correctness **100.0%**. |
+| **Chất lượng (Quality)** | **Nửa vời:** Độ hợp lệ cao (94.71%) nhưng Độ hoàn thiện thấp (72.22%) do cơ chế All-or-Nothing làm mất dữ liệu sạch. | **Kém:** Để lọt toàn bộ lỗi Ingestion vào Silver; chỉ chặn muộn tại Gold khi Silver đã ô nhiễm nặng nề. | **Tối ưu tuyệt đối:** Hợp lệ **100.00%**, Hoàn thiện **99.98%**, Triệt tiêu Blast Radius về **0.0%**, Ingest Correctness **100.0%**. |
 | **Độ trễ Kiểm định (Latency)** | $0.0\text{ ms}$ (tích hợp trong DDL engine của DB). | $48.8\text{ ms}$ (SF=0.1) đến $134.0\text{ ms}$ (SF=1.0). | $289.4\text{ ms}$ (SF=0.1) đến $506.1\text{ ms}$ (SF=1.0) cho cả 2 cổng Gate 1 + Gate 2. |
 | **Độ trễ Phục hồi (MTTR)** | **Thủ công & Rất lâu:** Data Engineer phải sửa code nguồn và nạp lại toàn bộ từ Bronze (tốn hàng chục phút). | **Chậm:** Phải truncate và rerun Silver & Gold từ đầu. | **Tự động & Siêu nhanh:** Phục hồi Gold từ LKG Snapshot chỉ mất **`51.9 ms`**; Replay & Backfill mất **`8.3 giây`**. |
 | **Chi phí Tính toán (Compute Overhead)** | Thấp (+0.5% ở SF=0.1). | Thấp (+0.5% ở SF=0.1, +2.5% ở SF=1.0). | Cực kỳ hợp lý: **+2.6%** (SF=0.1) và **+8.5%** (SF=1.0). Thuật toán kiểm định chiếm chưa đầy **`9.4%`** runtime của dbt. |
@@ -111,7 +111,7 @@ flowchart TD
    - *Biện pháp giảm thiểu:* Thiết kế của MedalGuard tách bạch giữa tầng đặc tả hợp đồng (YAML agnostic) và tầng thực thi kiểm định (SQL pushdown). Toàn bộ các truy vấn vị từ và kiểm định tổng hợp (vector aggregates) đều tuân thủ chuẩn ANSI-SQL, cho phép chuyển đổi trực tiếp sang Trino, DuckDB trên S3/GCS, Databricks Spark SQL hoặc Snowflake mà không cần sửa đổi kiến trúc.
 3. **Nguy cơ Đe dọa Tính Hợp lệ Đo lường (Construct Validity):**
    - *Nguy cơ:* Chỉ số `Blast Radius` có thể bị ước lượng sai nếu chỉ đếm số dòng lệch mà không tính đến trọng số sai lệch số học.
-   - *Biện pháp giảm thiểu:* Áp dụng công thức `Residual Difference Ratio` so khớp trên từng cặp khóa chính và so sánh giá trị số thực với ngưỡng sai số tuyệt đối $\epsilon = 10^{-4}$.
+   - *Biện pháp giảm thiểu:* Áp dụng công thức `Residual Difference Ratio` so khớp trên từng cặp khóa chính và so sánh giá trị số thực với ngưỡng sai số tương đối $\text{REL\_TOL} = 10^{-9}$.
 4. **Nguy cơ Đe dọa Tính Hợp lệ Thống kê (Statistical Validity):**
    - *Nguy cơ:* Cỡ mẫu 14 kịch bản Core có thể gặp phương sai lớn.
    - *Biện pháp giảm thiểu:* Mở rộng lên 36 kịch bản (180 runs E1, 168 runs E2, 64 runs E3); đo lường 7 lần chạy lặp độc lập; tính toán khoảng tin cậy 95% Wilson Score cho tỷ lệ nhị thức, 95% Bootstrap CI (2,000 resamples) cho sai số trung bình và kiểm định McNemar Exact Binomial Test.

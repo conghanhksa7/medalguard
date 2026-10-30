@@ -32,7 +32,7 @@ All experiments were executed on TPC-H Benchmark across 5 configurations:
 - **C3_standalone:** MedalGuard Standalone In-line Gate.
 - **C3:** MedalGuard Full In-line Dual-Gate Architecture.
 
-### 2.1 E1: Main Comparative Matrix (SF=0.1, 150,000 lineitem rows)
+### 2.1 E1: Main Comparative Matrix (SF=0.1, ~765,572 dòng qua 3 bảng chính: 600,572 dòng lineitem, 150,000 dòng orders, 15,000 dòng customer)
 
 #### Table 1: Core 19 Benchmark (14 Harmful + 5 Benign Scenarios = 95 Runs)
 | Configuration | Detection Rate (95% Wilson CI) | FPR (95% Wilson CI) | Mean Blast Radius (95% Bootstrap CI) | $\Delta$BR vs C3 (95% CI) | McNemar *p* (vs C3) | Core Execution (ms) | Ingest Correctness | SLA Attainment |
@@ -86,7 +86,7 @@ All experiments were executed on TPC-H Benchmark across 5 configurations:
 | **C2 (Great Exp.)** | 14,963.3 ms | +0.5% | 19,306.3 ms | +2.5% | 134.0 ms | 7,769 |
 | **C3 (MedalGuard)** | 15,269.4 ms | **+2.6%** | 20,434.0 ms | **+8.5%** | **506.1 ms** *(9.4% dbt time)* | 7,341 |
 
-#### Table 6: Stress Test on 6 Representative Mutations at SF=1.0 (1.5 Million Records)
+#### Table 6: Stress Test on 6 Representative Mutations at SF=1.0 (~7.65 triệu dòng qua 3 bảng chính: 6.0M dòng lineitem, 1.5M dòng orders, 150K dòng customer)
 | Mutation Scenario | Category | Severity | Pipeline Status | Detected? | DDI | Quarantined Rows | QE (%) | Blast Radius % | Wall Time (ms) |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | `M1a_AddSingleCol` | ADDITIVE | MEDIUM | `BLOCKED` | **True** | DDI=0 | 0 | N/A | **0.0%** | 7,581.7 |

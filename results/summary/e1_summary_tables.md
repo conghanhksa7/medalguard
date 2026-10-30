@@ -1,5 +1,5 @@
 # BẢNG KẾT QUẢ THỰC NGHIỆM E1: MA TRẬN SO SÁNH ĐA CẤU HÌNH
-**Quy mô thực nghiệm:** TPC-H SF=0.1 (150,000 dòng `lineitem`), 5 cấu hình (`C0, C1, C2, C3_standalone, C3`).
+**Quy mô thực nghiệm:** TPC-H SF=0.1 (~765,572 dòng qua 3 bảng chính: 600,572 dòng lineitem, 150,000 dòng orders, 15,000 dòng customer), 5 cấu hình (`C0, C1, C2, C3_standalone, C3`).
 **Phương pháp thống kê:** Khoảng tin cậy 95% Wilson Score (Tỷ lệ phát hiện & Dương tính giả), 95% Non-parametric Bootstrap CI (2,000 resamples cho Blast Radius & Paired Diff), và McNemar's Exact Binomial Test đối chiếu cặp từng kịch bản đột biến.
 
 ## 1. Kết Quả Thực Nghiệm Tập Core 19 (14 Harmful + 5 Benign = 95 Runs)

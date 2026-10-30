@@ -1,7 +1,7 @@
 # BẢNG KẾT QUẢ THỰC NGHIỆM E3: ĐO LƯỜNG OVERHEAD & NĂNG LỰC CO GIÃN (SCALE BENCHMARK)
 Đo lường thời gian thực thi, dbt runtime, thời gian kiểm định (validation), chi phí overhead và thông lượng (throughput) trên dữ liệu sạch chuẩn TPC-H.
 
-## 1. Chi Phí Thực Thi Tại Quy Mô Tiêu Chuẩn SF=0.1 (150,000 Dòng lineitem, 7 Lần Chạy Lặp)
+## 1. Chi Phí Thực Thi Tại Quy Mô Tiêu Chuẩn SF=0.1 (~765,572 dòng qua 3 bảng chính: 600,572 dòng lineitem, 150,000 dòng orders, 15,000 dòng customer, 7 Lần Chạy Lặp)
 | Cấu hình | Median Wall (ms) | Mean ± Std (ms) | dbt Elapsed (ms) | Validation (ms) | Core Exec (ms) | Overhead vs C0 (%) | Throughput (records/sec) |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **C0** | **14885.1** | 14972.2 ± 249.8 | 1502.9 | 0.0 | 1502.9 | **0.0% (Ref)** | 1,008 |
@@ -9,7 +9,7 @@
 | **C2** | **14963.3** | 15151.6 ± 520.4 | 1483.8 | 48.8 | 1532.6 | **+0.5%** | 1,002 |
 | **C3** | **15269.4** | 15273.7 ± 189.3 | 1544.6 | 289.4 | 1839.7 | **+2.6%** | 982 |
 
-## 2. Chi Phí Thực Thi Tại Quy Mô Mở Rộng SF=1.0 (1,500,000 Dòng lineitem, 3 Lần Chạy Lặp)
+## 2. Chi Phí Thực Thi Tại Quy Mô Mở Rộng SF=1.0 (~7.65 triệu dòng qua 3 bảng chính: 6.0M dòng lineitem, 1.5M dòng orders, 150K dòng customer, 3 Lần Chạy Lặp)
 | Cấu hình | Median Wall (ms) | Mean ± Std (ms) | dbt Elapsed (ms) | Validation (ms) | Core Exec (ms) | Overhead vs C0 (%) | Throughput (records/sec) |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **C0** | **18826.7** | 18860.2 ± 76.1 | 5387.8 | 0.0 | 5387.8 | **0.0% (Ref)** | 7,967 |
@@ -17,7 +17,7 @@
 | **C2** | **19306.3** | 19338.9 ± 97.1 | 5399.4 | 134.0 | 5533.4 | **+2.5%** | 7,769 |
 | **C3** | **20434.0** | 20368.5 ± 282.5 | 5994.2 | 506.1 | 6497.0 | **+8.5%** | 7,341 |
 
-## 3. Kiểm Thử Áp Lực (Stress Test) 6 Kịch Bản Đại Diện trên C3 tại SF=1.0
+## 3. Kiểm Thử Áp Lực (Stress Test) 6 Kịch Bản Đại Diện trên C3 tại SF=1.0 (~7.65 triệu dòng)
 | Kịch bản Đột biến | Phân loại | Severity | Trạng thái Pipeline | Phát hiện? | Độ sâu (DDI) | Số dòng Cách ly | Hiệu quả Cách ly (QE) | Blast Radius % | Wall Time (ms) |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **M1a_AddSingleCol** | ADDITIVE | MEDIUM | `BLOCKED` | **True** | DDI=0 | 0 | N/A | **0.0%** | 7581.7 |
@@ -37,4 +37,4 @@
 
 ### Nhận định Học thuật:
 1. **Chi phí Kiểm định Tuyệt đối Siêu Thấp:** Tại SF=0.1, MedalGuard In-line Gate (`C3`) chỉ tốn xấp xỉ vài chục mili-giây cho Gate validation trên DuckDB vector engine, duy trì mức overhead hoàn toàn chấp nhận được so với lợi ích triệt tiêu 100% Blast Radius.
-2. **Tính Ổn định Tuyệt đối khi Scale:** Ở quy mô 1.5 triệu bản ghi (SF=1.0), MedalGuard phát hiện và cách ly hoàn hảo 100% các lỗi nghiêm trọng, bảo toàn tính toàn vẹn của tầng Gold với $BR = 0.0\%$.
+2. **Tính Ổn định Tuyệt đối khi Scale:** Ở quy mô ~7.65 triệu bản ghi (SF=1.0), MedalGuard phát hiện và cách ly hoàn hảo 100% các lỗi nghiêm trọng, bảo toàn tính toàn vẹn của tầng Gold với $BR = 0.0\%$.
