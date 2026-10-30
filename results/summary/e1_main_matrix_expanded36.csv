@@ -1,0 +1,341 @@
+experiment_id,mutation_name,category,config_name,scale_factor,run_index,pipeline_status,measurement_type,detected,blast_radius,source_fault_leakage,detection_depth,detection_depth_index,detection_stage,false_positive,pipeline_wall_ms,dbt_elapsed_ms,validation_ms,quarantined_rows,quarantine_effective,quarantine_effectiveness_pct,quarantine_recall,clean_rows_preserved_pct,gate1_violations,gate2_violations,gx_violations,gold_residual_diff_ratio,completeness_pct,validity_pct,duplication_rate_pct,ingest_correctness,sla_attained,recoverability_pct,core_execution_ms,severity,schema_version,target_table,is_core,timestamp,error_message
+M1a_AddSingleCol__C0__SF0.1__run0,M1a_AddSingleCol,ADDITIVE,C0,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,11864.2,1501.3,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,False,100.0,1501.3,MEDIUM,v1.1-unregistered,lineitem,True,2026-10-30T17:51:19.400396,
+M1b_AddMultiCol__C0__SF0.1__run0,M1b_AddMultiCol,ADDITIVE,C0,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10901.4,1639.8,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,False,100.0,1639.8,MEDIUM,v1.2-unregistered,lineitem,True,2026-10-30T17:51:31.472208,
+M1c_AddCustomerPiiCol__C0__SF0.1__run0,M1c_AddCustomerPiiCol,ADDITIVE,C0,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10373.3,1494.7,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,False,100.0,1494.7,HIGH,v1.1-pii-leak,customer,False,2026-10-30T17:51:42.654346,
+M1d_AddOrdersShadowCol__C0__SF0.1__run0,M1d_AddOrdersShadowCol,ADDITIVE,C0,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10390.4,1486.4,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,False,100.0,1486.4,MEDIUM,v1.1-unregistered,orders,False,2026-10-30T17:51:53.178254,
+M2a_DropNonKey__C0__SF0.1__run0,M2a_DropNonKey,DESTRUCTIVE,C0,0.1,0,CRASH,ASSIGNED_CRASH,False,0.0,0.0,-1,-1,NOT_DETECTED,False,5520.5,620.6,0.0,0,False,0.0,,100.0,0,0,0,0.0,0.0,0.0,0.0,False,False,0.0,620.6,CRITICAL,v2.0-breaking,lineitem,True,2026-10-30T17:52:03.713239,"Silver error: 10:52:06  Running with dbt=1.12.5
+10:52:07  Registered adapter: duckdb=1.11.0
+10:52:07  Found 8 models, 5 data tests, 8 sources, 501 macros
+10:52:07  
+10:52:07  Concurrency: 4 threads (target='dev')
+10:52:07  
+10:52:07  1 of 3 START sql table model silver.silver_customer ............................ [RUN]
+10:52:07  2 of 3 START sql table model silver.silver_lineitem ............................ [RUN]
+10:52:07  3 of 3 START sql table model silver.silver_orders .............................. [RUN]"
+M2b_DropKeyCol__C0__SF0.1__run0,M2b_DropKeyCol,DESTRUCTIVE,C0,0.1,0,CRASH,ASSIGNED_CRASH,False,0.0,0.0,-1,-1,NOT_DETECTED,False,5516.8,580.0,0.0,0,False,0.0,,100.0,0,0,0,0.0,0.0,0.0,0.0,False,False,0.0,580.0,CRITICAL,v2.0-breaking,lineitem,True,2026-10-30T17:52:09.714622,"Silver error: 10:52:13  Running with dbt=1.12.5
+10:52:13  Registered adapter: duckdb=1.11.0
+10:52:13  Found 8 models, 5 data tests, 8 sources, 501 macros
+10:52:13  
+10:52:13  Concurrency: 4 threads (target='dev')
+10:52:13  
+10:52:14  1 of 3 START sql table model silver.silver_customer ............................ [RUN]
+10:52:14  2 of 3 START sql table model silver.silver_lineitem ............................ [RUN]
+10:52:14  3 of 3 START sql table model silver.silver_orders .............................. [RUN]"
+M2c_RenameCol__C0__SF0.1__run0,M2c_RenameCol,DESTRUCTIVE,C0,0.1,0,CRASH,ASSIGNED_CRASH,False,0.0,0.0,-1,-1,NOT_DETECTED,False,5362.5,560.2,0.0,0,False,0.0,,100.0,0,0,0,0.0,0.0,0.0,0.0,False,False,0.0,560.2,CRITICAL,v2.0-breaking,lineitem,True,2026-10-30T17:52:15.730944,"Silver error: 10:52:18  Running with dbt=1.12.5
+10:52:19  Registered adapter: duckdb=1.11.0
+10:52:19  Found 8 models, 5 data tests, 8 sources, 501 macros
+10:52:19  
+10:52:19  Concurrency: 4 threads (target='dev')
+10:52:19  
+10:52:19  1 of 3 START sql table model silver.silver_customer ............................ [RUN]
+10:52:19  2 of 3 START sql table model silver.silver_lineitem ............................ [RUN]
+10:52:19  3 of 3 START sql table model silver.silver_orders .............................. [RUN]"
+M2d_DropCustomerNationKey__C0__SF0.1__run0,M2d_DropCustomerNationKey,DESTRUCTIVE,C0,0.1,0,CRASH,ASSIGNED_CRASH,False,0.0,0.0,-1,-1,NOT_DETECTED,False,5584.9,567.9,0.0,0,False,0.0,,100.0,0,0,0,0.0,0.0,0.0,0.0,False,False,0.0,567.9,CRITICAL,v2.0-breaking,customer,False,2026-10-30T17:52:21.570036,"Silver error: 10:52:24  Running with dbt=1.12.5
+10:52:24  Registered adapter: duckdb=1.11.0
+10:52:25  Found 8 models, 5 data tests, 8 sources, 501 macros
+10:52:25  
+10:52:25  Concurrency: 4 threads (target='dev')
+10:52:25  
+10:52:25  1 of 3 START sql table model silver.silver_customer ............................ [RUN]
+10:52:25  2 of 3 START sql table model silver.silver_lineitem ............................ [RUN]
+10:52:25  3 of 3 START sql table model silver.silver_orders .............................. [RUN]"
+M2e_RenameOrdersPriority__C0__SF0.1__run0,M2e_RenameOrdersPriority,DESTRUCTIVE,C0,0.1,0,CRASH,ASSIGNED_CRASH,False,0.0,0.0,-1,-1,NOT_DETECTED,False,5640.4,574.1,0.0,0,False,0.0,,100.0,0,0,0,0.0,0.0,0.0,0.0,False,False,0.0,574.1,CRITICAL,v2.0-breaking,orders,False,2026-10-30T17:52:27.324346,"Silver error: 10:52:30  Running with dbt=1.12.5
+10:52:30  Registered adapter: duckdb=1.11.0
+10:52:31  Found 8 models, 5 data tests, 8 sources, 501 macros
+10:52:31  
+10:52:31  Concurrency: 4 threads (target='dev')
+10:52:31  
+10:52:31  1 of 3 START sql table model silver.silver_customer ............................ [RUN]
+10:52:31  2 of 3 START sql table model silver.silver_lineitem ............................ [RUN]
+10:52:31  3 of 3 START sql table model silver.silver_orders .............................. [RUN]"
+M3a_DoubleToVarchar__C0__SF0.1__run0,M3a_DoubleToVarchar,TYPE_CHANGE,C0,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10717.8,1566.7,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,False,100.0,1566.7,HIGH,v2.0-type-drift,lineitem,True,2026-10-30T17:52:33.255240,
+M3b_IntegerToDouble__C0__SF0.1__run0,M3b_IntegerToDouble,TYPE_CHANGE,C0,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10626.5,1580.5,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,False,100.0,1580.5,MEDIUM,v2.0-type-drift,lineitem,True,2026-10-30T17:52:44.807930,
+M3c_DateToVarchar__C0__SF0.1__run0,M3c_DateToVarchar,TYPE_CHANGE,C0,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10373.3,1446.5,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,False,100.0,1446.5,HIGH,v2.0-type-drift,orders,True,2026-10-30T17:52:56.260861,
+M3d_CustomerAcctbalToVarchar__C0__SF0.1__run0,M3d_CustomerAcctbalToVarchar,TYPE_CHANGE,C0,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10446.4,1470.9,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,False,100.0,1470.9,HIGH,v2.0-type-drift,customer,False,2026-10-30T17:53:07.110199,
+M3e_OrdersCustkeyToVarchar__C0__SF0.1__run0,M3e_OrdersCustkeyToVarchar,TYPE_CHANGE,C0,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10449.9,1542.1,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,False,100.0,1542.1,CRITICAL,v2.0-type-drift,orders,False,2026-10-30T17:53:17.759542,
+M4a_NullAndNegative__C0__SF0.1__run0,M4a_NullAndNegative,CONSTRAINT_BREACH,C0,0.1,0,SUCCESS,MEASURED,False,0.1053,0.1053,-1,-1,NOT_DETECTED,False,10527.8,1509.7,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,89.47,0.0,False,False,100.0,1509.7,HIGH,v1.0-row-fault,orders,True,2026-10-30T17:53:28.679752,
+M4b_NullSmall__C0__SF0.1__run0,M4b_NullSmall,CONSTRAINT_BREACH,C0,0.1,0,SUCCESS,MEASURED,False,0.0263,0.0263,-1,-1,NOT_DETECTED,False,10609.0,1573.8,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,97.37,0.0,False,False,100.0,1573.8,MEDIUM,v1.0-row-fault,orders,True,2026-10-30T17:53:41.275443,
+M4c_DuplicateKeys__C0__SF0.1__run0,M4c_DuplicateKeys,CONSTRAINT_BREACH,C0,0.1,0,SUCCESS,MEASURED,False,0.0421,0.0421,-1,-1,NOT_DETECTED,False,10487.1,1488.6,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,95.79,0.0333,False,False,100.0,1488.6,HIGH,v1.0-row-fault,orders,True,2026-10-30T17:53:53.889452,
+M4d_LineitemNegativeQty__C0__SF0.1__run0,M4d_LineitemNegativeQty,CONSTRAINT_BREACH,C0,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10367.2,1466.3,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,False,100.0,1466.3,HIGH,v1.0-row-fault,lineitem,False,2026-10-30T17:54:04.686647,
+M4e_CustomerDuplicateKeys__C0__SF0.1__run0,M4e_CustomerDuplicateKeys,CONSTRAINT_BREACH,C0,0.1,0,SUCCESS,MEASURED,False,0.2316,0.2316,-1,-1,NOT_DETECTED,False,10447.2,1431.6,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,76.84,0.0667,False,False,100.0,1431.6,HIGH,v1.0-row-fault,customer,False,2026-10-30T17:54:15.539943,
+M5a_MULTIPLY_100__C0__SF0.1__run0,M5a_MULTIPLY_100,SEMANTIC_DRIFT,C0,0.1,0,SUCCESS,MEASURED,False,0.9211,0.9211,-1,-1,NOT_DETECTED,False,10351.4,1458.0,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,7.89,0.0,False,False,100.0,1458.0,CRITICAL,v1.0-semantic,lineitem,True,2026-10-30T17:54:26.163922,
+M5b_MULTIPLY_1_5__C0__SF0.1__run0,M5b_MULTIPLY_1_5,SEMANTIC_DRIFT,C0,0.1,0,SUCCESS,MEASURED,False,0.9211,0.9211,-1,-1,NOT_DETECTED,False,10409.2,1483.4,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,7.89,0.0,False,False,100.0,1483.4,HIGH,v1.0-semantic,lineitem,True,2026-10-30T17:54:37.017632,
+M5c_CATEGORICAL_SHIFT__C0__SF0.1__run0,M5c_CATEGORICAL_SHIFT,SEMANTIC_DRIFT,C0,0.1,0,SUCCESS,MEASURED,False,0.0615,0.0615,-1,-1,NOT_DETECTED,False,10526.2,1567.0,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,93.85,0.0,False,False,100.0,1567.0,HIGH,v1.0-semantic,orders,True,2026-10-30T17:54:47.926895,
+M5d_LineitemTaxSpike__C0__SF0.1__run0,M5d_LineitemTaxSpike,SEMANTIC_DRIFT,C0,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10400.0,1504.7,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,False,100.0,1504.7,CRITICAL,v1.0-stat-drift,lineitem,False,2026-10-30T17:54:58.749230,
+M5e_ShipmodeInvalidCode__C0__SF0.1__run0,M5e_ShipmodeInvalidCode,SEMANTIC_DRIFT,C0,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10674.3,1529.3,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,False,100.0,1529.3,MEDIUM,v1.0-domain-drift,lineitem,False,2026-10-30T17:55:09.655984,
+B1_AddColumn__C0__SF0.1__run0,B1_AddColumn,BENIGN,C0,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10369.6,1506.8,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1506.8,BENIGN,v1.1-compatible,lineitem,True,2026-10-30T17:55:20.806313,
+B2_ValueInRange__C0__SF0.1__run0,B2_ValueInRange,BENIGN,C0,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10530.2,1544.4,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1544.4,BENIGN,v1.1-compatible,lineitem,True,2026-10-30T17:55:31.364948,
+B3_InsertRows__C0__SF0.1__run0,B3_InsertRows,BENIGN,C0,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10408.7,1479.6,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1479.6,BENIGN,v1.1-compatible,orders,True,2026-10-30T17:55:42.367960,
+B4_ReorderCols__C0__SF0.1__run0,B4_ReorderCols,BENIGN,C0,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10470.5,1509.2,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1509.2,BENIGN,v1.1-reorder,orders,False,2026-10-30T17:55:53.063741,
+B5_AddValidStatus__C0__SF0.1__run0,B5_AddValidStatus,BENIGN,C0,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10411.4,1499.1,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1499.1,BENIGN,v1.1-compatible,orders,True,2026-10-30T17:56:03.988062,
+B6_IncreasePrecision__C0__SF0.1__run0,B6_IncreasePrecision,BENIGN,C0,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10472.6,1519.6,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1519.6,BENIGN,v1.1-widening,orders,False,2026-10-30T17:56:14.698214,
+B7_LargeBatchInsert__C0__SF0.1__run0,B7_LargeBatchInsert,BENIGN,C0,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10522.5,1545.3,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1545.3,BENIGN,v1.1-compatible,orders,True,2026-10-30T17:56:25.649983,
+B8_WhitespaceValues__C0__SF0.1__run0,B8_WhitespaceValues,BENIGN,C0,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10560.2,1567.4,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1567.4,BENIGN,v1.0-benign-data,orders,False,2026-10-30T17:56:36.813808,
+B9_AddOrdersAuditCol__C0__SF0.1__run0,B9_AddOrdersAuditCol,BENIGN,C0,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10410.6,1501.6,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1501.6,BENIGN,v1.1-allowlisted,orders,False,2026-10-30T17:56:47.735459,
+B10_AddCustomerAuditCol__C0__SF0.1__run0,B10_AddCustomerAuditCol,BENIGN,C0,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10427.8,1460.5,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1460.5,BENIGN,v1.1-allowlisted,customer,False,2026-10-30T17:56:58.291034,
+B11_QuantityInRange__C0__SF0.1__run0,B11_QuantityInRange,BENIGN,C0,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10485.9,1532.8,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1532.8,BENIGN,v1.0-benign-data,lineitem,False,2026-10-30T17:57:08.845177,
+B12_CustomerBalUpdate__C0__SF0.1__run0,B12_CustomerBalUpdate,BENIGN,C0,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10659.5,1610.2,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1610.2,BENIGN,v1.0-benign-data,customer,False,2026-10-30T17:57:19.808405,
+M1a_AddSingleCol__C1__SF0.1__run0,M1a_AddSingleCol,ADDITIVE,C1,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,11559.9,1703.4,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,False,100.0,1703.4,MEDIUM,v1.1-unregistered,lineitem,True,2026-10-30T17:57:30.642533,
+M1b_AddMultiCol__C1__SF0.1__run0,M1b_AddMultiCol,ADDITIVE,C1,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10628.9,1679.9,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,False,100.0,1679.9,MEDIUM,v1.2-unregistered,lineitem,True,2026-10-30T17:57:42.391573,
+M1c_AddCustomerPiiCol__C1__SF0.1__run0,M1c_AddCustomerPiiCol,ADDITIVE,C1,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10521.9,1532.9,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,False,100.0,1532.9,HIGH,v1.1-pii-leak,customer,False,2026-10-30T17:57:53.259917,
+M1d_AddOrdersShadowCol__C1__SF0.1__run0,M1d_AddOrdersShadowCol,ADDITIVE,C1,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10628.6,1579.6,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,False,100.0,1579.6,MEDIUM,v1.1-unregistered,orders,False,2026-10-30T17:58:03.907906,
+M2a_DropNonKey__C1__SF0.1__run0,M2a_DropNonKey,DESTRUCTIVE,C1,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,1,1,SILVER_CONTRACT,False,5540.3,569.9,0.0,0,False,0.0,,100.0,0,0,0,0.0,0.0,100.0,0.0,True,False,100.0,569.9,CRITICAL,v2.0-breaking,lineitem,True,2026-10-30T17:58:14.691124,"Silver error: 10:58:17  Running with dbt=1.12.5
+10:58:18  Registered adapter: duckdb=1.11.0
+10:58:18  Found 8 models, 5 data tests, 8 sources, 501 macros
+10:58:18  
+10:58:18  Concurrency: 4 threads (target='dev')
+10:58:18  
+10:58:18  1 of 3 START sql table model silver.silver_customer ............................ [RUN]
+10:58:18  2 of 3 START sql table model silver.silver_lineitem ............................ [RUN]
+10:58:18  3 of 3 START sql table model silver.silver_orders .............................. [RUN]"
+M2b_DropKeyCol__C1__SF0.1__run0,M2b_DropKeyCol,DESTRUCTIVE,C1,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,1,1,SILVER_CONTRACT,False,5473.6,554.5,0.0,0,False,0.0,,100.0,0,0,0,0.0,0.0,100.0,0.0,True,False,100.0,554.5,CRITICAL,v2.0-breaking,lineitem,True,2026-10-30T17:58:20.709217,"Silver error: 10:58:23  Running with dbt=1.12.5
+10:58:24  Registered adapter: duckdb=1.11.0
+10:58:24  Found 8 models, 5 data tests, 8 sources, 501 macros
+10:58:24  
+10:58:24  Concurrency: 4 threads (target='dev')
+10:58:24  
+10:58:24  1 of 3 START sql table model silver.silver_customer ............................ [RUN]
+10:58:24  2 of 3 START sql table model silver.silver_lineitem ............................ [RUN]
+10:58:24  3 of 3 START sql table model silver.silver_orders .............................. [RUN]"
+M2c_RenameCol__C1__SF0.1__run0,M2c_RenameCol,DESTRUCTIVE,C1,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,1,1,SILVER_CONTRACT,False,5522.9,582.2,0.0,0,False,0.0,,100.0,0,0,0,0.0,0.0,100.0,0.0,True,False,100.0,582.2,CRITICAL,v2.0-breaking,lineitem,True,2026-10-30T17:58:26.650998,"Silver error: 10:58:29  Running with dbt=1.12.5
+10:58:30  Registered adapter: duckdb=1.11.0
+10:58:30  Found 8 models, 5 data tests, 8 sources, 501 macros
+10:58:30  
+10:58:30  Concurrency: 4 threads (target='dev')
+10:58:30  
+10:58:30  1 of 3 START sql table model silver.silver_customer ............................ [RUN]
+10:58:30  2 of 3 START sql table model silver.silver_lineitem ............................ [RUN]
+10:58:30  3 of 3 START sql table model silver.silver_orders .............................. [RUN]"
+M2d_DropCustomerNationKey__C1__SF0.1__run0,M2d_DropCustomerNationKey,DESTRUCTIVE,C1,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,1,1,SILVER_CONTRACT,False,5786.6,595.5,0.0,0,False,0.0,,100.0,0,0,0,0.0,0.0,100.0,0.0,True,False,100.0,595.5,CRITICAL,v2.0-breaking,customer,False,2026-10-30T17:58:32.635688,"Silver error: 10:58:35  Running with dbt=1.12.5
+10:58:35  Registered adapter: duckdb=1.11.0
+10:58:36  Found 8 models, 5 data tests, 8 sources, 501 macros
+10:58:36  
+10:58:36  Concurrency: 4 threads (target='dev')
+10:58:36  
+10:58:36  1 of 3 START sql table model silver.silver_customer ............................ [RUN]
+10:58:36  2 of 3 START sql table model silver.silver_lineitem ............................ [RUN]
+10:58:36  3 of 3 START sql table model silver.silver_orders .............................. [RUN]"
+M2e_RenameOrdersPriority__C1__SF0.1__run0,M2e_RenameOrdersPriority,DESTRUCTIVE,C1,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,1,1,SILVER_CONTRACT,False,5691.2,560.0,0.0,0,False,0.0,,100.0,0,0,0,0.0,0.0,100.0,0.0,True,False,100.0,560.0,CRITICAL,v2.0-breaking,orders,False,2026-10-30T17:58:38.599552,"Silver error: 10:58:41  Running with dbt=1.12.5
+10:58:41  Registered adapter: duckdb=1.11.0
+10:58:42  Found 8 models, 5 data tests, 8 sources, 501 macros
+10:58:42  
+10:58:42  Concurrency: 4 threads (target='dev')
+10:58:42  
+10:58:42  1 of 3 START sql table model silver.silver_customer ............................ [RUN]
+10:58:42  2 of 3 START sql table model silver.silver_lineitem ............................ [RUN]
+10:58:42  3 of 3 START sql table model silver.silver_orders .............................. [RUN]"
+M3a_DoubleToVarchar__C1__SF0.1__run0,M3a_DoubleToVarchar,TYPE_CHANGE,C1,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10791.7,1740.8,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,False,100.0,1740.8,HIGH,v2.0-type-drift,lineitem,True,2026-10-30T17:58:44.598063,
+M3b_IntegerToDouble__C1__SF0.1__run0,M3b_IntegerToDouble,TYPE_CHANGE,C1,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10566.0,1640.4,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,False,100.0,1640.4,MEDIUM,v2.0-type-drift,lineitem,True,2026-10-30T17:58:56.254177,
+M3c_DateToVarchar__C1__SF0.1__run0,M3c_DateToVarchar,TYPE_CHANGE,C1,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10594.1,1645.7,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,False,100.0,1645.7,HIGH,v2.0-type-drift,orders,True,2026-10-30T17:59:07.654080,
+M3d_CustomerAcctbalToVarchar__C1__SF0.1__run0,M3d_CustomerAcctbalToVarchar,TYPE_CHANGE,C1,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10668.5,1517.8,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,False,100.0,1517.8,HIGH,v2.0-type-drift,customer,False,2026-10-30T17:59:18.772595,
+M3e_OrdersCustkeyToVarchar__C1__SF0.1__run0,M3e_OrdersCustkeyToVarchar,TYPE_CHANGE,C1,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,1,1,SILVER_CONTRACT,False,5683.0,598.9,0.0,0,False,0.0,,100.0,0,0,0,0.0,0.0,100.0,0.0,True,False,100.0,598.9,CRITICAL,v2.0-type-drift,orders,False,2026-10-30T17:59:29.655014,"Silver error: 10:59:32  Running with dbt=1.12.5
+10:59:33  Registered adapter: duckdb=1.11.0
+10:59:33  Found 8 models, 5 data tests, 8 sources, 501 macros
+10:59:33  
+10:59:33  Concurrency: 4 threads (target='dev')
+10:59:33  
+10:59:33  1 of 3 START sql table model silver.silver_customer ............................ [RUN]
+10:59:33  2 of 3 START sql table model silver.silver_lineitem ............................ [RUN]
+10:59:33  3 of 3 START sql table model silver.silver_orders .............................. [RUN]"
+M4a_NullAndNegative__C1__SF0.1__run0,M4a_NullAndNegative,CONSTRAINT_BREACH,C1,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,1,1,SILVER_CONTRACT,False,5719.6,589.1,0.0,0,False,0.0,,100.0,0,0,0,0.0,0.0,100.0,0.0,True,False,100.0,589.1,HIGH,v1.0-row-fault,orders,True,2026-10-30T17:59:35.815091,"Silver error: 10:59:38  Running with dbt=1.12.5
+10:59:38  Registered adapter: duckdb=1.11.0
+10:59:39  Found 8 models, 5 data tests, 8 sources, 501 macros
+10:59:39  
+10:59:39  Concurrency: 4 threads (target='dev')
+10:59:39  
+10:59:39  1 of 3 START sql table model silver.silver_customer ............................ [RUN]
+10:59:39  2 of 3 START sql table model silver.silver_lineitem ............................ [RUN]
+10:59:39  3 of 3 START sql table model silver.silver_orders .............................. [RUN]"
+M4b_NullSmall__C1__SF0.1__run0,M4b_NullSmall,CONSTRAINT_BREACH,C1,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,1,1,SILVER_CONTRACT,False,5869.7,590.3,0.0,0,False,0.0,,100.0,0,0,0,0.0,0.0,100.0,0.0,True,False,100.0,590.3,MEDIUM,v1.0-row-fault,orders,True,2026-10-30T17:59:43.554162,"Silver error: 10:59:46  Running with dbt=1.12.5
+10:59:46  Registered adapter: duckdb=1.11.0
+10:59:47  Found 8 models, 5 data tests, 8 sources, 501 macros
+10:59:47  
+10:59:47  Concurrency: 4 threads (target='dev')
+10:59:47  
+10:59:47  1 of 3 START sql table model silver.silver_customer ............................ [RUN]
+10:59:47  2 of 3 START sql table model silver.silver_lineitem ............................ [RUN]
+10:59:47  3 of 3 START sql table model silver.silver_orders .............................. [RUN]"
+M4c_DuplicateKeys__C1__SF0.1__run0,M4c_DuplicateKeys,CONSTRAINT_BREACH,C1,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,1,1,SILVER_CONTRACT,False,10200.6,602.5,0.0,0,False,0.0,,100.0,0,0,0,0.0,0.0,100.0,0.0,True,False,100.0,602.5,HIGH,v1.0-row-fault,orders,True,2026-10-30T17:59:51.533542,"Silver error: 10:59:55  Running with dbt=1.12.5
+10:59:56  Registered adapter: duckdb=1.11.0
+10:59:57  Found 8 models, 5 data tests, 8 sources, 501 macros
+10:59:57  
+10:59:57  Concurrency: 4 threads (target='dev')
+10:59:58  
+10:59:58  1 of 3 START sql table model silver.silver_customer ............................ [RUN]
+10:59:58  2 of 3 START sql table model silver.silver_lineitem ............................ [RUN]
+10:59:58  3 of 3 START sql table model silver.silver_orders .............................. [RUN]"
+M4d_LineitemNegativeQty__C1__SF0.1__run0,M4d_LineitemNegativeQty,CONSTRAINT_BREACH,C1,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,17219.8,2725.3,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,False,100.0,2725.3,HIGH,v1.0-row-fault,lineitem,False,2026-10-30T18:00:02.101331,
+M4e_CustomerDuplicateKeys__C1__SF0.1__run0,M4e_CustomerDuplicateKeys,CONSTRAINT_BREACH,C1,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,1,1,SILVER_CONTRACT,False,9061.8,831.8,0.0,0,False,0.0,,100.0,0,0,0,0.0,0.0,100.0,0.0,True,False,100.0,831.8,HIGH,v1.0-row-fault,customer,False,2026-10-30T18:00:20.217726,"Silver error: 11:00:24  Running with dbt=1.12.5
+11:00:25  Registered adapter: duckdb=1.11.0
+11:00:26  Found 8 models, 5 data tests, 8 sources, 501 macros
+11:00:26  
+11:00:26  Concurrency: 4 threads (target='dev')
+11:00:26  
+11:00:26  1 of 3 START sql table model silver.silver_customer ............................ [RUN]
+11:00:26  2 of 3 START sql table model silver.silver_lineitem ............................ [RUN]
+11:00:26  3 of 3 START sql table model silver.silver_orders .............................. [RUN]"
+M5a_MULTIPLY_100__C1__SF0.1__run0,M5a_MULTIPLY_100,SEMANTIC_DRIFT,C1,0.1,0,SUCCESS,MEASURED,False,0.9211,0.9211,-1,-1,NOT_DETECTED,False,16948.5,2894.7,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,7.89,0.0,False,False,100.0,2894.7,CRITICAL,v1.0-semantic,lineitem,True,2026-10-30T18:00:29.551673,
+M5b_MULTIPLY_1_5__C1__SF0.1__run0,M5b_MULTIPLY_1_5,SEMANTIC_DRIFT,C1,0.1,0,SUCCESS,MEASURED,False,0.9211,0.9211,-1,-1,NOT_DETECTED,False,17121.5,2758.9,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,7.89,0.0,False,False,100.0,2758.9,HIGH,v1.0-semantic,lineitem,True,2026-10-30T18:00:47.199800,
+M5c_CATEGORICAL_SHIFT__C1__SF0.1__run0,M5c_CATEGORICAL_SHIFT,SEMANTIC_DRIFT,C1,0.1,0,SUCCESS,MEASURED,False,0.0615,0.0615,-1,-1,NOT_DETECTED,False,16945.8,2640.5,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,93.85,0.0,False,False,100.0,2640.5,HIGH,v1.0-semantic,orders,True,2026-10-30T18:01:05.153567,
+M5d_LineitemTaxSpike__C1__SF0.1__run0,M5d_LineitemTaxSpike,SEMANTIC_DRIFT,C1,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,16742.0,2644.0,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,False,100.0,2644.0,CRITICAL,v1.0-stat-drift,lineitem,False,2026-10-30T18:01:22.570194,
+M5e_ShipmodeInvalidCode__C1__SF0.1__run0,M5e_ShipmodeInvalidCode,SEMANTIC_DRIFT,C1,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,16755.5,2648.6,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,False,100.0,2648.6,MEDIUM,v1.0-domain-drift,lineitem,False,2026-10-30T18:01:40.029406,
+B1_AddColumn__C1__SF0.1__run0,B1_AddColumn,BENIGN,C1,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,16329.2,2659.1,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,2659.1,BENIGN,v1.1-compatible,lineitem,True,2026-10-30T18:01:57.496204,
+B2_ValueInRange__C1__SF0.1__run0,B2_ValueInRange,BENIGN,C1,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,17211.5,2929.3,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,2929.3,BENIGN,v1.1-compatible,lineitem,True,2026-10-30T18:02:14.057471,
+B3_InsertRows__C1__SF0.1__run0,B3_InsertRows,BENIGN,C1,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,16572.5,2644.9,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,2644.9,BENIGN,v1.1-compatible,orders,True,2026-10-30T18:02:31.981441,
+B4_ReorderCols__C1__SF0.1__run0,B4_ReorderCols,BENIGN,C1,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,17184.0,2649.0,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,2649.0,BENIGN,v1.1-reorder,orders,False,2026-10-30T18:02:48.999130,
+B5_AddValidStatus__C1__SF0.1__run0,B5_AddValidStatus,BENIGN,C1,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,17148.8,2586.2,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,2586.2,BENIGN,v1.1-compatible,orders,True,2026-10-30T18:03:06.847581,
+B6_IncreasePrecision__C1__SF0.1__run0,B6_IncreasePrecision,BENIGN,C1,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,18557.9,3145.0,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,3145.0,BENIGN,v1.1-widening,orders,False,2026-10-30T18:03:24.432562,
+B7_LargeBatchInsert__C1__SF0.1__run0,B7_LargeBatchInsert,BENIGN,C1,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,15587.0,2776.7,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,2776.7,BENIGN,v1.1-compatible,orders,True,2026-10-30T18:03:43.666438,
+B8_WhitespaceValues__C1__SF0.1__run0,B8_WhitespaceValues,BENIGN,C1,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10509.5,1527.3,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1527.3,BENIGN,v1.0-benign-data,orders,False,2026-10-30T18:04:00.449851,
+B9_AddOrdersAuditCol__C1__SF0.1__run0,B9_AddOrdersAuditCol,BENIGN,C1,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10469.9,1523.4,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1523.4,BENIGN,v1.1-allowlisted,orders,False,2026-10-30T18:04:11.321567,
+B10_AddCustomerAuditCol__C1__SF0.1__run0,B10_AddCustomerAuditCol,BENIGN,C1,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10483.2,1540.0,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1540.0,BENIGN,v1.1-allowlisted,customer,False,2026-10-30T18:04:21.930600,
+B11_QuantityInRange__C1__SF0.1__run0,B11_QuantityInRange,BENIGN,C1,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10486.1,1489.1,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1489.1,BENIGN,v1.0-benign-data,lineitem,False,2026-10-30T18:04:32.537255,
+B12_CustomerBalUpdate__C1__SF0.1__run0,B12_CustomerBalUpdate,BENIGN,C1,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10577.4,1716.7,0.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1716.7,BENIGN,v1.0-benign-data,customer,False,2026-10-30T18:04:43.498157,
+M1a_AddSingleCol__C2__SF0.1__run0,M1a_AddSingleCol,ADDITIVE,C2,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10926.9,1496.3,48.3,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,False,100.0,1544.6,MEDIUM,v1.1-unregistered,lineitem,True,2026-10-30T18:04:54.256010,
+M1b_AddMultiCol__C2__SF0.1__run0,M1b_AddMultiCol,ADDITIVE,C2,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10304.7,1452.5,45.9,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,False,100.0,1498.4,MEDIUM,v1.2-unregistered,lineitem,True,2026-10-30T18:05:05.375093,
+M1c_AddCustomerPiiCol__C2__SF0.1__run0,M1c_AddCustomerPiiCol,ADDITIVE,C2,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10362.8,1441.1,49.3,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,False,100.0,1490.4,HIGH,v1.1-pii-leak,customer,False,2026-10-30T18:05:15.946757,
+M1d_AddOrdersShadowCol__C2__SF0.1__run0,M1d_AddOrdersShadowCol,ADDITIVE,C2,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10304.7,1440.2,47.1,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,False,100.0,1487.3,MEDIUM,v1.1-unregistered,orders,False,2026-10-30T18:05:26.445532,
+M2a_DropNonKey__C2__SF0.1__run0,M2a_DropNonKey,DESTRUCTIVE,C2,0.1,0,CRASH,ASSIGNED_CRASH,False,0.0,0.0,-1,-1,NOT_DETECTED,False,5321.6,558.8,0.0,0,False,0.0,,100.0,0,0,0,0.0,0.0,0.0,0.0,False,False,0.0,558.8,CRITICAL,v2.0-breaking,lineitem,True,2026-10-30T18:05:36.889549,"Silver error: 11:05:40  Running with dbt=1.12.5
+11:05:40  Registered adapter: duckdb=1.11.0
+11:05:40  Found 8 models, 5 data tests, 8 sources, 501 macros
+11:05:40  
+11:05:40  Concurrency: 4 threads (target='dev')
+11:05:40  
+11:05:40  1 of 3 START sql table model silver.silver_customer ............................ [RUN]
+11:05:40  2 of 3 START sql table model silver.silver_lineitem ............................ [RUN]
+11:05:40  3 of 3 START sql table model silver.silver_orders .............................. [RUN]"
+M2b_DropKeyCol__C2__SF0.1__run0,M2b_DropKeyCol,DESTRUCTIVE,C2,0.1,0,CRASH,ASSIGNED_CRASH,False,0.0,0.0,-1,-1,NOT_DETECTED,False,5418.8,559.3,0.0,0,False,0.0,,100.0,0,0,0,0.0,0.0,0.0,0.0,False,False,0.0,559.3,CRITICAL,v2.0-breaking,lineitem,True,2026-10-30T18:05:42.669408,"Silver error: 11:05:45  Running with dbt=1.12.5
+11:05:46  Registered adapter: duckdb=1.11.0
+11:05:46  Found 8 models, 5 data tests, 8 sources, 501 macros
+11:05:46  
+11:05:46  Concurrency: 4 threads (target='dev')
+11:05:46  
+11:05:46  1 of 3 START sql table model silver.silver_customer ............................ [RUN]
+11:05:46  2 of 3 START sql table model silver.silver_lineitem ............................ [RUN]
+11:05:46  3 of 3 START sql table model silver.silver_orders .............................. [RUN]"
+M2c_RenameCol__C2__SF0.1__run0,M2c_RenameCol,DESTRUCTIVE,C2,0.1,0,CRASH,ASSIGNED_CRASH,False,0.0,0.0,-1,-1,NOT_DETECTED,False,5275.8,553.1,0.0,0,False,0.0,,100.0,0,0,0,0.0,0.0,0.0,0.0,False,False,0.0,553.1,CRITICAL,v2.0-breaking,lineitem,True,2026-10-30T18:05:48.549363,"Silver error: 11:05:51  Running with dbt=1.12.5
+11:05:51  Registered adapter: duckdb=1.11.0
+11:05:52  Found 8 models, 5 data tests, 8 sources, 501 macros
+11:05:52  
+11:05:52  Concurrency: 4 threads (target='dev')
+11:05:52  
+11:05:52  1 of 3 START sql table model silver.silver_customer ............................ [RUN]
+11:05:52  2 of 3 START sql table model silver.silver_lineitem ............................ [RUN]
+11:05:52  3 of 3 START sql table model silver.silver_orders .............................. [RUN]"
+M2d_DropCustomerNationKey__C2__SF0.1__run0,M2d_DropCustomerNationKey,DESTRUCTIVE,C2,0.1,0,CRASH,ASSIGNED_CRASH,False,0.0,0.0,-1,-1,NOT_DETECTED,False,5624.3,566.1,0.0,0,False,0.0,,100.0,0,0,0,0.0,0.0,0.0,0.0,False,False,0.0,566.1,CRITICAL,v2.0-breaking,customer,False,2026-10-30T18:05:54.269629,"Silver error: 11:05:57  Running with dbt=1.12.5
+11:05:57  Registered adapter: duckdb=1.11.0
+11:05:58  Found 8 models, 5 data tests, 8 sources, 501 macros
+11:05:58  
+11:05:58  Concurrency: 4 threads (target='dev')
+11:05:58  
+11:05:58  1 of 3 START sql table model silver.silver_customer ............................ [RUN]
+11:05:58  2 of 3 START sql table model silver.silver_lineitem ............................ [RUN]
+11:05:58  3 of 3 START sql table model silver.silver_orders .............................. [RUN]"
+M2e_RenameOrdersPriority__C2__SF0.1__run0,M2e_RenameOrdersPriority,DESTRUCTIVE,C2,0.1,0,CRASH,ASSIGNED_CRASH,False,0.0,0.0,-1,-1,NOT_DETECTED,False,5827.7,700.6,0.0,0,False,0.0,,100.0,0,0,0,0.0,0.0,0.0,0.0,False,False,0.0,700.6,CRITICAL,v2.0-breaking,orders,False,2026-10-30T18:06:00.067764,"Silver error: 11:06:03  Running with dbt=1.12.5
+11:06:03  Registered adapter: duckdb=1.11.0
+11:06:04  Found 8 models, 5 data tests, 8 sources, 501 macros
+11:06:04  
+11:06:04  Concurrency: 4 threads (target='dev')
+11:06:04  
+11:06:04  1 of 3 START sql table model silver.silver_customer ............................ [RUN]
+11:06:04  2 of 3 START sql table model silver.silver_lineitem ............................ [RUN]
+11:06:04  3 of 3 START sql table model silver.silver_orders .............................. [RUN]"
+M3a_DoubleToVarchar__C2__SF0.1__run0,M3a_DoubleToVarchar,TYPE_CHANGE,C2,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10358.6,1476.4,49.2,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,False,100.0,1525.6,HIGH,v2.0-type-drift,lineitem,True,2026-10-30T18:06:06.186486,
+M3b_IntegerToDouble__C2__SF0.1__run0,M3b_IntegerToDouble,TYPE_CHANGE,C2,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10298.1,1422.8,49.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,False,100.0,1471.8,MEDIUM,v2.0-type-drift,lineitem,True,2026-10-30T18:06:17.354974,
+M3c_DateToVarchar__C2__SF0.1__run0,M3c_DateToVarchar,TYPE_CHANGE,C2,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10313.4,1420.9,41.7,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,False,100.0,1462.6,HIGH,v2.0-type-drift,orders,True,2026-10-30T18:06:28.470157,
+M3d_CustomerAcctbalToVarchar__C2__SF0.1__run0,M3d_CustomerAcctbalToVarchar,TYPE_CHANGE,C2,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10293.1,1375.6,49.6,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,False,100.0,1425.2,HIGH,v2.0-type-drift,customer,False,2026-10-30T18:06:39.271880,
+M3e_OrdersCustkeyToVarchar__C2__SF0.1__run0,M3e_OrdersCustkeyToVarchar,TYPE_CHANGE,C2,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10505.7,1529.7,46.7,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,False,100.0,1576.4,CRITICAL,v2.0-type-drift,orders,False,2026-10-30T18:06:49.771637,
+M4a_NullAndNegative__C2__SF0.1__run0,M4a_NullAndNegative,CONSTRAINT_BREACH,C2,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,2,2,POST_TRANSFORM,False,5751.8,1208.8,49.2,0,False,0.0,,100.0,0,0,2,0.0,100.0,100.0,0.0,True,False,100.0,1258.0,HIGH,v1.0-row-fault,orders,True,2026-10-30T18:07:00.743053,
+M4b_NullSmall__C2__SF0.1__run0,M4b_NullSmall,CONSTRAINT_BREACH,C2,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,2,2,POST_TRANSFORM,False,5652.8,1148.7,50.0,0,False,0.0,,100.0,0,0,1,0.0,100.0,100.0,0.0,True,False,100.0,1198.7,MEDIUM,v1.0-row-fault,orders,True,2026-10-30T18:07:08.511531,
+M4c_DuplicateKeys__C2__SF0.1__run0,M4c_DuplicateKeys,CONSTRAINT_BREACH,C2,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,2,2,POST_TRANSFORM,False,5819.6,1285.1,46.4,0,False,0.0,,100.0,0,0,1,0.0,100.0,100.0,0.0,True,False,100.0,1331.5,HIGH,v1.0-row-fault,orders,True,2026-10-30T18:07:16.171733,
+M4d_LineitemNegativeQty__C2__SF0.1__run0,M4d_LineitemNegativeQty,CONSTRAINT_BREACH,C2,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,2,2,POST_TRANSFORM,False,5620.6,1166.9,48.4,0,False,0.0,,100.0,0,0,1,0.0,100.0,100.0,0.0,True,False,100.0,1215.3,HIGH,v1.0-row-fault,lineitem,False,2026-10-30T18:07:22.301953,
+M4e_CustomerDuplicateKeys__C2__SF0.1__run0,M4e_CustomerDuplicateKeys,CONSTRAINT_BREACH,C2,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,2,2,POST_TRANSFORM,False,5697.2,1168.1,49.9,0,False,0.0,,100.0,0,0,1,0.0,100.0,100.0,0.0,True,False,100.0,1218.0,HIGH,v1.0-row-fault,customer,False,2026-10-30T18:07:28.365492,
+M5a_MULTIPLY_100__C2__SF0.1__run0,M5a_MULTIPLY_100,SEMANTIC_DRIFT,C2,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,2,2,POST_TRANSFORM,False,5709.1,1171.7,47.6,0,False,0.0,,100.0,0,0,1,0.0,100.0,100.0,0.0,True,False,100.0,1219.3,CRITICAL,v1.0-semantic,lineitem,True,2026-10-30T18:07:34.233242,
+M5b_MULTIPLY_1_5__C2__SF0.1__run0,M5b_MULTIPLY_1_5,SEMANTIC_DRIFT,C2,0.1,0,SUCCESS,MEASURED,False,0.9211,0.9211,-1,-1,NOT_DETECTED,False,10400.8,1403.8,47.2,0,False,0.0,,100.0,0,0,0,0.0,100.0,7.89,0.0,False,False,100.0,1451.0,HIGH,v1.0-semantic,lineitem,True,2026-10-30T18:07:40.435474,
+M5c_CATEGORICAL_SHIFT__C2__SF0.1__run0,M5c_CATEGORICAL_SHIFT,SEMANTIC_DRIFT,C2,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,2,2,POST_TRANSFORM,False,5605.1,1146.1,46.1,0,False,0.0,,100.0,0,0,1,0.0,100.0,100.0,0.0,True,False,100.0,1192.2,HIGH,v1.0-semantic,orders,True,2026-10-30T18:07:51.340427,
+M5d_LineitemTaxSpike__C2__SF0.1__run0,M5d_LineitemTaxSpike,SEMANTIC_DRIFT,C2,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,2,2,POST_TRANSFORM,False,6302.2,1239.4,46.7,0,False,0.0,,100.0,0,0,1,0.0,100.0,100.0,0.0,True,False,100.0,1286.1,CRITICAL,v1.0-stat-drift,lineitem,False,2026-10-30T18:07:57.247932,
+M5e_ShipmodeInvalidCode__C2__SF0.1__run0,M5e_ShipmodeInvalidCode,SEMANTIC_DRIFT,C2,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,2,2,POST_TRANSFORM,False,5722.8,1194.3,44.2,0,False,0.0,,100.0,0,0,1,0.0,100.0,100.0,0.0,True,False,100.0,1238.5,MEDIUM,v1.0-domain-drift,lineitem,False,2026-10-30T18:08:04.057365,
+B1_AddColumn__C2__SF0.1__run0,B1_AddColumn,BENIGN,C2,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10344.0,1475.3,48.6,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1523.9,BENIGN,v1.1-compatible,lineitem,True,2026-10-30T18:08:10.250961,
+B2_ValueInRange__C2__SF0.1__run0,B2_ValueInRange,BENIGN,C2,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10416.4,1428.3,46.8,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1475.1,BENIGN,v1.1-compatible,lineitem,True,2026-10-30T18:08:20.777275,
+B3_InsertRows__C2__SF0.1__run0,B3_InsertRows,BENIGN,C2,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10385.3,1419.5,45.8,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1465.3,BENIGN,v1.1-compatible,orders,True,2026-10-30T18:08:31.668588,
+B4_ReorderCols__C2__SF0.1__run0,B4_ReorderCols,BENIGN,C2,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10403.3,1416.4,47.7,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1464.1,BENIGN,v1.1-reorder,orders,False,2026-10-30T18:08:42.355414,
+B5_AddValidStatus__C2__SF0.1__run0,B5_AddValidStatus,BENIGN,C2,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10492.3,1451.3,48.7,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1500.0,BENIGN,v1.1-compatible,orders,True,2026-10-30T18:08:53.199990,
+B6_IncreasePrecision__C2__SF0.1__run0,B6_IncreasePrecision,BENIGN,C2,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10315.8,1417.9,47.9,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1465.8,BENIGN,v1.1-widening,orders,False,2026-10-30T18:09:03.981504,
+B7_LargeBatchInsert__C2__SF0.1__run0,B7_LargeBatchInsert,BENIGN,C2,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10486.1,1606.7,49.1,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1655.8,BENIGN,v1.1-compatible,orders,True,2026-10-30T18:09:14.758282,
+B8_WhitespaceValues__C2__SF0.1__run0,B8_WhitespaceValues,BENIGN,C2,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10410.1,1427.5,47.4,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1474.9,BENIGN,v1.0-benign-data,orders,False,2026-10-30T18:09:25.887925,
+B9_AddOrdersAuditCol__C2__SF0.1__run0,B9_AddOrdersAuditCol,BENIGN,C2,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10669.2,1431.3,49.9,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1481.2,BENIGN,v1.1-allowlisted,orders,False,2026-10-30T18:09:36.674570,
+B10_AddCustomerAuditCol__C2__SF0.1__run0,B10_AddCustomerAuditCol,BENIGN,C2,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10963.0,1465.9,47.8,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1513.7,BENIGN,v1.1-allowlisted,customer,False,2026-10-30T18:09:47.481374,
+B11_QuantityInRange__C2__SF0.1__run0,B11_QuantityInRange,BENIGN,C2,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10308.4,1396.5,48.6,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1445.1,BENIGN,v1.0-benign-data,lineitem,False,2026-10-30T18:09:58.572372,
+B12_CustomerBalUpdate__C2__SF0.1__run0,B12_CustomerBalUpdate,BENIGN,C2,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,11248.6,1527.2,48.5,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1575.7,BENIGN,v1.0-benign-data,customer,False,2026-10-30T18:10:09.366598,
+M1a_AddSingleCol__C3_standalone__SF0.1__run0,M1a_AddSingleCol,ADDITIVE,C3_standalone,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,0,0,PRE_TRANSFORM,False,721.1,594.7,119.4,0,False,0.0,,100.0,1,0,0,0.0,100.0,100.0,0.0,True,True,100.0,714.1,MEDIUM,v1.1-unregistered,lineitem,True,2026-10-30T18:10:20.789280,
+M1b_AddMultiCol__C3_standalone__SF0.1__run0,M1b_AddMultiCol,ADDITIVE,C3_standalone,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,0,0,PRE_TRANSFORM,False,737.7,613.6,117.2,0,False,0.0,,100.0,3,0,0,0.0,100.0,100.0,0.0,True,True,100.0,730.8,MEDIUM,v1.2-unregistered,lineitem,True,2026-10-30T18:10:21.693832,
+M1c_AddCustomerPiiCol__C3_standalone__SF0.1__run0,M1c_AddCustomerPiiCol,ADDITIVE,C3_standalone,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,0,0,PRE_TRANSFORM,False,746.2,582.7,155.2,0,False,0.0,,100.0,1,0,0,0.0,100.0,100.0,0.0,True,True,100.0,737.9,HIGH,v1.1-pii-leak,customer,False,2026-10-30T18:10:22.653974,
+M1d_AddOrdersShadowCol__C3_standalone__SF0.1__run0,M1d_AddOrdersShadowCol,ADDITIVE,C3_standalone,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,0,0,PRE_TRANSFORM,False,624.9,581.6,40.7,0,False,0.0,,100.0,1,0,0,0.0,100.0,100.0,0.0,True,True,100.0,622.3,MEDIUM,v1.1-unregistered,orders,False,2026-10-30T18:10:23.522884,
+M2a_DropNonKey__C3_standalone__SF0.1__run0,M2a_DropNonKey,DESTRUCTIVE,C3_standalone,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,0,0,PRE_TRANSFORM,False,713.6,586.7,119.2,0,False,0.0,,100.0,1,0,0,0.0,100.0,100.0,0.0,True,True,100.0,705.9,CRITICAL,v2.0-breaking,lineitem,True,2026-10-30T18:10:24.288346,
+M2b_DropKeyCol__C3_standalone__SF0.1__run0,M2b_DropKeyCol,DESTRUCTIVE,C3_standalone,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,0,0,PRE_TRANSFORM,False,786.3,658.1,121.2,0,False,0.0,,100.0,1,0,0,0.0,100.0,100.0,0.0,True,True,100.0,779.3,CRITICAL,v2.0-breaking,lineitem,True,2026-10-30T18:10:25.502939,
+M2c_RenameCol__C3_standalone__SF0.1__run0,M2c_RenameCol,DESTRUCTIVE,C3_standalone,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,0,0,PRE_TRANSFORM,False,838.4,709.7,120.9,0,False,0.0,,100.0,2,0,0,0.0,100.0,100.0,0.0,True,True,100.0,830.6,CRITICAL,v2.0-breaking,lineitem,True,2026-10-30T18:10:26.838928,
+M2d_DropCustomerNationKey__C3_standalone__SF0.1__run0,M2d_DropCustomerNationKey,DESTRUCTIVE,C3_standalone,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,0,0,PRE_TRANSFORM,False,811.6,629.6,172.4,0,False,0.0,,100.0,1,0,0,0.0,100.0,100.0,0.0,True,True,100.0,802.0,CRITICAL,v2.0-breaking,customer,False,2026-10-30T18:10:28.185052,
+M2e_RenameOrdersPriority__C3_standalone__SF0.1__run0,M2e_RenameOrdersPriority,DESTRUCTIVE,C3_standalone,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,0,0,PRE_TRANSFORM,False,705.6,657.3,44.9,0,False,0.0,,100.0,2,0,0,0.0,100.0,100.0,0.0,True,True,100.0,702.2,CRITICAL,v2.0-breaking,orders,False,2026-10-30T18:10:29.164594,
+M3a_DoubleToVarchar__C3_standalone__SF0.1__run0,M3a_DoubleToVarchar,TYPE_CHANGE,C3_standalone,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,0,0,PRE_TRANSFORM,False,793.6,673.0,114.0,0,False,0.0,,100.0,1,0,0,0.0,100.0,100.0,0.0,True,True,100.0,787.0,HIGH,v2.0-type-drift,lineitem,True,2026-10-30T18:10:30.164222,
+M3b_IntegerToDouble__C3_standalone__SF0.1__run0,M3b_IntegerToDouble,TYPE_CHANGE,C3_standalone,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,0,0,PRE_TRANSFORM,False,848.7,712.0,128.7,0,False,0.0,,100.0,1,0,0,0.0,100.0,100.0,0.0,True,True,100.0,840.7,MEDIUM,v2.0-type-drift,lineitem,True,2026-10-30T18:10:31.900088,
+M3c_DateToVarchar__C3_standalone__SF0.1__run0,M3c_DateToVarchar,TYPE_CHANGE,C3_standalone,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,0,0,PRE_TRANSFORM,False,671.1,623.7,44.8,0,False,0.0,,100.0,1,0,0,0.0,100.0,100.0,0.0,True,True,100.0,668.5,HIGH,v2.0-type-drift,orders,True,2026-10-30T18:10:33.607256,
+M3d_CustomerAcctbalToVarchar__C3_standalone__SF0.1__run0,M3d_CustomerAcctbalToVarchar,TYPE_CHANGE,C3_standalone,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,0,0,PRE_TRANSFORM,False,815.6,633.6,172.2,0,False,0.0,,100.0,1,0,0,0.0,100.0,100.0,0.0,True,True,100.0,805.8,HIGH,v2.0-type-drift,customer,False,2026-10-30T18:10:34.748477,
+M3e_OrdersCustkeyToVarchar__C3_standalone__SF0.1__run0,M3e_OrdersCustkeyToVarchar,TYPE_CHANGE,C3_standalone,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,0,0,PRE_TRANSFORM,False,703.9,656.5,44.8,0,False,0.0,,100.0,1,0,0,0.0,100.0,100.0,0.0,True,True,100.0,701.3,CRITICAL,v2.0-type-drift,orders,False,2026-10-30T18:10:35.807749,
+M4a_NullAndNegative__C3_standalone__SF0.1__run0,M4a_NullAndNegative,CONSTRAINT_BREACH,C3_standalone,0.1,0,SUCCESS,MEASURED,True,0.0,0.0,0,0,PRE_TRANSFORM,False,11112.0,1679.8,459.9,30,True,100.0,1.0,100.0,2,0,0,0.2158,99.8,100.0,0.0,True,True,100.0,2139.7,HIGH,v1.0-row-fault,orders,True,2026-10-30T18:10:37.021266,
+M4b_NullSmall__C3_standalone__SF0.1__run0,M4b_NullSmall,CONSTRAINT_BREACH,C3_standalone,0.1,0,SUCCESS,MEASURED,True,0.0,0.0,0,0,PRE_TRANSFORM,False,10893.5,1446.4,446.5,5,True,100.0,1.0,100.0,1,0,0,0.0421,99.9667,100.0,0.0,True,True,100.0,1892.9,MEDIUM,v1.0-row-fault,orders,True,2026-10-30T18:10:50.163965,
+M4c_DuplicateKeys__C3_standalone__SF0.1__run0,M4c_DuplicateKeys,CONSTRAINT_BREACH,C3_standalone,0.1,0,SUCCESS,MEASURED,True,0.0,0.0,0,0,PRE_TRANSFORM,False,10912.2,1467.8,482.3,5,True,100.0,1.0,100.0,1,0,0,0.0,99.9667,100.0,0.0,True,True,100.0,1950.1,HIGH,v1.0-row-fault,orders,True,2026-10-30T18:11:03.025194,
+M4d_LineitemNegativeQty__C3_standalone__SF0.1__run0,M4d_LineitemNegativeQty,CONSTRAINT_BREACH,C3_standalone,0.1,0,SUCCESS,MEASURED,True,0.0,0.0,0,0,PRE_TRANSFORM,False,11151.5,1560.0,735.1,25,True,100.0,1.0,100.0,1,0,0,0.0368,99.8333,100.0,0.0,True,True,100.0,2295.1,HIGH,v1.0-row-fault,lineitem,False,2026-10-30T18:11:14.227591,
+M4e_CustomerDuplicateKeys__C3_standalone__SF0.1__run0,M4e_CustomerDuplicateKeys,CONSTRAINT_BREACH,C3_standalone,0.1,0,SUCCESS,MEASURED,True,0.0,0.0,0,0,PRE_TRANSFORM,False,11068.4,1408.0,301.8,10,True,100.0,1.0,100.0,1,0,0,0.0,99.9333,100.0,0.0,True,True,100.0,1709.8,HIGH,v1.0-row-fault,customer,False,2026-10-30T18:11:25.843856,
+M5a_MULTIPLY_100__C3_standalone__SF0.1__run0,M5a_MULTIPLY_100,SEMANTIC_DRIFT,C3_standalone,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,0,0,PRE_TRANSFORM,False,679.8,555.9,116.1,0,False,0.0,,100.0,2,0,0,0.0,100.0,100.0,0.0,True,True,100.0,672.0,CRITICAL,v1.0-semantic,lineitem,True,2026-10-30T18:11:37.085295,
+M5b_MULTIPLY_1_5__C3_standalone__SF0.1__run0,M5b_MULTIPLY_1_5,SEMANTIC_DRIFT,C3_standalone,0.1,0,SUCCESS,MEASURED,False,0.9211,0.9211,-1,-1,NOT_DETECTED,False,10486.0,1439.3,227.8,0,False,0.0,,100.0,0,0,0,0.0,100.0,7.89,0.0,False,False,100.0,1667.1,HIGH,v1.0-semantic,lineitem,True,2026-10-30T18:11:38.222466,
+M5c_CATEGORICAL_SHIFT__C3_standalone__SF0.1__run0,M5c_CATEGORICAL_SHIFT,SEMANTIC_DRIFT,C3_standalone,0.1,0,SUCCESS,MEASURED,True,0.0,0.0,0,0,PRE_TRANSFORM,False,11064.9,1458.3,467.3,10,True,100.0,1.0,100.0,1,0,0,0.0895,99.9333,100.0,0.0,True,True,100.0,1925.6,HIGH,v1.0-semantic,orders,True,2026-10-30T18:11:49.205364,
+M5d_LineitemTaxSpike__C3_standalone__SF0.1__run0,M5d_LineitemTaxSpike,SEMANTIC_DRIFT,C3_standalone,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,0,0,PRE_TRANSFORM,False,700.2,579.2,114.0,0,False,0.0,,100.0,1,0,0,0.0,100.0,100.0,0.0,True,True,100.0,693.2,CRITICAL,v1.0-stat-drift,lineitem,False,2026-10-30T18:12:00.586803,
+M5e_ShipmodeInvalidCode__C3_standalone__SF0.1__run0,M5e_ShipmodeInvalidCode,SEMANTIC_DRIFT,C3_standalone,0.1,0,SUCCESS,MEASURED,True,0.0,0.0,0,0,PRE_TRANSFORM,False,11415.5,1542.8,783.8,15,True,100.0,1.0,100.0,1,0,0,0.0263,99.9,100.0,0.0,True,True,100.0,2326.6,MEDIUM,v1.0-domain-drift,lineitem,False,2026-10-30T18:12:01.751915,
+B1_AddColumn__C3_standalone__SF0.1__run0,B1_AddColumn,BENIGN,C3_standalone,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10587.2,1463.4,226.9,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1690.3,BENIGN,v1.1-compatible,lineitem,True,2026-10-30T18:12:13.623875,
+B2_ValueInRange__C3_standalone__SF0.1__run0,B2_ValueInRange,BENIGN,C3_standalone,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10477.2,1411.1,235.7,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1646.8,BENIGN,v1.1-compatible,lineitem,True,2026-10-30T18:12:24.377742,
+B3_InsertRows__C3_standalone__SF0.1__run0,B3_InsertRows,BENIGN,C3_standalone,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10534.6,1453.7,237.8,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1691.5,BENIGN,v1.1-compatible,orders,True,2026-10-30T18:12:35.353448,
+B4_ReorderCols__C3_standalone__SF0.1__run0,B4_ReorderCols,BENIGN,C3_standalone,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10404.6,1385.6,254.0,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1639.6,BENIGN,v1.1-reorder,orders,False,2026-10-30T18:12:46.197559,
+B5_AddValidStatus__C3_standalone__SF0.1__run0,B5_AddValidStatus,BENIGN,C3_standalone,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10820.0,1538.1,230.9,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1769.0,BENIGN,v1.1-compatible,orders,True,2026-10-30T18:12:57.080353,
+B6_IncreasePrecision__C3_standalone__SF0.1__run0,B6_IncreasePrecision,BENIGN,C3_standalone,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10667.4,1507.5,229.1,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1736.6,BENIGN,v1.1-widening,orders,False,2026-10-30T18:13:08.204310,
+B7_LargeBatchInsert__C3_standalone__SF0.1__run0,B7_LargeBatchInsert,BENIGN,C3_standalone,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10544.6,1466.1,227.1,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1693.2,BENIGN,v1.1-compatible,orders,True,2026-10-30T18:13:19.304969,
+B8_WhitespaceValues__C3_standalone__SF0.1__run0,B8_WhitespaceValues,BENIGN,C3_standalone,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10524.7,1424.1,233.3,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1657.4,BENIGN,v1.0-benign-data,orders,False,2026-10-30T18:13:30.471753,
+B9_AddOrdersAuditCol__C3_standalone__SF0.1__run0,B9_AddOrdersAuditCol,BENIGN,C3_standalone,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10617.6,1415.0,230.2,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1645.2,BENIGN,v1.1-allowlisted,orders,False,2026-10-30T18:13:41.340361,
+B10_AddCustomerAuditCol__C3_standalone__SF0.1__run0,B10_AddCustomerAuditCol,BENIGN,C3_standalone,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10569.0,1435.4,228.7,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1664.1,BENIGN,v1.1-allowlisted,customer,False,2026-10-30T18:13:52.102541,
+B11_QuantityInRange__C3_standalone__SF0.1__run0,B11_QuantityInRange,BENIGN,C3_standalone,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10824.9,1441.4,235.3,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1676.7,BENIGN,v1.0-benign-data,lineitem,False,2026-10-30T18:14:02.801656,
+B12_CustomerBalUpdate__C3_standalone__SF0.1__run0,B12_CustomerBalUpdate,BENIGN,C3_standalone,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10564.1,1429.5,233.6,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1663.1,BENIGN,v1.0-benign-data,customer,False,2026-10-30T18:14:14.066045,
+M1a_AddSingleCol__C3__SF0.1__run0,M1a_AddSingleCol,ADDITIVE,C3,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,0,0,PRE_TRANSFORM,False,715.3,595.9,112.7,0,False,0.0,,100.0,1,0,0,0.0,100.0,100.0,0.0,True,True,100.0,708.6,MEDIUM,v1.1-unregistered,lineitem,True,2026-10-30T18:14:24.805751,
+M1b_AddMultiCol__C3__SF0.1__run0,M1b_AddMultiCol,ADDITIVE,C3,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,0,0,PRE_TRANSFORM,False,695.0,573.6,115.1,0,False,0.0,,100.0,3,0,0,0.0,100.0,100.0,0.0,True,True,100.0,688.7,MEDIUM,v1.2-unregistered,lineitem,True,2026-10-30T18:14:25.712052,
+M1c_AddCustomerPiiCol__C3__SF0.1__run0,M1c_AddCustomerPiiCol,ADDITIVE,C3,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,0,0,PRE_TRANSFORM,False,695.5,527.8,159.1,0,False,0.0,,100.0,1,0,0,0.0,100.0,100.0,0.0,True,True,100.0,686.9,HIGH,v1.1-pii-leak,customer,False,2026-10-30T18:14:26.642356,
+M1d_AddOrdersShadowCol__C3__SF0.1__run0,M1d_AddOrdersShadowCol,ADDITIVE,C3,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,0,0,PRE_TRANSFORM,False,583.9,542.1,39.3,0,False,0.0,,100.0,1,0,0,0.0,100.0,100.0,0.0,True,True,100.0,581.4,MEDIUM,v1.1-unregistered,orders,False,2026-10-30T18:14:27.456596,
+M2a_DropNonKey__C3__SF0.1__run0,M2a_DropNonKey,DESTRUCTIVE,C3,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,0,0,PRE_TRANSFORM,False,665.9,547.7,111.7,0,False,0.0,,100.0,1,0,0,0.0,100.0,100.0,0.0,True,True,100.0,659.4,CRITICAL,v2.0-breaking,lineitem,True,2026-10-30T18:14:28.174724,
+M2b_DropKeyCol__C3__SF0.1__run0,M2b_DropKeyCol,DESTRUCTIVE,C3,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,0,0,PRE_TRANSFORM,False,801.7,673.0,122.1,0,False,0.0,,100.0,1,0,0,0.0,100.0,100.0,0.0,True,True,100.0,795.1,CRITICAL,v2.0-breaking,lineitem,True,2026-10-30T18:14:29.304201,
+M2c_RenameCol__C3__SF0.1__run0,M2c_RenameCol,DESTRUCTIVE,C3,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,0,0,PRE_TRANSFORM,False,782.5,664.4,111.4,0,False,0.0,,100.0,2,0,0,0.0,100.0,100.0,0.0,True,True,100.0,775.8,CRITICAL,v2.0-breaking,lineitem,True,2026-10-30T18:14:30.560115,
+M2d_DropCustomerNationKey__C3__SF0.1__run0,M2d_DropCustomerNationKey,DESTRUCTIVE,C3,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,0,0,PRE_TRANSFORM,False,767.2,593.9,164.6,0,False,0.0,,100.0,1,0,0,0.0,100.0,100.0,0.0,True,True,100.0,758.5,CRITICAL,v2.0-breaking,customer,False,2026-10-30T18:14:31.801201,
+M2e_RenameOrdersPriority__C3__SF0.1__run0,M2e_RenameOrdersPriority,DESTRUCTIVE,C3,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,0,0,PRE_TRANSFORM,False,589.0,543.9,42.6,0,False,0.0,,100.0,2,0,0,0.0,100.0,100.0,0.0,True,True,100.0,586.5,CRITICAL,v2.0-breaking,orders,False,2026-10-30T18:14:32.747465,
+M3a_DoubleToVarchar__C3__SF0.1__run0,M3a_DoubleToVarchar,TYPE_CHANGE,C3,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,0,0,PRE_TRANSFORM,False,807.8,675.5,125.6,0,False,0.0,,100.0,1,0,0,0.0,100.0,100.0,0.0,True,True,100.0,801.1,HIGH,v2.0-type-drift,lineitem,True,2026-10-30T18:14:33.633643,
+M3b_IntegerToDouble__C3__SF0.1__run0,M3b_IntegerToDouble,TYPE_CHANGE,C3,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,0,0,PRE_TRANSFORM,False,779.6,645.4,127.3,0,False,0.0,,100.0,1,0,0,0.0,100.0,100.0,0.0,True,True,100.0,772.7,MEDIUM,v2.0-type-drift,lineitem,True,2026-10-30T18:14:35.355394,
+M3c_DateToVarchar__C3__SF0.1__run0,M3c_DateToVarchar,TYPE_CHANGE,C3,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,0,0,PRE_TRANSFORM,False,700.2,655.1,42.6,0,False,0.0,,100.0,1,0,0,0.0,100.0,100.0,0.0,True,True,100.0,697.7,HIGH,v2.0-type-drift,orders,True,2026-10-30T18:14:36.996974,
+M3d_CustomerAcctbalToVarchar__C3__SF0.1__run0,M3d_CustomerAcctbalToVarchar,TYPE_CHANGE,C3,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,0,0,PRE_TRANSFORM,False,844.1,645.0,189.4,0,False,0.0,,100.0,1,0,0,0.0,100.0,100.0,0.0,True,True,100.0,834.4,HIGH,v2.0-type-drift,customer,False,2026-10-30T18:14:38.193499,
+M3e_OrdersCustkeyToVarchar__C3__SF0.1__run0,M3e_OrdersCustkeyToVarchar,TYPE_CHANGE,C3,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,0,0,PRE_TRANSFORM,False,667.9,616.2,48.9,0,False,0.0,,100.0,1,0,0,0.0,100.0,100.0,0.0,True,True,100.0,665.1,CRITICAL,v2.0-type-drift,orders,False,2026-10-30T18:14:39.264100,
+M4a_NullAndNegative__C3__SF0.1__run0,M4a_NullAndNegative,CONSTRAINT_BREACH,C3,0.1,0,SUCCESS,MEASURED,True,0.0,0.0,0,0,PRE_TRANSFORM,False,11639.9,1618.3,499.1,30,True,100.0,1.0,100.0,2,0,0,0.2158,99.8,100.0,0.0,True,True,100.0,2117.4,HIGH,v1.0-row-fault,orders,True,2026-10-30T18:14:40.419899,
+M4b_NullSmall__C3__SF0.1__run0,M4b_NullSmall,CONSTRAINT_BREACH,C3,0.1,0,SUCCESS,MEASURED,True,0.0,0.0,0,0,PRE_TRANSFORM,False,10881.8,1452.5,498.4,5,True,100.0,1.0,100.0,1,0,0,0.0421,99.9667,100.0,0.0,True,True,100.0,1950.9,MEDIUM,v1.0-row-fault,orders,True,2026-10-30T18:14:54.056487,
+M4c_DuplicateKeys__C3__SF0.1__run0,M4c_DuplicateKeys,CONSTRAINT_BREACH,C3,0.1,0,SUCCESS,MEASURED,True,0.0,0.0,0,0,PRE_TRANSFORM,False,11115.6,1508.4,529.7,5,True,100.0,1.0,100.0,1,0,0,0.0,99.9667,100.0,0.0,True,True,100.0,2038.1,HIGH,v1.0-row-fault,orders,True,2026-10-30T18:15:06.912694,
+M4d_LineitemNegativeQty__C3__SF0.1__run0,M4d_LineitemNegativeQty,CONSTRAINT_BREACH,C3,0.1,0,SUCCESS,MEASURED,True,0.0,0.0,0,0,PRE_TRANSFORM,False,11426.9,1643.2,780.5,25,True,100.0,1.0,100.0,1,0,0,0.0368,99.8333,100.0,0.0,True,True,100.0,2423.7,HIGH,v1.0-row-fault,lineitem,False,2026-10-30T18:15:18.321281,
+M4e_CustomerDuplicateKeys__C3__SF0.1__run0,M4e_CustomerDuplicateKeys,CONSTRAINT_BREACH,C3,0.1,0,SUCCESS,MEASURED,True,0.0,0.0,0,0,PRE_TRANSFORM,False,10734.0,1472.5,374.4,10,True,100.0,1.0,100.0,1,0,0,0.0,99.9333,100.0,0.0,True,True,100.0,1846.9,HIGH,v1.0-row-fault,customer,False,2026-10-30T18:15:30.215287,
+M5a_MULTIPLY_100__C3__SF0.1__run0,M5a_MULTIPLY_100,SEMANTIC_DRIFT,C3,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,0,0,PRE_TRANSFORM,False,688.5,566.2,114.8,0,False,0.0,,100.0,2,0,0,0.0,100.0,100.0,0.0,True,True,100.0,681.0,CRITICAL,v1.0-semantic,lineitem,True,2026-10-30T18:15:41.138493,
+M5b_MULTIPLY_1_5__C3__SF0.1__run0,M5b_MULTIPLY_1_5,SEMANTIC_DRIFT,C3,0.1,0,SUCCESS,MEASURED,False,0.9211,0.9211,-1,-1,NOT_DETECTED,False,11256.6,1479.1,284.9,0,False,0.0,,100.0,0,0,0,0.0,100.0,7.89,0.0,False,False,100.0,1764.0,HIGH,v1.0-semantic,lineitem,True,2026-10-30T18:15:42.327584,
+M5c_CATEGORICAL_SHIFT__C3__SF0.1__run0,M5c_CATEGORICAL_SHIFT,SEMANTIC_DRIFT,C3,0.1,0,SUCCESS,MEASURED,True,0.0,0.0,0,0,PRE_TRANSFORM,False,11509.8,1451.1,527.4,10,True,100.0,1.0,100.0,1,0,0,0.0895,99.9333,100.0,0.0,True,True,100.0,1978.5,HIGH,v1.0-semantic,orders,True,2026-10-30T18:15:54.057348,
+M5d_LineitemTaxSpike__C3__SF0.1__run0,M5d_LineitemTaxSpike,SEMANTIC_DRIFT,C3,0.1,0,BLOCKED,ASSIGNED_BLOCK,True,0.0,0.0,0,0,PRE_TRANSFORM,False,670.4,547.6,115.1,0,False,0.0,,100.0,1,0,0,0.0,100.0,100.0,0.0,True,True,100.0,662.7,CRITICAL,v1.0-stat-drift,lineitem,False,2026-10-30T18:16:05.865700,
+M5e_ShipmodeInvalidCode__C3__SF0.1__run0,M5e_ShipmodeInvalidCode,SEMANTIC_DRIFT,C3,0.1,0,SUCCESS,MEASURED,True,0.0,0.0,0,0,PRE_TRANSFORM,False,11572.2,1565.8,875.8,15,True,100.0,1.0,100.0,1,0,0,0.0263,99.9,100.0,0.0,True,True,100.0,2441.6,MEDIUM,v1.0-domain-drift,lineitem,False,2026-10-30T18:16:07.033757,
+B1_AddColumn__C3__SF0.1__run0,B1_AddColumn,BENIGN,C3,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,11320.7,1544.9,281.4,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1826.3,BENIGN,v1.1-compatible,lineitem,True,2026-10-30T18:16:19.103505,
+B2_ValueInRange__C3__SF0.1__run0,B2_ValueInRange,BENIGN,C3,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10925.7,1483.2,279.8,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1763.0,BENIGN,v1.1-compatible,lineitem,True,2026-10-30T18:16:30.614710,
+B3_InsertRows__C3__SF0.1__run0,B3_InsertRows,BENIGN,C3,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10722.7,1499.8,280.6,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1780.4,BENIGN,v1.1-compatible,orders,True,2026-10-30T18:16:42.025600,
+B4_ReorderCols__C3__SF0.1__run0,B4_ReorderCols,BENIGN,C3,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10780.9,1452.2,281.5,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1733.7,BENIGN,v1.1-reorder,orders,False,2026-10-30T18:16:53.026339,
+B5_AddValidStatus__C3__SF0.1__run0,B5_AddValidStatus,BENIGN,C3,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10891.8,1564.6,284.2,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1848.8,BENIGN,v1.1-compatible,orders,True,2026-10-30T18:17:04.242786,
+B6_IncreasePrecision__C3__SF0.1__run0,B6_IncreasePrecision,BENIGN,C3,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10735.0,1481.3,288.7,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1770.0,BENIGN,v1.1-widening,orders,False,2026-10-30T18:17:15.422328,
+B7_LargeBatchInsert__C3__SF0.1__run0,B7_LargeBatchInsert,BENIGN,C3,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10799.6,1586.8,288.7,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1875.5,BENIGN,v1.1-compatible,orders,True,2026-10-30T18:17:26.597720,
+B8_WhitespaceValues__C3__SF0.1__run0,B8_WhitespaceValues,BENIGN,C3,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,11055.8,1500.1,278.6,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1778.7,BENIGN,v1.0-benign-data,orders,False,2026-10-30T18:17:38.023215,
+B9_AddOrdersAuditCol__C3__SF0.1__run0,B9_AddOrdersAuditCol,BENIGN,C3,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,11691.9,1533.2,298.6,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1831.8,BENIGN,v1.1-allowlisted,orders,False,2026-10-30T18:17:49.446481,
+B10_AddCustomerAuditCol__C3__SF0.1__run0,B10_AddCustomerAuditCol,BENIGN,C3,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10910.5,1493.1,288.2,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1781.3,BENIGN,v1.1-allowlisted,customer,False,2026-10-30T18:18:01.291827,
+B11_QuantityInRange__C3__SF0.1__run0,B11_QuantityInRange,BENIGN,C3,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,11508.8,1600.5,284.2,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1884.7,BENIGN,v1.0-benign-data,lineitem,False,2026-10-30T18:18:12.330579,
+B12_CustomerBalUpdate__C3__SF0.1__run0,B12_CustomerBalUpdate,BENIGN,C3,0.1,0,SUCCESS,MEASURED,False,0.0,0.0,-1,-1,NOT_DETECTED,False,10620.9,1451.1,277.9,0,False,0.0,,100.0,0,0,0,0.0,100.0,100.0,0.0,True,True,100.0,1729.0,BENIGN,v1.0-benign-data,customer,False,2026-10-30T18:18:24.278231,

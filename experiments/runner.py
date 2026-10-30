@@ -101,6 +101,15 @@ class ExperimentResult:
     gx_violations: int = 0
     gold_residual_diff_ratio: float = 0.0
 
+    # Quality metrics (DE-A/B/C)
+    completeness_pct: float = 100.0
+    validity_pct: float = 100.0
+    duplication_rate_pct: float = 0.0
+    ingest_correctness: bool = True
+    sla_attained: bool = True
+    recoverability_pct: float = 100.0
+    core_execution_ms: float = 0.0   # dbt_elapsed_ms + validation_ms
+
     # Metadata
     severity: str = "HIGH"
     schema_version: str = "v1.0"
@@ -117,7 +126,16 @@ class ExperimentResult:
 # Database & dbt helpers
 # ---------------------------------------------------------------------------
 def reset_database(db_path: str = DB_PATH, scale_factor: float = 0.1):
-    """Reset DuckDB to clean TPC-H state."""
+    """Reset DuckDB to clean TPC-H state using fast template cache."""
+    template_path = Path(PROJECT_ROOT) / "data" / f"warehouse_template_sf{scale_factor}.duckdb"
+    if not template_path.exists():
+        template_path.parent.mkdir(parents=True, exist_ok=True)
+        con = duckdb.connect(str(template_path))
+        con.execute("CREATE SCHEMA IF NOT EXISTS source")
+        con.execute("INSTALL tpch; LOAD tpch;")
+        con.execute(f"CALL dbgen(sf={scale_factor}, schema='source', overwrite=true)")
+        con.close()
+
     for p in (db_path, db_path + ".wal"):
         if os.path.exists(p):
             try:
@@ -125,12 +143,19 @@ def reset_database(db_path: str = DB_PATH, scale_factor: float = 0.1):
             except Exception:
                 pass
     os.makedirs(os.path.dirname(db_path), exist_ok=True)
+    shutil.copy2(template_path, db_path)
+
+
+def ingest_bronze_fast(db_path: str = DB_PATH) -> tuple[str, float, float, str]:
+    """Fast in-process bronze ingestion for high-throughput batch experimentation."""
+    t0 = time.perf_counter()
     con = duckdb.connect(db_path)
-    con.execute("DROP SCHEMA IF EXISTS source CASCADE;")
-    con.execute("CREATE SCHEMA IF NOT EXISTS source")
-    con.execute("INSTALL tpch; LOAD tpch;")
-    con.execute(f"CALL dbgen(sf={scale_factor}, schema='source', overwrite=true)")
+    con.execute("CREATE SCHEMA IF NOT EXISTS bronze")
+    for tbl in ("orders", "lineitem", "customer"):
+        con.execute(f"CREATE OR REPLACE TABLE bronze.bronze_{tbl} AS SELECT * FROM source.{tbl}")
     con.close()
+    el_ms = round((time.perf_counter() - t0) * 1000, 1)
+    return "SUCCESS", el_ms, el_ms, ""
 
 
 def swap_dbt_config(dbt_contracts_enabled: bool, project_dir: str = DBT_PROJECT):
@@ -267,6 +292,44 @@ def build_clean_reference(scale_factor: float = 0.1, db_path: str = DB_PATH) -> 
     return snapshot_gold(db_path)
 
 
+def _finalize_quality_metrics(result: ExperimentResult, mutation, scale_factor: float, is_benign: bool, medalguard_on: bool):
+    """Compute DE-A/B/C quality and SLA metrics."""
+    result.core_execution_ms = round(result.dbt_elapsed_ms + result.validation_ms, 1)
+    if result.pipeline_status == "CRASH":
+        result.completeness_pct = 0.0
+        result.validity_pct = 0.0
+        result.ingest_correctness = False
+        result.sla_attained = False
+        result.recoverability_pct = 0.0
+    elif result.pipeline_status == "BLOCKED":
+        if result.detection_depth_index in (0, 1):
+            result.validity_pct = 100.0
+            result.completeness_pct = 100.0 if medalguard_on else 0.0
+            result.ingest_correctness = True
+            result.sla_attained = (result.detection_depth_index == 0)
+        else:
+            result.validity_pct = round(max(0.0, (1.0 - result.gold_residual_diff_ratio) * 100.0), 2)
+            result.sla_attained = False
+    elif result.pipeline_status == "SUCCESS":
+        if result.quarantined_rows > 0 and result.quarantine_effective:
+            result.validity_pct = 100.0
+            result.completeness_pct = round((1.0 - result.quarantined_rows / max(1, 150000 * scale_factor)) * 100.0, 4)
+            result.duplication_rate_pct = 0.0
+            result.ingest_correctness = True
+            result.sla_attained = True
+        elif not is_benign and not result.detected:
+            result.validity_pct = round(max(0.0, (1.0 - result.blast_radius) * 100.0), 2)
+            result.duplication_rate_pct = round((getattr(mutation, "injected_fault_count", 0) / max(1, 150000 * scale_factor)) * 100.0, 4) if "Duplicate" in mutation.name else 0.0
+            result.ingest_correctness = (result.blast_radius == 0.0)
+            result.sla_attained = False
+        else:
+            result.validity_pct = 100.0
+            result.completeness_pct = 100.0
+            result.duplication_rate_pct = 0.0
+            result.ingest_correctness = True
+            result.sla_attained = True
+
+
 def _revert_mutation(mutation):
     """Safely revert mutation if applied."""
     if getattr(mutation, "applied", False):
@@ -288,6 +351,7 @@ def run_single_experiment(
     reference: dict,
     scale_factor: float = 0.1,
     run_index: int = 0,
+    use_fast_bronze: bool = False,
 ) -> ExperimentResult:
     """Run one experiment: 1 mutation × 1 config through the staged pipeline."""
     is_benign = getattr(mutation, "category", "") == "BENIGN"
@@ -295,6 +359,9 @@ def run_single_experiment(
     medalguard_on = config.get("medalguard", False)
     gx_on = config.get("great_expectations", False)
     gate_mode = config.get("gate_mode", "quarantine")
+    gate1_enabled = config.get("gate1_enabled", True)
+    gate2_enabled = config.get("gate2_enabled", True)
+    gate2_mode = config.get("gate2_mode", "log_only")
     enabled_validators = config.get("enabled_validators", ["schema", "constraint", "semantic"])
 
     exp_id = f"{mutation.name}__{config_name}__SF{scale_factor}__run{run_index}"
@@ -328,7 +395,10 @@ def run_single_experiment(
         t0 = time.perf_counter()
 
         # Chặng 1 (Stage 1): Run bronze
-        st_b, wall_b, el_b, err_b = run_dbt("tag:bronze")
+        if use_fast_bronze:
+            st_b, wall_b, el_b, err_b = ingest_bronze_fast(DB_PATH)
+        else:
+            st_b, wall_b, el_b, err_b = run_dbt("tag:bronze")
         result.dbt_elapsed_ms += el_b
         if st_b == "CRASH":
             result.pipeline_status = "CRASH"
@@ -339,10 +409,11 @@ def run_single_experiment(
             result.validation_ms = round(result.validation_ms, 1)
             result.dbt_elapsed_ms = round(result.dbt_elapsed_ms, 1)
             result.pipeline_wall_ms = round((time.perf_counter() - t0) * 1000, 1)
+            _finalize_quality_metrics(result, mutation, scale_factor, is_benign, medalguard_on)
             return result
 
-        # Gate 1: Pre-transform validation on Bronze (nếu medalguard_on)
-        if medalguard_on:
+        # Gate 1: Pre-transform validation on Bronze (nếu medalguard_on và gate1_enabled)
+        if medalguard_on and gate1_enabled:
             contracts = [
                 ("orders", os.path.join(CONTRACTS_DIR, "bronze_to_silver", "orders.yaml"), "bronze.bronze_orders"),
                 ("lineitem", os.path.join(CONTRACTS_DIR, "bronze_to_silver", "lineitem.yaml"), "bronze.bronze_lineitem"),
@@ -384,6 +455,7 @@ def run_single_experiment(
                     result.validation_ms = round(result.validation_ms, 1)
                     result.dbt_elapsed_ms = round(result.dbt_elapsed_ms, 1)
                     result.pipeline_wall_ms = round((time.perf_counter() - t0) * 1000, 1)
+                    _finalize_quality_metrics(result, mutation, scale_factor, is_benign, medalguard_on)
                     return result
 
         # Chặng 2 (Stage 2): Run silver
@@ -409,6 +481,7 @@ def run_single_experiment(
             result.validation_ms = round(result.validation_ms, 1)
             result.dbt_elapsed_ms = round(result.dbt_elapsed_ms, 1)
             result.pipeline_wall_ms = round((time.perf_counter() - t0) * 1000, 1)
+            _finalize_quality_metrics(result, mutation, scale_factor, is_benign, medalguard_on)
             return result
 
         # Post-Silver Check (Great Expectations Suite, nếu gx_on)
@@ -430,6 +503,7 @@ def run_single_experiment(
                 result.validation_ms = round(result.validation_ms, 1)
                 result.dbt_elapsed_ms = round(result.dbt_elapsed_ms, 1)
                 result.pipeline_wall_ms = round((time.perf_counter() - t0) * 1000, 1)
+                _finalize_quality_metrics(result, mutation, scale_factor, is_benign, medalguard_on)
                 return result
 
         # Chặng 3 (Stage 3): Run gold
@@ -444,10 +518,11 @@ def run_single_experiment(
             result.validation_ms = round(result.validation_ms, 1)
             result.dbt_elapsed_ms = round(result.dbt_elapsed_ms, 1)
             result.pipeline_wall_ms = round((time.perf_counter() - t0) * 1000, 1)
+            _finalize_quality_metrics(result, mutation, scale_factor, is_benign, medalguard_on)
             return result
 
-        # Gate 2: Post-transform Gold Validation (nếu medalguard_on)
-        if medalguard_on:
+        # Gate 2: Post-transform Gold Validation (nếu medalguard_on và gate2_enabled)
+        if medalguard_on and gate2_enabled:
             g2_contracts = [
                 ("revenue_by_nation", os.path.join(CONTRACTS_DIR, "silver_to_gold", "revenue_by_nation.yaml"), "silver.silver_orders", "gold.gold_revenue_by_nation"),
                 ("order_priority_summary", os.path.join(CONTRACTS_DIR, "silver_to_gold", "order_priority_summary.yaml"), "silver.silver_orders", "gold.gold_order_priority_summary"),
@@ -458,20 +533,36 @@ def run_single_experiment(
                         gate_name=f"S->G:{g2_name}",
                         contract_path=g2_cpath,
                         db_path=DB_PATH,
-                        mode="log_only",
+                        mode=gate2_mode,
                         enabled_validators=enabled_validators,
                         experiment_id=exp_id,
                     )
                     t_g2 = time.perf_counter()
-                    res2 = g2.validate(s_tbl, g_tbl, injected_fault_count=getattr(mutation, "injected_fault_count", 0))
-                    val_time = getattr(res2, "validation_time_ms", 0.0) or ((time.perf_counter() - t_g2) * 1000)
-                    result.validation_ms += val_time
-                    result.gate2_violations += len(res2.violations)
-                    if not res2.passed and not result.detected:
+                    try:
+                        res2 = g2.validate(s_tbl, g_tbl, injected_fault_count=getattr(mutation, "injected_fault_count", 0))
+                        val_time = getattr(res2, "validation_time_ms", 0.0) or ((time.perf_counter() - t_g2) * 1000)
+                        result.validation_ms += val_time
+                        result.gate2_violations += len(res2.violations)
+                        if not res2.passed and not result.detected:
+                            result.detected = True
+                            result.detection_stage = "POST_TRANSFORM"
+                            result.detection_depth = 2
+                            result.detection_depth_index = 2
+                    except ContractViolationError as e:
+                        val_time = getattr(e, "validation_time_ms", 0.0) or ((time.perf_counter() - t_g2) * 1000)
+                        result.validation_ms += val_time
+                        result.gate2_violations += len(e.violations)
                         result.detected = True
                         result.detection_stage = "POST_TRANSFORM"
                         result.detection_depth = 2
                         result.detection_depth_index = 2
+                        result.pipeline_status = "BLOCKED"
+                        result.measurement_type = "ASSIGNED_BLOCK"
+                        br_leak, _, _, _ = diff_gold(reference, snapshot_gold(DB_PATH))
+                        result.gold_residual_diff_ratio = round(br_leak, 4)
+                        if not gate1_enabled:
+                            result.blast_radius = round(br_leak, 4)
+                            result.source_fault_leakage = round(br_leak, 4)
 
         # Đo Blast Radius tại Gold
         br, dev_rows, total_rows, _ = diff_gold(reference, snapshot_gold(DB_PATH))
@@ -502,8 +593,9 @@ def run_single_experiment(
                 if injected_cnt > 0:
                     result.quarantine_recall = round(result.quarantined_rows / injected_cnt, 4)
         elif result.pipeline_status == "BLOCKED":
-            result.blast_radius = 0.0
-            result.source_fault_leakage = 0.0
+            if not (medalguard_on and not gate1_enabled and gate2_enabled):
+                result.blast_radius = 0.0
+                result.source_fault_leakage = 0.0
             result.measurement_type = "ASSIGNED_BLOCK"
         else:
             result.blast_radius = 0.0 if is_benign else round(br, 4)
@@ -518,6 +610,9 @@ def run_single_experiment(
         result.dbt_elapsed_ms = round(result.dbt_elapsed_ms, 1)
         result.pipeline_wall_ms = round((time.perf_counter() - t0) * 1000, 1)
 
+        # DE-A/B/C Quality Metrics
+        _finalize_quality_metrics(result, mutation, scale_factor, is_benign, medalguard_on)
+
     except Exception as e:
         result.pipeline_status = "CRASH"
         result.measurement_type = "ASSIGNED_CRASH"
@@ -525,6 +620,7 @@ def run_single_experiment(
         result.validation_ms = round(result.validation_ms, 1)
         result.dbt_elapsed_ms = round(result.dbt_elapsed_ms, 1)
         result.pipeline_wall_ms = round((time.perf_counter() - t0) * 1000, 1)
+        _finalize_quality_metrics(result, mutation, scale_factor, is_benign, medalguard_on)
 
     finally:
         swap_dbt_config(False)

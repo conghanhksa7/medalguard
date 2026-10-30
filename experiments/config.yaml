@@ -94,6 +94,38 @@ ablation:
     enabled_validators:
       - semantic
 
+boundary_ablation:
+  B1_GATE1_ONLY:
+    description: "Gate 1 (Bronze->Silver) only, no Gate 2"
+    dbt_contracts: false
+    great_expectations: false
+    medalguard: true
+    gate1_enabled: true
+    gate2_enabled: false
+    gate_mode: "quarantine"
+    gate2_mode: "log_only"
+    enabled_validators: ["schema", "constraint", "semantic"]
+  B2_GATE2_ONLY:
+    description: "Gate 2 (Silver->Gold) only, no Gate 1"
+    dbt_contracts: false
+    great_expectations: false
+    medalguard: true
+    gate1_enabled: false
+    gate2_enabled: true
+    gate_mode: "quarantine"
+    gate2_mode: "block"
+    enabled_validators: ["schema", "constraint", "semantic"]
+  C3_DUAL_GATE:
+    description: "Dual-Boundary Gate 1 (Bronze->Silver) + Gate 2 (Silver->Gold)"
+    dbt_contracts: false
+    great_expectations: false
+    medalguard: true
+    gate1_enabled: true
+    gate2_enabled: true
+    gate_mode: "quarantine"
+    gate2_mode: "block"
+    enabled_validators: ["schema", "constraint", "semantic"]
+
 execution:
   repeat_count: 7
   stress_test:
