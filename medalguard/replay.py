@@ -170,9 +170,26 @@ class ReplayAndRecoveryEngine:
             con.close()
             return {"status": "QUARANTINE_EMPTY", "quarantined_input_rows": 0}
 
-        # Check if _replayed column exists
+        # Check if _replayed column exists and handle Idempotency
         cols = [r[1] for r in con.execute(f"PRAGMA table_info('{q_table}')").fetchall()]
-        if "_replayed" not in cols:
+        if "_replayed" in cols:
+            unplayed_count = con.execute(
+                f"SELECT COUNT(*) FROM {q_table} WHERE _replayed IS NULL OR _replayed = FALSE"
+            ).fetchone()[0]
+            if unplayed_count == 0:
+                con.close()
+                return {
+                    "status": "ALREADY_REPLAYED_IDEMPOTENT",
+                    "quarantined_input_rows": q_count,
+                    "repaired_and_backfilled_rows": 0,
+                    "quarantine_remaining": 0,
+                    "deduplicated_rows": 0,
+                    "mttr_ms": round((time.perf_counter() - t0) * 1000, 1),
+                    "availability_pct": 100.0,
+                    "data_loss_rate_pct": 0.0,
+                    "blast_radius": 0.0,
+                }
+        else:
             con.execute(f"ALTER TABLE {q_table} ADD COLUMN _replayed BOOLEAN DEFAULT FALSE")
 
         # Analyze violation reasons
@@ -201,11 +218,14 @@ class ReplayAndRecoveryEngine:
             """
             con.execute(repair_sql)
 
-            # Insert clean copies from lkg_snapshot back into bronze
+            # Insert clean copies from lkg_snapshot back into bronze (with anti-duplicate primary key guard)
             backfill_sql = f"""
                 INSERT INTO {bronze_table}
                 SELECT r.* FROM {clean_ref_table} r
                 JOIN _repair_candidates c ON r.{primary_key} = c.{primary_key}
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM {bronze_table} b WHERE b.{primary_key} = r.{primary_key}
+                )
             """
             con.execute(backfill_sql)
             repaired_count = con.execute("SELECT COUNT(*) FROM _repair_candidates").fetchone()[0]

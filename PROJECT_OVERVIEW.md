@@ -1,7 +1,8 @@
 # TÀI LIỆU TỔNG QUAN ĐỀ TÀI NGHIÊN CỨU: MEDALGUARD
-> **Master Technical Overview & Project Architecture Dossier**  
+> **Project Technical Overview & Architecture Dossier**  
 > **Đề tài:** MedalGuard — Early Data Failure Detection Framework for Medallion Lakehouse via Automated Contract Validation at Layer Boundaries under Schema Evolution  
-> **Học viên:** Lương Lê Công Hạnh | **MSSV:** 23280057 | **Bậc:** Thạc sĩ Khoa học Dữ liệu (K23), ĐH Khoa học Tự nhiên, ĐHQG-HCM  
+> **Sinh viên:** Lương Lê Công Hạnh | **MSSV:** 23280057 | **Chương trình:** Khoa học Dữ liệu, ĐH Khoa học Tự nhiên, ĐHQG-HCM  
+> **Mục tiêu:** Báo cáo Seminar Chuyên đề & Khóa luận Tốt nghiệp (2026)  
 > **Trạng thái đề tài:** Đã hoàn thành 100% toàn bộ 3 Đóng góp Kỹ thuật (CT1, CT2, CT3), hoàn tất thực nghiệm toàn diện Phase 2 (E1 Ma trận so sánh, E2 Ablation 2 trục, E3 Scale Benchmark, E4 Error Analysis, E5 Reproducibility) và xác thực thành công Pilot 3 Tình huống thực tế trên Giao diện Console.
 
 ---
@@ -9,7 +10,7 @@
 ## MỤC LỤC
 1. [Tổng quan Đề tài & Bài toán Cốt lõi](#1-tổng-quan-đề-tài--bài-toán-cốt-lõi)
 2. [Bộ 3 Đóng Góp Kỹ thuật Chính (CT1, CT2, CT3)](#2-bộ-3-đóng-góp-kỹ-thuật-chính-ct1-ct2-ct3)
-3. [Ánh Xạ Đề Cương Luận Văn 7 Chương Của GVHD](#3-ánh-xạ-đề-cương-luận-văn-7-chương-của-gvhd)
+3. [Ánh Xạ Đề Cương Báo Cáo / Khóa Luận 7 Chương Của GVHD](#3-ánh-xạ-đề-cương-báo-cáo--khóa-luận-7-chương-của-gvhd)
 4. [Chuỗi Logic Đóng Góp Học Thuật Bắt Buộc](#4-chuỗi-logic-đóng-góp-học-thuật-bắt-buộc)
 5. [Kết Quả Thực Nghiệm Toàn Diện (E1, E2, E3, E4, E5)](#5-kết-quả-thực-nghiệm-toàn-diện-e1-e2-e3-e4-e5)
 6. [Hệ Thống Thử Nghiệm CT3 Pilot & Quarantine Console](#6-hệ-thống-thử-nghiệm-ct3-pilot--quarantine-console)
@@ -61,11 +62,11 @@ flowchart LR
 
 ---
 
-## 3. ÁNH XẠ ĐỀ CƯƠNG LUẬN VĂN 7 CHƯƠNG CỦA GVHD
+## 3. ÁNH XẠ ĐỀ CƯƠNG BÁO CÁO / KHÓA LUẬN 7 CHƯƠNG CỦA GVHD
 
-Toàn bộ cấu trúc mã nguồn, tài liệu và kết quả thực nghiệm của đề tài khớp 100% với Đề cương Luận văn Thạc sĩ 7 Chương:
+Toàn bộ cấu trúc mã nguồn, tài liệu và kết quả thực nghiệm của đề tài khớp 100% với Đề cương Báo cáo Seminar & Khóa luận 7 Chương:
 
-| Chương Luận Văn | Tiêu đề & Nội dung Học thuật | Thành phần Code & Dữ liệu Thực nghiệm Ánh xạ trong Project |
+| Chương Báo Cáo / Khóa Luận | Tiêu đề & Nội dung Học thuật | Thành phần Code & Dữ liệu Thực nghiệm Ánh xạ trong Project |
 | :--- | :--- | :--- |
 | **Chương 1** | **Giới Thiệu & Đặt Vấn Đề:** Tổng quan về Data Downtime, Silent Failures trong Medallion Lakehouse; mục tiêu, phạm vi và 3 đóng góp khoa học chính. | `PROJECT_OVERVIEW.md` (Mục 1, 2); `README.md` (Mục 1). |
 | **Chương 2** | **Cơ Sở Lý Thuyết & Công Trình Liên Quan:** Khảo cứu Medallion Architecture, Data Contracts movement, dbt model contracts, Great Expectations, Soda Core; phân tích khoảng trống nghiên cứu (Research Gap). | `docs/academic_baseline_spec.md`; `docs/gap_analysis.md`. |
@@ -79,7 +80,7 @@ Toàn bộ cấu trúc mã nguồn, tài liệu và kết quả thực nghiệm 
 
 ## 4. CHUỖI LOGIC ĐÓNG GÓP HỌC THUẬT BẮT BUỘC
 
-Luận văn tuân thủ nghiêm ngặt chuỗi lập luận khoa học theo tiêu chuẩn thẩm định của GVHD:
+Đề tài tuân thủ nghiêm ngặt chuỗi lập luận khoa học theo tiêu chuẩn thẩm định của GVHD:
 
 ```
 [Vấn đề cụ thể] 
@@ -202,6 +203,10 @@ Kết quả thẩm định Task-based Pilot trên 3 sự cố vận hành thực
 
 ```
 medalguard-seminar/
+├── .github/                                  # CI/CD workflows
+│   └── workflows/ci.yml                      # GitHub Actions automated test & parity pipeline
+├── tests/                                    # Automated pytest suite
+│   └── test_medalguard_suite.py              # Suite 7 bài test in-memory (validators, replay, evidence parity)
 ├── contracts/                                # Hợp đồng dữ liệu YAML đa tầng (CT1)
 │   ├── bronze_to_silver/                     # Hợp đồng Gate 1 (orders, lineitem, customer)
 │   └── silver_to_gold/                       # Hợp đồng Gate 2 (revenue_by_nation, order_priority)

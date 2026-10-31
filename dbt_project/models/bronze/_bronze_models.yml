@@ -2,8 +2,58 @@ version: 2
 
 models:
   - name: bronze_orders
-    description: "Raw orders from source (no transformation)"
+    description: "Raw ingested TPC-H orders data from source without transformation"
+    meta:
+      owner: "@data-engineering"
+      layer: "bronze"
+      contract_gate: "Gate 1"
+      sla_tier: "bronze_raw"
+    columns:
+      - name: o_orderkey
+        description: "Primary key for orders"
+      - name: o_custkey
+        description: "Foreign key referencing customer"
+      - name: o_orderstatus
+        description: "Status flag of the order: O (Open), F (Fulfilled), P (Pending)"
+      - name: o_totalprice
+        description: "Total invoice amount for the order"
+      - name: o_orderdate
+        description: "Date the order was placed"
+
   - name: bronze_lineitem
-    description: "Raw lineitem from source (no transformation)"
+    description: "Raw ingested TPC-H lineitem facts from source without transformation"
+    meta:
+      owner: "@data-engineering"
+      layer: "bronze"
+      contract_gate: "Gate 1"
+      sla_tier: "bronze_raw"
+    columns:
+      - name: l_orderkey
+        description: "Composite foreign key referencing orders"
+      - name: l_linenumber
+        description: "Line item sequential position within the order"
+      - name: l_quantity
+        description: "Item unit quantity purchased"
+      - name: l_extendedprice
+        description: "Extended price for the line item before discount"
+      - name: l_discount
+        description: "Discount factor applied (0.00 to 0.10)"
+      - name: l_tax
+        description: "Sales tax rate applied (0.00 to 0.08)"
+
   - name: bronze_customer
-    description: "Raw customer from source (no transformation)"
+    description: "Raw ingested TPC-H customer dimensions from source without transformation"
+    meta:
+      owner: "@data-engineering"
+      layer: "bronze"
+      contract_gate: "Gate 1"
+      sla_tier: "bronze_raw"
+    columns:
+      - name: c_custkey
+        description: "Primary key for customer"
+      - name: c_name
+        description: "Customer legal identifier"
+      - name: c_nationkey
+        description: "Foreign key referencing nation"
+      - name: c_acctbal
+        description: "Customer account balance in standard currency"

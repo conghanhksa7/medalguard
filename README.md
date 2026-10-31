@@ -3,10 +3,9 @@
 > **MedalGuard: Early Data Failure Detection Framework for Medallion Lakehouse via Automated Contract Validation at Layer Boundaries under Schema Evolution**
 
 **Author:** Lương Lê Công Hạnh (MSSV: 23280057)  
-**Program:** Master of Science in Data Science, University of Science, VNU-HCM (HCMUS)  
-**Advisor:** Course Faculty & Research Committee  
-**Course:** Data Science Seminar & Master Thesis Preparation (2026)  
-**Git Repository:** `D:\Study\Seminar\medalguard-seminar`
+**Program:** Data Science, University of Science, VNU-HCM (HCMUS)  
+**Course:** Data Science Seminar & Graduation Thesis (2026)  
+**Git Repository:** `https://github.com/conghanhksa7/medalguard`
 
 ---
 

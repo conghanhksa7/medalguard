@@ -13,16 +13,28 @@
 - [x] Test thử với 1-2 mutations -> detect đúng
 
 ## GATE 3 (Cuối Week 11)
-- [ ] 5 loại Mutation implement xong
-- [ ] 20 experiments chạy xong
-- [ ] 4 metrics thu thập xong
-- [ ] Summary table hoàn chỉnh
+- [x] 5 loại Mutation implement xong (mở rộng lên 36 kịch bản v2)
+- [x] 20+ experiments chạy xong (180 runs E1 + 168 runs E2 + 64 runs E3)
+- [x] 4 metrics thu thập xong (DR, FPR, Blast Radius, DDI + DE SLA metrics)
+- [x] Summary table hoàn chỉnh (Core 19 & Expanded 36)
+
+## PHASE 2 — GVHD IMPROVEMENTS (HOÀN TẤT 100%)
+- [x] CT1: Ngôn ngữ hợp đồng YAML đa tầng & Bộ 36 kịch bản đột biến (24 Harmful + 12 Benign)
+- [x] CT2: In-line Dual-Boundary Gate (Pre-transform Gate 1 & Post-transform Gate 2) + Staged In-place Quarantine
+- [x] CT3: Multi-hop Data Lineage, Root-Cause Diff, LKG Gold Rollback (51.9ms), Replay/Backfill Engine, Alerting & Web Console
+- [x] E1: Ma trận so sánh chính (Core 19 & Expanded 36) với 95% Wilson & Bootstrap CI, McNemar exact tests
+- [x] E2: Nghiên cứu triệt tiêu 2 trục (Validator Ablation A1..A6 & Boundary Placement B1, B2, C3_DUAL)
+- [x] E3: Đánh giá chi phí & năng lực co giãn (SF=0.1 vs SF=1.0, Stress test ~7.65M records, mô hình $T(SF)$)
+- [x] E4: Báo cáo phân tích lỗi & Đánh đổi chất lượng - chi phí - độ trễ
+- [x] E5: Hồ sơ tái lập thực nghiệm chuẩn khoa học
+- [x] 6 Biểu đồ khoa học 300 DPI (`fig1` đến `fig6`)
+- [x] Tích hợp Automated Pytest Suite & Pre-flight Contract Validator CLI
 
 ## FINAL (Week 15)
-- [ ] Báo cáo Seminar (~13-15 trang)
+- [ ] Báo cáo Seminar (~15-25 trang)
 - [ ] Slide thuyết trình (15-20 slides)
-- [ ] Code repo clean, có README hướng dẫn reproduce
-- [ ] Results + charts trong thư mục results/
+- [x] Code repo clean, có README hướng dẫn reproduce
+- [x] Results + charts trong thư mục results/
 
 ---
 
@@ -93,33 +105,30 @@
 - [x] experiments/runner.py
 
 ### Week 10 (16/11 – 22/11): Experiments (phần 1)
-- [ ] matrix_runner.py
-- [ ] M1 x 4 configs (E01–E04)
-- [ ] M2 x 4 configs (E05–E08)
-- [ ] M3 x 4 configs (E09–E12)
+- [x] matrix_runner.py & run_phase2_experiments.py
+- [x] M1 x 4 configs (E01–E04)
+- [x] M2 x 4 configs (E05–E08)
+- [x] M3 x 4 configs (E09–E12)
 
 ### Week 11 (23/11 – 29/11): Experiments (phần 2)
-- [ ] M4 x 4 configs (E13–E16)
-- [ ] M5 x 4 configs (E17–E20)
-- [ ] Re-run nếu cần
-- [ ] Tổng hợp summary table
-- [ ] **GATE 3 CHECKPOINT**
+- [x] M4 x 4 configs (E13–E16)
+- [x] M5 x 4 configs (E17–E20)
+- [x] Mở rộng 36 kịch bản v2
+- [x] Tổng hợp summary table E1, E2, E3
+- [x] **GATE 3 CHECKPOINT**
 
-### Week 12 (30/11 – 06/12): Phân tích
-- [ ] analyzer.py + visualizer.py
-- [ ] Vẽ charts (bar, heatmap, stacked bar)
-- [ ] Viết Introduction + Related Work
+### Week 12 (30/11 – 06/12): Phân tích & Hình ảnh Hóa
+- [x] visualize_phase2.py xuất 6 biểu đồ 300 DPI
+- [x] Phân tích E4 Error Analysis & Quality-Latency-Cost trade-offs
+- [x] Hồ sơ tái lập E5 Reproducibility
 
 ### Week 13 (07/12 – 13/12): Viết báo cáo
-- [ ] Viết Methodology
-- [ ] Viết Results + Discussion
-- [ ] Viết Conclusion + Future Work
+- [ ] Soạn thảo bản thảo báo cáo Seminar theo cấu trúc 7 chương
 - [ ] Gửi draft cho GV review
 
-### Week 14 (14/12 – 20/12): Chỉnh sửa
-- [ ] Nhận feedback GV
-- [ ] Chỉnh sửa báo cáo
-- [ ] Clean up code repo
+### Week 14 (14/12 – 20/12): Chỉnh sửa & Đánh bóng
+- [x] Nhận feedback cải tiến GVHD & hoàn tất Phase 2
+- [x] Clean up code repo, tích hợp Automated Pytest suite
 
 ### Week 15 (21/12 – 28/12): Thuyết trình
 - [ ] Làm slide (15-20 slides)

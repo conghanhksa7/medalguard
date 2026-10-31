@@ -2,13 +2,43 @@ version: 2
 
 models:
   - name: gold_revenue_by_nation
-    description: "Revenue aggregated by nation and year"
+    description: "Business KPI aggregate mart: total revenue and average discount by nation and year"
+    meta:
+      owner: "@data-engineering"
+      layer: "gold"
+      contract_gate: "Gate 2"
+      sla_tier: "gold_critical"
     columns:
       - name: nation
+        description: "Customer nation name"
         tests:
           - not_null
+      - name: order_year
+        description: "Year order was placed"
+      - name: total_orders
+        description: "Total count of orders placed in the year"
       - name: total_revenue
+        description: "Aggregated gross sales revenue after discount"
         tests:
           - not_null
+      - name: avg_discount
+        description: "Mean discount applied across orders"
+
   - name: gold_order_priority_summary
-    description: "Order counts and revenue by priority and status"
+    description: "Business KPI aggregate mart: order volume and average order value by order priority and status"
+    meta:
+      owner: "@data-engineering"
+      layer: "gold"
+      contract_gate: "Gate 2"
+      sla_tier: "gold_critical"
+    columns:
+      - name: o_orderpriority
+        description: "Priority category of the order (1-URGENT to 5-LOW)"
+      - name: o_orderstatus
+        description: "Fulfillment status of the order"
+      - name: order_count
+        description: "Total number of orders within priority and status"
+      - name: total_value
+        description: "Total invoice value for the grouping"
+      - name: avg_order_value
+        description: "Average order ticket value"

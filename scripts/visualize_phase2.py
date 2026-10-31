@@ -109,7 +109,7 @@ def plot_fig1():
             # Direct data labels with alternating vertical offsets to prevent label collision
             for bar, val in zip(bars, vals):
                 if val > 0:
-                    y_off = 3 + (m_idx % 2) * 6
+                    y_off = 3 + (m_idx % 2) * 7
                     ax.annotate(f"{val:.0f}%",
                                 xy=(bar.get_x() + bar.get_width() / 2, bar.get_height()),
                                 xytext=(0, y_off), textcoords="offset points",
@@ -325,7 +325,7 @@ def plot_fig4():
 
         for bar, r in zip(bars, rates):
             if r > 0:
-                y_off = 3 + (g_idx % 2) * 5
+                y_off = 3 + (g_idx % 2) * 6
                 ax.annotate(f"{r:.0f}%", xy=(bar.get_x() + bar.get_width() / 2, bar.get_height()),
                             xytext=(0, y_off), textcoords="offset points", ha="center", va="bottom", fontsize=7.5, weight="bold")
 
@@ -456,7 +456,7 @@ def plot_fig6():
     ax1.set_xticklabels(uc_labels)
     ax1.set_ylabel("Latency (ms)")
     ax1.set_yscale("log")
-    ax1.set_ylim(10, 45000)
+    ax1.set_ylim(10, 48000)
     ax1.legend(loc="upper left", frameon=True, fontsize=9)
     ax1.grid(axis="y", linestyle="--", alpha=0.6)
 

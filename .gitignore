@@ -40,3 +40,10 @@ scripts/fill_baseline_form.py
 *.docx
 *.pdf
 
+# Local AI tooling & agent configs
+CLAUDE.md
+.cursorrules
+.cursor/
+.agents/
+.duckdb-skills/
+
